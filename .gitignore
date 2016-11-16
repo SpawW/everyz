@@ -1,0 +1,5 @@
+# Arquivos a ignorar
+*.php
+# Arquivos a ignorar o comando de ignore
+!everyz.php
+!zbxe-logo.php
