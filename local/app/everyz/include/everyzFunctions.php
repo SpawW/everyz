@@ -90,10 +90,10 @@ function zbxeUpdateConfigValue($param, $value, $id = 0) {
         //echo "update [$currentValue] <br> [$query]";
     }
     //if ($param == "map_title_show") {
-        if (isset($query)) {
-            //echo "<br>ois [" . strlen($query) . "]";
-            return prepareQuery($query);
-        }
+    if (isset($query)) {
+        //echo "<br>ois [" . strlen($query) . "]";
+        return prepareQuery($query);
+    }
     //}
     //echo "[<br> $param - [$currentValue/$value]";
 }
@@ -412,9 +412,11 @@ function selectedHostGroups($groupids) {
 function selectHostsByGroup($groupids, $inventoryFields = NULL) {
     $multiSelectHostData = [];
     if ($groupids !== [] && $groupids !== NULL && $groupids[0] !== NULL) {
+        // Get hosts only with inventory enabled
         $filterHosts = API::Host()->get([
             'output' => ['hostid', 'name'],
             'selectInventory' => $inventoryFields,
+            'withInventory' => true,
             'groupids' => $groupids
         ]);
         foreach ($filterHosts as $host) {
@@ -429,6 +431,31 @@ function selectHostsByGroup($groupids, $inventoryFields = NULL) {
         }
     }
     return $multiSelectHostData;
+}
+
+/* Return Events from a list of groupids */
+
+
+function selectEventsByGroup($groupids, $status = 1, $severity = 0) {
+    $events = [];
+    if ($groupids !== [] && $groupids !== NULL && $groupids[0] !== NULL) {
+        // Find active triggers from selected host groups
+        $events = API::Trigger()->get([
+            'output' => ['triggerid', 'description', 'expression', 'priority', 'flags', 'url'],
+            'selectHosts' => ['hostid'],
+            //'selectItems' => ['itemid', 'hostid', 'name', 'key_', 'value_type'],
+            //'triggerids' => zbx_objectValues($events, 'objectid'),
+            'active' => true,
+            'only_true' => true,
+            'expandComment' => true,
+            'expandDescription' => true,
+            'groupids' => $groupids,
+            'preservekeys' => true,
+            'selectLastEvent' => true,
+            'filter' => ["value" => $status]
+        ]);
+    }
+    return $events;
 }
 
 /* Return Hosts form a list of hostids with inventory data */

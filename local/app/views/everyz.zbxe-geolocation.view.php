@@ -66,19 +66,42 @@ for ($i = 0; $i < count($iconMapping[0]["mappings"]); $i++) {
     }
 }
 //var_dump($iconMapping[0]);
+$eventData = selectEventsByGroup($filter["groupids"], 1);
+//var_dump($eventData);
 $hostData = selectHostsByGroup($filter["groupids"], $inventoryFields);
 $cont = 0;
 $imagesArray = [];
-//var_dump($iconMapping);
 foreach ($hostData as $host) {
+    // Popular dados de triggers no host
+    // Descobrir a imagem do host
+    $hostData[$cont]["maxPriority"] = -1;
+    foreach ($eventData as $event) {
+        $related = false;
+        foreach ($event["hosts"] as $eventHost) {
+            if ($eventHost["hostid"] == $host["id"]) {
+                if (!isset($hostData[$cont]["events"])) {
+                    $hostData[$cont]["events"] = [];
+                }
+                $related = true;
+            }
+        }
+        if ($related) {
+            //$duration = ((new DateTime())->getTimestamp()) - $event["lastEvent"]["clock"];
+            //var_dump($duration);
+            $hostData[$cont]["events"][count($hostData[$cont]["events"])] = [
+                $event["triggerid"], $event["description"], $event["priority"],
+                zbx_date2age($event["lastEvent"]["clock"])
+            ];
+            if ($hostData[$cont]["maxPriority"] < $event["priority"]) {
+                $hostData[$cont]["maxPriority"] = $event["priority"];
+            }
+        }
+    }
     // Descobrir a imagem do host
     foreach ($iconMapping[0]["mappings"] as $iMap) {
         if (array_key_exists($iMap["inventory_field"], $host)) {
             if ($host[$iMap["inventory_field"]] == $iMap["expression"]) {
                 $hostData[$cont]["iconid"] = $iMap["iconid"];
-//                if (!in_array($hostData[$cont]["iconid"], $imagesArray)) {
-//                    $imagesArray[count($imagesArray)] = $hostData[$cont]["iconid"];
-//                }
                 break;
             }
         }
@@ -106,7 +129,6 @@ foreach ($hostData as $host) {
     $cont++;
 }
 //var_dump($hostData);
-
 /*
  * Display
  */
