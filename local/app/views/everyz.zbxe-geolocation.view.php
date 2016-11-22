@@ -110,7 +110,7 @@ foreach ($hostData as $host) {
             $hostData[$cont]["iconid"] = $iconMapping[0]["default_iconid"];
         }
     } else {
-        $hostData[$cont]["iconid"] = zbxeImageId(zbxeConfigValue('geo_default_poi', 0, "zbxe_default_icon"));
+        $hostData[$cont]["iconid"] = zbxeConfigValue('geo_default_poi', 0, "zbxe_default_icon");
     }
     /* if (!array_key_exists("imageid", $host)) {
       $hostData[$cont]["imageid"] = $iconMapping[0]["default_iconid"];

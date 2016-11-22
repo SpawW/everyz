@@ -28,14 +28,6 @@
 require_once dirname(__FILE__) . '/include/config.inc.php';
 require_once dirname(__FILE__) . '/local/app/everyz/include/everyzFunctions.php';
 header("Content-type: image/png");
-$query = 'SELECT * FROM `zbxe_preferences` WHERE userid in (0,' . CWebUser::$data['userid']
-        . ') and tx_option = "company_logo'
-        . (getRequest2("mode") == "login" ? "_login" : "_site") . '" order by userid desc';
-$res = prepareQuery($query);
-while ($row = DBfetch($res)) {
-    $logo = $row['tx_value'];
-}
-//var_dump($query);
-$query = "SELECT image FROM images WHERE name = '" . $logo . "'";
+$imageid = zbxeConfigValue("company_logo_" . (getRequest2("mode") == "login" ? "login" : "site"));
+$query = "SELECT image FROM images WHERE imageid = " . $imageid;
 echo zbx_unescape_image(zbxeFieldValue($query, 'image'));
-//echo "--oi";

@@ -80,17 +80,29 @@ $iconList = API::Image()->get([
     'filter' => ['imagetype' => IMAGE_TYPE_ICON], 'preservekeys' => true]);
 order_result($iconList, 'name');
 
-$idLogoSite = zbxeImageId(zbxeConfigValue('company_logo_site', 0, "zbxe_logo"));
-$idLogoLogin = zbxeImageId(zbxeConfigValue('company_logo_login', 0, "zbxe_logo"));
-$idGeoDefaultPOI = zbxeImageId(zbxeConfigValue('geo_default_poi', 0, "zbxe_default_icon"));
+$idLogoSite = zbxeConfigValue('company_logo_site', 0, "company_logo_site");
+$idLogoLogin = zbxeConfigValue('company_logo_login', 0, "company_logo_login");
+$idGeoDefaultPOI = zbxeConfigValue('geo_default_poi', 0, "geo_default_poi");
+
+// Constroi combo padrão para seleção de imagem
+function comboImageSelect($name, $value) {
+    $tmp = new CComboBox('cnf_' . $name, $value);
+    $tmp->onChange('javascript:getZbxImage(this.value,"img_' . $name . '");');
+    return $tmp;
+}
 
 // Combos com logotipos ========================================================
-$cmbLogoSite = new CComboBox('cnf_company_logo', $idLogoSite);
-$cmbLogoSite->onChange('javascript:getZbxImage(this.value,"img_company_logo_site");');
-$cmbLogoLogin = new CComboBox('cnf_company_logo', $idLogoLogin);
-$cmbLogoLogin->onChange('javascript:getZbxImage(this.value,"img_company_logo_login");');
-$cmbDefaultPoi = new CComboBox('cnf_geo_default_poi', $idLogoLogin);
-$cmbDefaultPoi->onChange('javascript:getZbxImage(this.value,"img_geo_default_poi");');
+$cmbLogoSite = comboImageSelect('company_logo_site', $idLogoSite);
+$cmbLogoLogin = comboImageSelect('company_logo_login', $idLogoLogin);
+$cmbDefaultPoi = comboImageSelect('geo_default_poi', $idGeoDefaultPOI);
+/* $cmbLogoSite = new CComboBox('cnf_company_logo_site', $idLogoSite);
+  $cmbLogoSite->onChange('javascript:getZbxImage(this.value,"img_company_logo_site");');
+  $cmbLogoLogin = new CComboBox('cnf_company_logo_login', $idLogoLogin);
+  $cmbLogoLogin->onChange('javascript:getZbxImage(this.value,"img_company_logo_login");');
+  $cmbDefaultPoi = new CComboBox('cnf_geo_default_poi', $idGeoDefaultPOI);
+  $cmbDefaultPoi->onChange('javascript:getZbxImage(this.value,"img_geo_default_poi");');
+ * 
+ */
 foreach ($iconList as $icon) {
     $cmbLogoSite->addItem($icon['imageid'], $icon['name']);
     $cmbLogoLogin->addItem($icon['imageid'], $icon['name']);
@@ -120,7 +132,7 @@ $table->addRow(
                         , zbxeConfigValue('geo_token')))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH))
                 ->addRow(_zeT('Default POI'), [$cmbDefaultPoi,
                     (new CImg('imgstore.php?iconid=' . $idGeoDefaultPOI
-                    , 'cnf_geo_default_poi', zbxeConfigValue('geo_default_poi'), 25))->setId("img_geo_default_poi")])
+                    , 'cnf_geo_default_poi', 32, 32))->setId("img_geo_default_poi")])
 );
 $dashboardGrid[0][1] = newWidget('geo', _zeT("ZabGeo"), $table);
 
