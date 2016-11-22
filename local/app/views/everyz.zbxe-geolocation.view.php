@@ -54,11 +54,7 @@ check_fields($fields);
 $inventoryFields = ["notes", "location_lat", "location_lon"];
 $iconMapImageId = [];
 
-$iconMapping = API::IconMap()->get([
-    'iconmapids' => $filter["iconmapid"]
-    , 'output' => "extend"
-    , "selectMappings" => "extend"
-        ]);
+$iconMapping = API::IconMap()->get([ 'iconmapids' => $filter["iconmapid"], 'output' => "extend", "selectMappings" => "extend"]);
 $withIconMapping = (count($iconMapping) == 1);
 if ($withIconMapping) {
     for ($i = 0; $i < count($iconMapping[0]["mappings"]); $i++) {
