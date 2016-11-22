@@ -23,6 +23,12 @@
 // Global definitions ==========================================================
 require_once dirname(__FILE__) . '/include/config.inc.php';
 
+//define('ZBX_PAGE_DO_REFRESH', 1);
+/**
+ * Base path to profiles on Zabbix Database
+ */
+$baseProfile = "everyz.";
+
 $page['title'] = _('EveryZ');
 $page['file'] = 'everyz.php';
 //Todo: Make this module to accept 4 modes: html, report, csv, json
@@ -30,8 +36,6 @@ $page['type'] = detect_page_type(PAGE_TYPE_HTML);
 $page['scripts'] = array('class.calendar.js', 'multiselect.js', 'gtlc.js');
 
 $filter = $fields = [];
-//define('ZBX_PAGE_DO_REFRESH', 1);
-$baseProfile = "everyz.";
 
 require_once dirname(__FILE__) . '/include/page_header.php';
 

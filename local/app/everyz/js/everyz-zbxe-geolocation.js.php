@@ -47,8 +47,9 @@
     function zbxImage(p_iconid) {
         return L.icon({
             iconUrl: '/imgstore.php?iconid=' + p_iconid,
-            iconSize: [32, 44],
-            iconAnchor: [12, 42],
+            iconSize: [28, 34],
+//            iconSize: [32, 44],
+            iconAnchor: [14, 34],
             popupAnchor: [2, -38],
         });
     }

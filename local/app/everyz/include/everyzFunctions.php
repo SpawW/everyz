@@ -52,6 +52,14 @@ function descItem($itemName, $itemKey) {
 }
 
 // Functions using my project tables ===========================================
+/**
+ * _zeT
+ *
+ * Translate strings using zbxe_translation. Need to be used on all modules.
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param string  $p_msg   text to translate
+ */
 function _zeT($p_msg) {
     $lang = quotestr(CWebUser::$data['lang']);
     $p_msg2 = quotestr($p_msg);
@@ -66,14 +74,33 @@ function _zeT($p_msg) {
     return $return;
 }
 
-function zbxeConfigValue($param, $id = 0) {
+/**
+ * zbxeConfigValue
+ *
+ * Get configuration value from zbxe_preferences.
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param string  $param   param to get current value
+ * @param integer $id      get the value for specific user (default 0 = all users)
+ * @param string  $default default value (used if dont exists configuration paramiter with $param name)
+ */
+function zbxeConfigValue($param, $id = 0, $default = "") {
     $query = 'select tx_value from zbxe_preferences where userid = '
             . $id . " and tx_option = " . quotestr($param);
-//var_dump("<br>[$query]<br>");
     $retorno = zbxeFieldValue($query, 'tx_value');
-    return $retorno;
+    return (strlen($retorno) < 1 ? $default : $retorno);
 }
 
+/**
+ * zbxeUpdateConfigValue
+ *
+ * Update configuration values on zbxe_preferences.
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param string   $param   param to update value
+ * @param string   $value   new value
+ * @param integer  $id      userid (default 0 = all users)
+ */
 function zbxeUpdateConfigValue($param, $value, $id = 0) {
     $currentValue = zbxeConfigValue($param, $id);
     if ($currentValue == "") {
@@ -98,7 +125,16 @@ function zbxeUpdateConfigValue($param, $value, $id = 0) {
     //echo "[<br> $param - [$currentValue/$value]";
 }
 
-// prepara a query para inserir registros em uma tabela
+/**
+ * zbxeInsert
+ *
+ * Return SQL query to insert records in a table.
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param string   $table       table name
+ * @param array    $fields      fields to insert values
+ * @param array    $values      new values
+ */
 function zbxeInsert($table, $fields, $values) {
     global $conn;
     $field_names = $field_values = "";
@@ -114,7 +150,18 @@ function zbxeInsert($table, $fields, $values) {
     return $query;
 }
 
-// Prepara a query para atualizar registros em uma tabela
+/**
+ * zbxeUpdate
+ *
+ * Return SQL query to update records in a table.
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param string   $table       table name
+ * @param array    $fields      fields to update
+ * @param array    $values      new values
+ * @param array    $filternames fields filter definition to update SQL
+ * @param array    $filternames values of fields to search
+ */
 function zbxeUpdate($table, $fields, $values, $filterNames, $filterValues) {
     global $conn;
     $updateFields = "";
@@ -134,34 +181,19 @@ function zbxeUpdate($table, $fields, $values, $filterNames, $filterValues) {
     return $query;
 }
 
-//function zbxeUpdateParameter($name, $value) {
-# Update parameter
-//}
-
-function zbxeSubMenus($menu) {
-    $query = 'select tx_value from zbxe_preferences where tx_option = ' . quotestr($menu);
-    $res = DBselect($query);
-    $retorno = array();
-    $i = 0;
-    while ($row = DBfetch($res)) {
-        $tmp = explode("|", $row['tx_value']);
-        $retorno[$i] = array('url' => $tmp[0], 'label' => _zeT($tmp[1]));
-        $i += 1;
-    }
-    return $retorno;
-}
-
-// Functions to remove =========================================================
-function exibeConteudo($condicao, $conteudo) {
-    if ($condicao) {
-        return $conteudo;
-    } else {
-        return array("");
-    }
-}
-
-function newComboFilter($query, $value, $name) {
-    $cmbRange = new CComboBox($name, $value, 'javascript: submit();');
+/**
+ * newComboFilter
+ *
+ * Return a combo with options from SQL values
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param string    $query   SQL statement
+ * @param string    $name    name of HTML element
+ * @param string    $value   current value
+ * @param boolean   $reload  true - submit form when value are changed
+ */
+function newComboFilter($query, $name, $value, $reload = true) {
+    $cmbRange = new CComboBox($name, $value, ($reload ? 'javascript: submit();' : ''));
     $result = DBselect($query);
     $cmbRange->additem("0", "");
     while ($row_extra = DBfetch($result)) {
@@ -170,6 +202,17 @@ function newComboFilter($query, $value, $name) {
     return $cmbRange;
 }
 
+/**
+ * newComboFilterArray
+ *
+ * Return a combo with options from a array of values
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param array     $array   array of options (key and value)
+ * @param string    $name    name of HTML element
+ * @param string    $value   current value
+ * @param boolean   $reload  true - submit form when value are changed
+ */
 function newComboFilterArray($array, $name, $value, $reload = true) {
     $cmbRange = new CComboBox($name, $value, ($reload ? 'javascript: submit();' : ''));
     $cmbRange->additem('', 'Selecione...');
@@ -179,6 +222,14 @@ function newComboFilterArray($array, $name, $value, $reload = true) {
     return $cmbRange;
 }
 
+/**
+ * prepareQuery
+ *
+ * Execute a SQL code using native Zabbix Frontend Functions
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param string    $p_query    SQL code to execute
+ */
 function prepareQuery($p_query) {
     $result = DBselect($p_query);
     if (!$result) {
@@ -190,6 +241,16 @@ function prepareQuery($p_query) {
     }
 }
 
+/**
+ * getBetweenStrings
+ *
+ * Get text between two strings
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param string    $start  Start identifier
+ * @param string    $end    End identifier
+ * @param string    $str    Full text
+ */
 function getBetweenStrings($start, $end, $str) {
     $matches = array();
     $regex = "/$start([a-zA-Z0-9_]*)$end/";
@@ -197,10 +258,20 @@ function getBetweenStrings($start, $end, $str) {
     return $matches[1];
 }
 
-function debugInfo($p_mensagem, $p_debug = false, $p_cor = "gray") {
+/**
+ * debugInfo
+ *
+ * Generic function to show debug messages
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param string    $p_text   Debug text message
+ * @param boolean   $p_debug  True - Show message, False - Dont show
+ * @param string    $p_color  Background color of message
+ */
+function debugInfo($p_text, $p_debug = false, $p_color = "gray") {
     global $VG_DEBUG;
     if ($p_debug == true || $VG_DEBUG == true) {
-        echo '<div style="background-color:' . $p_cor . ';">' . $p_mensagem . "</div>";
+        echo '<div style="background-color:' . $p_color . ';">' . $p_text . "</div>";
     }
 }
 
@@ -238,18 +309,41 @@ function array_sort($array, $on, $order = SORT_ASC) {
     return $new_array;
 }
 
-function quotestr($p_texto) { // Função para colocar aspas com mais segurança
+/**
+ * quotestr
+ *
+ * Generic function to quote strings
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param string    $p_text   Text to quote
+ */
+function quotestr($p_text) {
     global $DB;
     return "'" . ($DB['TYPE'] == ZBX_DB_POSTGRESQL ?
-                    pg_escape_string($p_texto) :
-                    addslashes($p_texto)
+                    pg_escape_string($p_text) :
+                    addslashes($p_text)
             ) . "'";
 }
 
-function versaoZabbix() {
+/**
+ * ezZabbixVersion
+ *
+ * Return Current Zabbix Version.
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ */
+function ezZabbixVersion() {
     return str_replace(".", "", substr(ZABBIX_VERSION, 0, 5));
 }
 
+/**
+ * checkAccessGroup
+ *
+ * Check if current user can access (read) hostgroup data.
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param string    $p_groupid   ID of hostgroup
+ */
 function checkAccessGroup($p_groupid) {
     if (getRequest($p_groupid) && !API::HostGroup()->isReadable(array($_REQUEST[$p_groupid]))) {
         access_deny();
@@ -259,6 +353,14 @@ function checkAccessGroup($p_groupid) {
     return $groupids;
 }
 
+/**
+ * checkAccessHost
+ *
+ * Check if current user can access (read) host data.
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param string    $p_hostid   ID of host
+ */
 function checkAccessHost($p_hostid) {
     if (getRequest($p_hostid) && !API::Host()->isReadable(array($_REQUEST[$p_hostid]))) {
         access_deny();
@@ -271,6 +373,15 @@ function checkAccessHost($p_hostid) {
     return $hostids;
 }
 
+/**
+ * getRequest2
+ *
+ * Get a parameter value with support to default value. Function created because Zabbix INC change this funcion name many times last years.
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param string    $p_name     Name of parameter
+ * @param boolean   $p_message  Default value
+ */
 function getRequest2($p_name, $p_default = "") {
     if (isset($_REQUEST[$p_name])) {
         return $_REQUEST[$p_name];
@@ -279,7 +390,15 @@ function getRequest2($p_name, $p_default = "") {
     }
 }
 
-// Check required field
+/**
+ * checkRequiredField
+ *
+ * Check if a mandatory field is empty.
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param string    $p_name     Name of parameter
+ * @param boolean   $p_message  Custom error message
+ */
 function checkRequiredField($p_name, $p_message = "") {
     global $requiredMissing;
     $value = getRequest2($p_name);
@@ -294,6 +413,13 @@ function checkRequiredField($p_name, $p_message = "") {
     }
 }
 
+/**
+ * addFilterActions
+ *
+ * Add the standard fields on $fields variable (common variable used for filter on standard zabbix pages)
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ */
 function addFilterActions() {
     global $filter, $fields, $moduleName;
     $fields["action"] = array(T_ZBX_STR, O_OPT, P_UNSET_EMPTY, NULL, null);
@@ -306,12 +432,31 @@ function addFilterActions() {
     $filter["fullscreen"] = getRequest2("fullscreen", "1");
 }
 
+/**
+ * fullScreenIcon
+ *
+ * Return a object for control fullscreen mode
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ */
 function fullScreenIcon() {
     global $filter;
     return (new CList())->addItem(get_icon('fullscreen', ['fullscreen' => $filter['fullscreen']]));
 }
 
-// Add filter fields
+/**
+ * addFilterParameter
+ *
+ * Add filter fields with support to default values and profiles.
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param string  $p_name         Paramiter name
+ * @param string  $p_type         Type of data
+ * @param string  $p_default      Default value
+ * @param boolean $p_array        The data will be stored as array values on Zabbix Database
+ * @param boolean $p_unset_empty  Clear data on profile when empty
+ * @param boolean $p_use_profile  Use Zabbix Profile system
+ */
 function addFilterParameter($p_name, $p_type, $p_default = "", $p_array = false
 , $p_unset_empty = false, $p_use_profile = true) {
     global $baseProfile, $fields, $filter;
@@ -333,6 +478,15 @@ function addFilterParameter($p_name, $p_type, $p_default = "", $p_array = false
     }
 }
 
+/**
+ * resetProfile
+ *
+ * Clear profile data on Zabbix Database.
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param string    $p_name   Last part of profile name on Zabbix Database ($baseProfile$p_name)
+ * @param boolean   $p_array  True - Filter variable will receive "blank value" | False - Filter variable will receive "null" value.
+ */
 function resetProfile($p_name, $p_array = false) {
     global $baseProfile, $filter;
     CProfile::delete($baseProfile . "." . $p_name);
@@ -343,12 +497,26 @@ function resetProfile($p_name, $p_array = false) {
     }
 }
 
+/**
+ * baseURL
+ *
+ * Return current URL of frontend. Used for create dynamic links (for example)
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ */
 function baseURL() {
     global $s, $_SERVER;
     return "http" . ((!empty($s['HTTPS']) && $s['HTTPS'] == 'on' ) ? "s" : "") . "://{$_SERVER['HTTP_HOST']}";
 }
 
-// Recover required item data
+/**
+ * getItem
+ *
+ * Return a standard object with item data.
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param array     $itemid   Primary Key (unique identifier) of item on Zabbix Database
+ */
 function getItem($itemid) {
     $item = API::Item()->get([
         'itemids' => $itemid,
@@ -361,7 +529,14 @@ function getItem($itemid) {
     }
 }
 
-// Return a standard object for select hosts
+/**
+ * multiSelectHosts
+ *
+ * Return a standard object for select hosts.
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param array     $multiSelectHostData   Array with hosts from Zabbix
+ */
 function multiSelectHosts($multiSelectHostData) {
     return (new CMultiSelect([
         'name' => 'hostids[]',
@@ -373,7 +548,14 @@ function multiSelectHosts($multiSelectHostData) {
         ]]))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH);
 }
 
-// Return a standard object for select host groups
+/**
+ * multiSelectHostGroups
+ *
+ * Return a standard object for select host groups.
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param array     $multiSelectHostGroupData   Array with hostgroups from Zabbix
+ */
 function multiSelectHostGroups($multiSelectHostGroupData) {
     return (new CMultiSelect(
             [
@@ -388,6 +570,14 @@ function multiSelectHostGroups($multiSelectHostGroupData) {
     ;
 }
 
+/**
+ * selectedHostGroups
+ *
+ * Return data from grouphosts.
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param array     $groupids   Array with groupid to get grouphost data
+ */
 function selectedHostGroups($groupids) {
     $multiSelectHostGroupData = NULL;
     if ($groupids !== [] && $groupids !== NULL && $groupids[0] !== NULL) {
@@ -407,8 +597,15 @@ function selectedHostGroups($groupids) {
     return $multiSelectHostGroupData;
 }
 
-/* Return Hosts from a list of groupids with inventory data */
-
+/**
+ * selectHostsByGroup
+ *
+ * Return Hosts from a list of groupids with inventory data.
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param array     $groupids   Array with groupid to get hosts
+ * @param integer   $inventoryFields   Array with name of inventory fields to return with host data
+ */
 function selectHostsByGroup($groupids, $inventoryFields = NULL) {
     $multiSelectHostData = [];
     if ($groupids !== [] && $groupids !== NULL && $groupids[0] !== NULL) {
@@ -433,18 +630,25 @@ function selectHostsByGroup($groupids, $inventoryFields = NULL) {
     return $multiSelectHostData;
 }
 
-/* Return Events from a list of groupids */
-
-
+/**
+ * selectEventsByGroup
+ *
+ * Return active events from a list of groupids.
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param array     $groupids   Array with groupid to search triggers and events
+ * @param integer   $status     Status of trigger (1 - Problem, 0 - OK)
+ * @param integer   $severity   Minimum severity of trigger
+ */
 function selectEventsByGroup($groupids, $status = 1, $severity = 0) {
     $events = [];
     if ($groupids !== [] && $groupids !== NULL && $groupids[0] !== NULL) {
         // Find active triggers from selected host groups
         $events = API::Trigger()->get([
-            'output' => ['triggerid', 'description', 'expression', 'priority', 'flags', 'url'],
+            'output' => ['triggerid', 'description', 'priority'
+            //, 'expression', 'flags', 'url'
+            ],
             'selectHosts' => ['hostid'],
-            //'selectItems' => ['itemid', 'hostid', 'name', 'key_', 'value_type'],
-            //'triggerids' => zbx_objectValues($events, 'objectid'),
             'active' => true,
             'only_true' => true,
             'expandComment' => true,
@@ -452,7 +656,8 @@ function selectEventsByGroup($groupids, $status = 1, $severity = 0) {
             'groupids' => $groupids,
             'preservekeys' => true,
             'selectLastEvent' => true,
-            'filter' => ["value" => $status]
+            'filter' => ["value" => $status],
+            'min_severity' => $severity
         ]);
     }
     return $events;
@@ -553,7 +758,7 @@ function zbxeDBConditionInt($p_field, $p_array) {
 try {
     $result = DBselect('select 1 from zbxe_translation where 0 = 1');
     if (!$result) {
-        $url = baseURL() . "/local/app/everyz/include/initDBEverys.php?p_versao_zbx=" . versaoZabbix() . "&p_modo_install=N";
+        $url = baseURL() . "/local/app/everyz/include/initDBEverys.php?p_versao_zbx=" . ezZabbixVersion() . "&p_modo_install=N";
 //{$_SERVER['REQUEST_URI']}
         echo "bd nao iniciado!" . $url;
         $ch = curl_init();

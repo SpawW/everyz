@@ -77,22 +77,24 @@ $table = (new CTable());
 // Imagens possiveis ===========================================================
 $iconList = API::Image()->get([
     'output' => ['imageid', 'name'],
-    'filter' => ['imagetype' => IMAGE_TYPE_ICON],
-    'preservekeys' => true
-        ]);
+    'filter' => ['imagetype' => IMAGE_TYPE_ICON], 'preservekeys' => true]);
 order_result($iconList, 'name');
 
-$idLogoSite = zbxeImageId(zbxeConfigValue('company_logo_site'));
-$idLogoLogin = zbxeImageId(zbxeConfigValue('company_logo_login'));
+$idLogoSite = zbxeImageId(zbxeConfigValue('company_logo_site', 0, "zbxe_logo"));
+$idLogoLogin = zbxeImageId(zbxeConfigValue('company_logo_login', 0, "zbxe_logo"));
+$idGeoDefaultPOI = zbxeImageId(zbxeConfigValue('geo_default_poi', 0, "zbxe_default_icon"));
 
 // Combos com logotipos ========================================================
 $cmbLogoSite = new CComboBox('cnf_company_logo', $idLogoSite);
 $cmbLogoSite->onChange('javascript:getZbxImage(this.value,"img_company_logo_site");');
 $cmbLogoLogin = new CComboBox('cnf_company_logo', $idLogoLogin);
 $cmbLogoLogin->onChange('javascript:getZbxImage(this.value,"img_company_logo_login");');
+$cmbDefaultPoi = new CComboBox('cnf_geo_default_poi', $idLogoLogin);
+$cmbDefaultPoi->onChange('javascript:getZbxImage(this.value,"img_geo_default_poi");');
 foreach ($iconList as $icon) {
     $cmbLogoSite->addItem($icon['imageid'], $icon['name']);
     $cmbLogoLogin->addItem($icon['imageid'], $icon['name']);
+    $cmbDefaultPoi->addItem($icon['imageid'], $icon['name']);
 }
 
 $table->addRow(
@@ -116,6 +118,9 @@ $table->addRow(
         (new CFormList())
                 ->addRow(_('Token'), (new CTextBox('cnf_geo_token'
                         , zbxeConfigValue('geo_token')))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH))
+                ->addRow(_zeT('Default POI'), [$cmbDefaultPoi,
+                    (new CImg('imgstore.php?iconid=' . $idGeoDefaultPOI
+                    , 'cnf_geo_default_poi', zbxeConfigValue('geo_default_poi'), 25))->setId("img_geo_default_poi")])
 );
 $dashboardGrid[0][1] = newWidget('geo', _zeT("ZabGeo"), $table);
 

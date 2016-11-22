@@ -960,7 +960,7 @@ function createGraph($itemids, $name, $width, $height, $graphtype, $func, $drawt
     // Check permissions
     if (!empty($itemids)) {
         $options = array(
-            'nodeids' => (versaoZabbix() < 240 ? get_current_nodeid(true) : 0),
+            'nodeids' => (ezZabbixVersion() < 240 ? get_current_nodeid(true) : 0),
             'itemids' => $itemids,
             'filter' => array('flags' => array(ZBX_FLAG_DISCOVERY_NORMAL, ZBX_FLAG_DISCOVERY_CREATED)),
             'webitems' => 1,

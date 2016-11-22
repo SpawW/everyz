@@ -59,15 +59,17 @@ $iconMapping = API::IconMap()->get([
     , 'output' => "extend"
     , "selectMappings" => "extend"
         ]);
-for ($i = 0; $i < count($iconMapping[0]["mappings"]); $i++) {
-    $iconMapping[0]["mappings"][$i]["inventory_field"] = zbxeInventoryField($iconMapping[0]["mappings"][$i]["inventory_link"]);
-    if (!in_array(zbxeInventoryField($iconMapping[0]["mappings"][$i]["inventory_link"]), $inventoryFields)) {
-        $inventoryFields[count($inventoryFields)] = $iconMapping[0]["mappings"][$i]["inventory_field"];
+$withIconMapping = (count($iconMapping) == 1);
+if ($withIconMapping) {
+    for ($i = 0; $i < count($iconMapping[0]["mappings"]); $i++) {
+        $iconMapping[0]["mappings"][$i]["inventory_field"] = zbxeInventoryField($iconMapping[0]["mappings"][$i]["inventory_link"]);
+        if (!in_array(zbxeInventoryField($iconMapping[0]["mappings"][$i]["inventory_link"]), $inventoryFields)) {
+            $inventoryFields[count($inventoryFields)] = $iconMapping[0]["mappings"][$i]["inventory_field"];
+        }
     }
 }
-//var_dump($iconMapping[0]);
+
 $eventData = selectEventsByGroup($filter["groupids"], 1);
-//var_dump($eventData);
 $hostData = selectHostsByGroup($filter["groupids"], $inventoryFields);
 $cont = 0;
 $imagesArray = [];
@@ -87,7 +89,7 @@ foreach ($hostData as $host) {
         }
         if ($related) {
             //$duration = ((new DateTime())->getTimestamp()) - $event["lastEvent"]["clock"];
-            //var_dump($duration);
+            //var_dump($event);
             $hostData[$cont]["events"][count($hostData[$cont]["events"])] = [
                 $event["triggerid"], $event["description"], $event["priority"],
                 zbx_date2age($event["lastEvent"]["clock"])
@@ -98,20 +100,25 @@ foreach ($hostData as $host) {
         }
     }
     // Descobrir a imagem do host
-    foreach ($iconMapping[0]["mappings"] as $iMap) {
-        if (array_key_exists($iMap["inventory_field"], $host)) {
-            if ($host[$iMap["inventory_field"]] == $iMap["expression"]) {
-                $hostData[$cont]["iconid"] = $iMap["iconid"];
-                break;
+    if ($withIconMapping) {
+        foreach ($iconMapping[0]["mappings"] as $iMap) {
+            if (array_key_exists($iMap["inventory_field"], $host)) {
+                if ($host[$iMap["inventory_field"]] == $iMap["expression"]) {
+                    $hostData[$cont]["iconid"] = $iMap["iconid"];
+                    break;
+                }
             }
         }
+
+        if (!isset($hostData[$cont]["iconid"])) {
+            $hostData[$cont]["iconid"] = $iconMapping[0]["default_iconid"];
+        }
+    } else {
+        $hostData[$cont]["iconid"] = zbxeImageId(zbxeConfigValue('geo_default_poi', 0, "zbxe_default_icon"));
     }
-    if (!isset($hostData[$cont]["iconid"])) {
-        $hostData[$cont]["iconid"] = $iconMapping[0]["default_iconid"];
-    }
-    if (!array_key_exists("imageid", $host)) {
-        $hostData[$cont]["imageid"] = $iconMapping[0]["default_iconid"];
-    }
+    /* if (!array_key_exists("imageid", $host)) {
+      $hostData[$cont]["imageid"] = $iconMapping[0]["default_iconid"];
+      } */
     // Varrer o notes e transferir o metadado para os arrays
     if (isset($host["notes"])) {
         $tmp2 = explode("\n", $host["notes"]);
