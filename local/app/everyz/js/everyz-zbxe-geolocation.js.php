@@ -8,7 +8,7 @@
     //Parametrizar
     var setViewLat = <?php echo $filter['centerLat'] ?>;
     var setViewLong = <?php echo $filter['centerLong'] ?>;
-    var setViewZoom = <?php echo getRequest2("zoomLevel", 19)?>;
+    var setViewZoom = <?php echo getRequest2("zoomLevel", 19) ?>;
     var showCircles = <?php echo ( in_array($filter["layers"], [3, 99]) ? 1 : 0); ?>; //(0=disable/1=enable)
     var showLines = <?php echo ( in_array($filter["layers"], [2, 99]) ? 1 : 0); ?>; //(0=disable/1=enable)
 
@@ -41,17 +41,26 @@
     L.tileLayer(mbUrl, {
         maxZoom: 18,
         attribution: mbAttr,
-        id: 'mapbox.streets'
+        id: 'mapbox.<?php
+// array com os nomes dos mapas
+$mapBackgroud = [ "light", "streets", "dark", "outdoors", "satellite", "emerald"];
+echo $mapBackgroud[$filter["map"]]; //"streets"             
+?>'
     }).addTo(ZabGeomap);
     // Cria dinamicamente a referencia para o icone do host
     function zbxImage(p_iconid) {
         return L.icon({
             iconUrl: '/imgstore.php?iconid=' + p_iconid,
             iconSize: [32, 32],
-//            iconSize: [32, 44],
             iconAnchor: [16, 32],
             popupAnchor: [2, -38],
         });
+    }
+    function addCircle (lat, lon, radiusSize, fillColor = '#303', borderColor = ''){
+        L.circle([lat, lon], {color: borderColor, fillColor: fillColor, fillOpacity: 0.2, radius: radiusSize}).addTo(ZabGeocircle);
+    }
+    function addHost(lat, lon, hostid, name, description) {
+        L.marker([lat, lon], {icon: zbxImage(hostid)}).addTo(ZabGeomap).bindPopup(name.description);
     }
     //
     //Change for repeat to read JSON and add Markers if lat and long exist
@@ -62,16 +71,21 @@ $linesPackage = "";
 foreach ($hostData as $host) {
     if (array_key_exists("location_lat", $host)) {
         // Add host
-        echo "L.marker([" . $host["location_lat"] . ", "
-        . $host["location_lon"] . "], {icon: zbxImage(" . $host["iconid"] . ")}).addTo(ZabGeomap).bindPopup('" . $host["name"]
-//        . $host["location_lon"] . "], {icon: zbxIconOk}).addTo(ZabGeomap).bindPopup('" . $host["name"]
-        . "<br>IP: 192.168.1.100');\n";
+        echo "\n addHost(" . $host["location_lat"] . "," . $host["location_lon"] . "," . $host["iconid"] . ",'" . $host["name"] . "');";
+        /* echo "L.marker([" . $host["location_lat"] . ", "
+          . $host["location_lon"] . "], {icon: zbxImage(" . $host["iconid"] . ")}).addTo(ZabGeomap).bindPopup('" . $host["name"]
+          //        . $host["location_lon"] . "], {icon: zbxIconOk}).addTo(ZabGeomap).bindPopup('" . $host["name"]
+          . "<br>IP: 192.168.1.100');\n"; */
         // Add circles
         if (isset($host["circle"])) {
             foreach ($host["circle"] as $circles) {
-                echo "L.circle([" . $host["location_lat"] . ", "
-                . $host["location_lon"] . "], {color: '" . $circles[2]
-                . "', fillColor: '#303', fillOpacity: 0.2, radius: " . $circles[1] . "}).addTo(ZabGeocircle);\n";
+                echo "addCircle(" . $host["location_lat"] . "," . $host["location_lon"] . "," . $circles[1] . ",'" . $circles[2] . "');";
+                /*
+                  echo "L.circle([" . $host["location_lat"] . ", "
+                  . $host["location_lon"] . "], {color: '" . $circles[2]
+                  . "', fillColor: '#303', fillOpacity: 0.2, radius: " . $circles[1] . "}).addTo(ZabGeocircle);\n";
+                 * 
+                 */
             }
         }
         // Add lines
@@ -79,7 +93,8 @@ foreach ($hostData as $host) {
             $lineCount = 1;
             foreach ($host["line"] as $lines) {
                 $linesPackage .= ($linesPackage == "" ? "" : ", ")
-                        . "\n" . '{"type": "Feature", "geometry": { "type": "LineString", "coordinates": [['
+                        . "\n"
+                        . '{"type": "Feature", "geometry": { "type": "LineString", "coordinates": [['
                         . $host["location_lon"] . ", " . $host["location_lat"]
                         . '],[' . $lines[2] . ', ' . $lines[1] . ']]}, "properties": { "popupContent": "' . $lines[5] . '"},"id": '
                         . $lineCount . '}';
@@ -106,14 +121,16 @@ foreach ($hostData as $host) {
     //Add Scale in maps
     L.control.scale().addTo(ZabGeomap);
 
+    function addTileLayer(name) {
+        return L.tileLayer(mbUrl, {id: 'mapbox.' + name, attribution: mbAttr});
+    }
     // Mapas disponíveis =======================================================
-    var grayscale = L.tileLayer(mbUrl, {id: 'mapbox.light', attribution: mbAttr})
-            , streets = L.tileLayer(mbUrl, {id: 'mapbox.streets', attribution: mbAttr})
-            , dark = L.tileLayer(mbUrl, {id: 'mapbox.dark', attribution: mbAttr})
-            , outdoors = L.tileLayer(mbUrl, {id: 'mapbox.outdoors', attribution: mbAttr})
-            , satellite = L.tileLayer(mbUrl, {id: 'mapbox.satellite', attribution: mbAttr})
-            , emerald = L.tileLayer(mbUrl, {id: 'mapbox.emerald', attribution: mbAttr})
-            ;
+    grayscale = addTileLayer("light");
+    streets = addTileLayer("streets");
+    dark = addTileLayer("dark");
+    outdoors = addTileLayer("outdoors");
+    satellite = addTileLayer("satellite");
+    emerald = addTileLayer("emerald");
 
     var baseMaps = {
         "Grayscale": grayscale
@@ -123,8 +140,6 @@ foreach ($hostData as $host) {
         , "Satellite": satellite
         , "Emerald": emerald
     };
-
-
 
     var overlayMaps = {
         "Circles": ZabGeocircle,
@@ -148,7 +163,6 @@ foreach ($hostData as $host) {
         "type": "FeatureCollection",
         "features": [
 <?php echo $linesPackage; ?>
-
         ]
     };
 

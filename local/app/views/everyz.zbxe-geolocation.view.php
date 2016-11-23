@@ -43,8 +43,7 @@ addFilterParameter("iconmapid", T_ZBX_INT);
 addFilterParameter("centerLat", T_ZBX_STR, "", false, false);
 addFilterParameter("centerLong", T_ZBX_STR, "", false, false);
 addFilterParameter("zoomLevel", T_ZBX_INT);
-//addFilterParameter("showCircles", T_ZBX_INT);
-//addFilterParameter("showLines", T_ZBX_INT);
+addFilterParameter("map", T_ZBX_STR, "1", false, false);
 addFilterParameter("layers", T_ZBX_INT);
 
 check_fields($fields);
@@ -162,8 +161,14 @@ $widget = (new CFilter('web.latest.filter.state'));
 
 // Left collumn
 $tmpColumn = new CFormList();
+if ($filter['map'] == "") {
+    $filter['map'] = 1;
+}
 $tmpColumn->addRow(_('Host Groups'), multiSelectHostGroups(selectedHostGroups($filter['groupids'])))
-        ->addRow(_('Automatic icon mapping'), [zbxeComboIconMap('iconmapid', $filter['iconmapid'])])
+        ->addRow(_zeT('Automatic icon mapping'), [zbxeComboIconMap('iconmapid', $filter['iconmapid'])])
+        ->addRow(_zeT('Default tile'), [newComboFilterArray(
+                    [ "Grayscale", "Streets", "Dark", "Outdoors", "Satellite", "Emerald"]
+                    , "map", $filter['map'], false, false)])
 ;
 $tmpColumn->addItem(new CInput('hidden', 'action', $filter["action"]));
 $widget->addColumn($tmpColumn);
