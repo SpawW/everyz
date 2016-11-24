@@ -21,6 +21,7 @@
 
 // Define and global variables
 define("ZE_VER", "3.0");
+define("EZ_TITLE", 'EveryZ - ');
 define("ZE_COPY", ", ZE " . ZE_VER);
 global $VG_DEBUG;
 global $zeMessages, $zeLocale, $baseName, $requiredMissing;

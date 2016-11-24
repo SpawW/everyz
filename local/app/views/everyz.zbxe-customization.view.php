@@ -1,7 +1,7 @@
 <?php
 
 /*
- * * Purpose: Allow configuration of visual customizations
+ * * Purpose: Allow configuration of EveryZ
  * * Adail Horst - http://spinola.net.br/blog
  * *
  * * This program is free software; you can redistribute it and/or modify
@@ -24,9 +24,7 @@ $moduleName = "zbxe-config";
 // ----------------- Update data -----------------------------------------------
 $updated = false;
 foreach ($_REQUEST as $key => $value) {
-    //echo "<br>todos - [".strpos($key, 'nf_')."]".$key;
     if (strpos($key, 'nf_')) {
-        //echo "<br>Achei - [$key/$value]";
         $configKey = substr($key, 4);
         zbxeUpdateConfigValue($configKey, $value);
         $updated = true;
