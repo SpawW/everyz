@@ -20,20 +20,27 @@
  * */
 
 require_once 'local/app/everyz/js/everyz.zbxe-customization.js.php';
+$moduleName = "zbxe-config";
 // ----------------- Update data -----------------------------------------------
+$updated = false;
 foreach ($_REQUEST as $key => $value) {
     //echo "<br>todos - [".strpos($key, 'nf_')."]".$key;
     if (strpos($key, 'nf_')) {
         //echo "<br>Achei - [$key/$value]";
         $configKey = substr($key, 4);
         zbxeUpdateConfigValue($configKey, $value);
+        $updated = true;
     }
+}
+
+if ($updated) {
+    show_message(_zeT('New configuration stored on EveryZ!'));
 }
 // -----------------------------------------------------------------------------
 
 $formData = (new CForm())->cleanItems()->setId('frmConfig');
 $buttonSave = (new CList())->addItem((new CSubmit('btnUpdate', _('Update'))));
-$dashboard = (new CWidget())->setTitle(_('Customization'));
+$dashboard = (new CWidget())->setTitle(_zeT('Customization'));
 
 $dashboardGrid = [[], [], []];
 
@@ -95,14 +102,7 @@ function comboImageSelect($name, $value) {
 $cmbLogoSite = comboImageSelect('company_logo_site', $idLogoSite);
 $cmbLogoLogin = comboImageSelect('company_logo_login', $idLogoLogin);
 $cmbDefaultPoi = comboImageSelect('geo_default_poi', $idGeoDefaultPOI);
-/* $cmbLogoSite = new CComboBox('cnf_company_logo_site', $idLogoSite);
-  $cmbLogoSite->onChange('javascript:getZbxImage(this.value,"img_company_logo_site");');
-  $cmbLogoLogin = new CComboBox('cnf_company_logo_login', $idLogoLogin);
-  $cmbLogoLogin->onChange('javascript:getZbxImage(this.value,"img_company_logo_login");');
-  $cmbDefaultPoi = new CComboBox('cnf_geo_default_poi', $idGeoDefaultPOI);
-  $cmbDefaultPoi->onChange('javascript:getZbxImage(this.value,"img_geo_default_poi");');
- * 
- */
+
 foreach ($iconList as $icon) {
     $cmbLogoSite->addItem($icon['imageid'], $icon['name']);
     $cmbLogoLogin->addItem($icon['imageid'], $icon['name']);

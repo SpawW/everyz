@@ -58,18 +58,22 @@ function descItem($itemName, $itemKey) {
  * Translate strings using zbxe_translation. Need to be used on all modules.
  * @author Adail Horst <the.spaww@gmail.com>
  * 
- * @param string  $p_msg   text to translate
+ * @param string  $msg        text to translate
+ * @param string  $moduleid   module identifier
  */
-function _zeT($p_msg) {
+function _zeT($msg, $moduleid = "") {
+    if ($moduleid == "") {
+        global $moduleName;
+        $moduleid = $moduleName;
+    }
     $lang = quotestr(CWebUser::$data['lang']);
-    $p_msg2 = quotestr($p_msg);
+    $p_msg2 = quotestr($msg);
     $return = zbxeFieldValue('select tx_new from zbxe_translation where tx_original = '
-            . $p_msg2 . ' and lang = ' . $lang
-            , 'tx_new');
+            . $p_msg2 . ' and lang = ' . $lang, 'tx_new');
     if ($return == "") {
-        $sql = "insert into zbxe_translation values (" . $lang . "," . $p_msg2 . "," . $p_msg2 . ")";
+        $sql = "insert into zbxe_translation values (" . $lang . "," . $p_msg2 . "," . $p_msg2 . ", " . quotestr($moduleid) . ")";
         prepareQuery($sql);
-        $return = $p_msg;
+        $return = $msg;
     }
     return $return;
 }

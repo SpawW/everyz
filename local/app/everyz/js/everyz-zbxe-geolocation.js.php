@@ -96,7 +96,7 @@ foreach ($hostData as $host) {
                         . "\n"
                         . '{"type": "Feature", "geometry": { "type": "LineString", "coordinates": [['
                         . $host["location_lon"] . ", " . $host["location_lat"]
-                        . '],[' . $lines[2] . ', ' . $lines[1] . ']]}, "properties": { "popupContent": "' . $lines[5] . '"},"id": '
+                        . '],[' . $lines[2] . ', ' . $lines[1] . ']]}, "properties": {  "popupContent": "' . $lines[5] . '"},"id": '
                         . $lineCount . '}';
                 $lineCount++;
             }
