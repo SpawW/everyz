@@ -888,4 +888,6 @@ function zbxeInventoryField($inventoryId) {
     return $inventoryFields[$inventoryId];
 }
 
+
+
 ?>

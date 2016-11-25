@@ -71,6 +71,7 @@ order by ano, mes, momento
     }
     return $query;
 }
+
 // Common fields
 addFilterParameter("format", T_ZBX_INT);
 addFilterActions();
@@ -189,8 +190,8 @@ $finalReport = Array();
 // Get data for report ---------------------------------------------------------
 if (hasRequest('filter_set')) {
     // Check if all required fields have values
-    checkRequiredField("hostids", "You need to provide a least one host in filter!");
-    checkRequiredField("item", "You need to provide a item key for analisys!");
+    checkRequiredField("hostids", zeT("You need to provide a least one host in filter!"));
+    checkRequiredField("item", zeT("You need to provide a item key for analisys!"));
     if ($requiredMissing == false) {
         $hostFilter = zeDBConditionInt('it.hostid', getRequest("hostids"));
         // Build a list of items with required key

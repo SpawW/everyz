@@ -2,7 +2,7 @@
 
 /*
  * * Purpose: Configure widgets / items
- * * Adail Horst - http://spinola.net.br/blog
+ * * @author Adail Horst - http://spinola.net.br/blog
  * *
  * * This program is free software; you can redistribute it and/or modify
  * * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@
  * * You should have received a copy of the GNU General Public License
  * * along with this program; if not, write to the Free Software
  * * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- * TodoS: ===========================================================================
  * */
 
 // Definitions -----------------------------------------------------------------
@@ -54,6 +53,7 @@ addFilterParameter("name", T_ZBX_STR);
 addFilterParameter("title", T_ZBX_STR);
 addFilterParameter("row", T_ZBX_INT);
 addFilterParameter("order", T_ZBX_INT);
+addFilterParameter("status", T_ZBX_INT);
 addFilterParameter("widgettype", T_ZBX_STR);
 addFilterParameter("dml", T_ZBX_STR);
 addFilterParameter("widget", T_ZBX_STR, "", false, true, false);
@@ -76,10 +76,10 @@ if (hasRequest('dml')) {
                 $last = intval($last[1]) + 1;
                 $name = "widget_" . $last; //. "_" . $name;
 // Insert
-                $sql = "insert into zbxe_preferences values (0," . quotestr($name) . "," . quotestr($title) . ",1)";
+                $sql = "insert into zbxe_preferences (userid, tx_option, tx_value, st_ativo) values (0," . quotestr($name) . "," . quotestr($title) . "," . $filter['status'] . ")";
             } else {
 // Update
-                $sql = "update zbxe_preferences set tx_value = " . quotestr($title) . " where tx_option = " . quotestr($filter["widget"]);
+                $sql = "update zbxe_preferences set tx_value = " . quotestr($title) . ", st_ativo = " . $filter['status'] . "" . " where tx_option = " . quotestr($filter["widget"]);
             }
             show_messages(prepareQuery($sql), _zeT('Widget ' . ($filter["mode"] == "widget.add" ? "added" : "updated")));
             $filter['mode'] = '';
@@ -150,7 +150,7 @@ if (strpos($filter['mode'], "edit") > 0 || strpos($filter['mode'], "add") > 0) {
     $createButton = (new CList())->addItem(new CSubmit('form', _zeT('Create ' . (strpos($filter['mode'], "item") > 0 ? 'item' : 'widget'))));
 }
 if (in_array($filter['mode'], ["widget.edit", "widget.items", "widget.item.edit", "widget.item.add"])) { // Recover widget data
-    $query = 'SELECT tx_value, tx_option from zbxe_preferences where tx_option = "' . $filter['widget'] . '" order by tx_value';
+    $query = 'SELECT tx_value, tx_option, st_ativo from zbxe_preferences where tx_option = "' . $filter['widget'] . '" order by tx_value';
     $result = DBselect($query);
     while ($row = DBfetch($result)) {
         $tmp = explode("|", $row['tx_value']);
@@ -158,6 +158,7 @@ if (in_array($filter['mode'], ["widget.edit", "widget.items", "widget.item.edit"
         $data['title'] = $tmp[3];
         $data['row'] = $tmp[0];
         $data['order'] = $tmp[1];
+        $data['status'] = $row['st_ativo'];
     }
     $extraTitle = " - [" . $data['title'] . "]";
 } else {
@@ -220,7 +221,7 @@ if ($filter['mode'] !== "") {
         case "widget.add":
         case "widget.edit":
             if ($filter['mode'] == "widget.add") { // Recover widget data aqui2
-                $data = ["name" => "", "title" => "", "row" => "", "order" => ""];
+                $data = ["name" => "", "title" => "", "row" => "", "order" => "", "status" => "1"];
             }
             $formWidget = (new CFormList())
                     ->addRow(_('Name')
@@ -234,6 +235,7 @@ if ($filter['mode'] !== "") {
                         , '&nbsp;', _('Order'), '&nbsp;', (new CNumericBox('order', $data['order'], 2))->setWidth(ZBX_TEXTAREA_NUMERIC_STANDARD_WIDTH)])
                     ->addRow(bold('Type of widget'), [(new CRadioButtonList('widgettype', (int) $filter['widgettype']))->setModern(true)
                         ->addValue(_zeT('Links'), 0)->addValue(_zeT('jQuery'), 1)->addValue(_zeT('Custom DIV'), 2)])
+                    ->addRow(bold(_zeT('Visibility')), buttonOptions("status", $data["status"], [_('Hide'),_('Show')]))
                     ->addItem(new CInput('hidden', 'action', $filter["action"]))
                     ->addItem(new CInput('hidden', 'mode', $filter['mode']))
                     ->addItem(new CInput('hidden', 'widget', $filter["widget"]))
