@@ -69,7 +69,6 @@ if (hasRequest('dml')) {
     switch ($filter['mode']) {
         case "widget.edit":
         case "widget.add":
-            var_dump("sQL - " . $sql);
             $name = str_replace("|", "", $filter['name']);
             $title = $filter['row'] . "|" . $filter['order'] . "|" . $name . "|" . str_replace("|", "", $filter['title']);
             if ($filter["mode"] == "widget.add") {
@@ -117,7 +116,6 @@ if (hasRequest('dml')) {
                 break;
             }
             $sql = 'delete from zbxe_preferences where tx_option like ' . quotestr(trim($filter["widget"] . "%"));
-            //var_dump($sql);
             show_messages(prepareQuery($sql), _zeT('Widget item ' . ($filter["mode"] == "widget.add" ? "added" : "deleted")));
             $filter['mode'] = '';
             $filter['item'] = '';
@@ -188,7 +186,7 @@ $table = (new CTableInfo())->addClass(ZBX_STYLE_OVERFLOW_ELLIPSIS);
 // Filtros =====================================================================
 if (hasRequest('filter_rst')) { // Clean the filter parameters
     $filter['filter_rst'] = NULL;
-    $filter['mode'] = NULL;
+    $filter['mode'] = "";
     $filter['nameFilter'] = "";
 }
 
@@ -197,7 +195,7 @@ $widget = (new CFilter('web.' . $moduleName . '.filter.state'));
 
 // Source data filter
 $tmpColumn = new CFormList();
-$tmpColumn->addRow(_('Name'), [ (new CTextBox('nameFilter', $filter['nameFilter']))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH)]);
+$tmpColumn->addRow(_zeT('Name/title'), [ (new CTextBox('nameFilter', $filter['nameFilter']))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH)]);
 $tmpColumn->addItem(new CInput('hidden', 'action', $filter["action"]));
 $widget->addColumn($tmpColumn);
 
@@ -213,12 +211,10 @@ if (hasRequest('filter_set')) {
     // $count variable for check if the report has results
     // $report for store the report data
     if ($filter['nameFilter'] !== "") {
-        $filterSQL = " and tx_value like " . quotestr($filter['nameFilter'] . "%");
-    }
-    if ($requiredMissing == false) {
-        // Get data for report
+        $filterSQL = " and tx_value like " . quotestr("%|%" . $filter['nameFilter'] . "%");
     }
 }
+
 if ($filter['mode'] !== "") {
     switch ($filter['mode']) {
         case "widget.add":
@@ -322,7 +318,7 @@ if ($filter['mode'] !== "") {
 } else { // Report
     $query = 'SELECT tx_option, tx_value FROM `zbxe_preferences` '
             . ' where tx_option like "widget%" '
-            . ' and tx_option not like "%link%" and st_ativo = 1 ' . $filterSQL
+            . ' and tx_option not like "%link%" ' . $filterSQL
             . ' order by userid, tx_option';
     $res = DBselect($query);
     $report = [];
