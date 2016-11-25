@@ -111,6 +111,18 @@ if (hasRequest('dml')) {
             $filter["item"] = '';
             break;
 // Delete
+        case "widget.delete":
+            if (trim($filter["widget"]) == "") {
+                error(_zeT("Invalid parameters!"));
+                break;
+            }
+            $sql = 'delete from zbxe_preferences where tx_option like ' . quotestr(trim($filter["widget"] . "%"));
+            //var_dump($sql);
+            show_messages(prepareQuery($sql), _zeT('Widget item ' . ($filter["mode"] == "widget.add" ? "added" : "deleted")));
+            $filter['mode'] = '';
+            $filter['item'] = '';
+            $filter['widget'] = '';
+            break;
         case "widget.item.delete":
             if (trim($filter["item"]) == "") {
                 error(_zeT("Invalid parameters!"));
@@ -350,7 +362,7 @@ if ($filter['mode'] !== "") {
                         , "&nbsp;"
                         , (new CRedirectButton(_('Items'), $baseAction . "&mode=widget.items", null))->setId('items')
                         , "&nbsp;"
-                        , (new CRedirectButton(_('Delete'), $baseAction . "&mode=widget.delete", _('Delete record?')))->setId('delete')
+                        , (new CRedirectButton(_('Delete'), $baseAction . "&dml=Y&mode=widget.delete", _('Delete record?')))->setId('delete')
                     );
 
                     // Calculo de UBM por host
