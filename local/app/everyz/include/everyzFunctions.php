@@ -71,7 +71,7 @@ function _zeT($msg, $moduleid = "") {
     $p_msg2 = quotestr($msg);
     $return = zbxeFieldValue('select tx_new from zbxe_translation where tx_original = '
             . $p_msg2 . ' and lang = ' . $lang, 'tx_new');
-    if ($return == "") {
+    if ($return == "") { 
         $sql = "insert into zbxe_translation values (" . $lang . "," . $p_msg2 . "," . $p_msg2 . ", " . quotestr($moduleid) . ")";
         prepareQuery($sql);
         $return = $msg;
