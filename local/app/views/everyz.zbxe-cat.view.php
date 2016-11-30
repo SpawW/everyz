@@ -104,7 +104,7 @@ $toggle_all = (new CColHeader(
                 ->addClass('app-list-toggle-all')
                 ->addItem(new CSpan())
         ))->addStyle('width: 18px');
-$form = (new CForm('GET', 'everyz.php'))->setName('cat');
+$form = (new CForm('GET', 'everyz.php'))->setName($moduleName);
 $table = (new CTableInfo())->addClass(ZBX_STYLE_OVERFLOW_ELLIPSIS);
 
 $intervalDesc = array('', _('Day'), _zeT('Week'), _zeT('Month'), _('Year'));
@@ -190,8 +190,8 @@ $finalReport = Array();
 // Get data for report ---------------------------------------------------------
 if (hasRequest('filter_set')) {
     // Check if all required fields have values
-    checkRequiredField("hostids", zeT("You need to provide a least one host in filter!"));
-    checkRequiredField("item", zeT("You need to provide a item key for analisys!"));
+    checkRequiredField("hostids", _zeT("You need to provide a least one host in filter!"));
+    checkRequiredField("item", _zeT("You need to provide a item key for analisys!"));
     if ($requiredMissing == false) {
         $hostFilter = zeDBConditionInt('it.hostid', getRequest("hostids"));
         // Build a list of items with required key

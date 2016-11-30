@@ -187,6 +187,7 @@ $table = (new CTableInfo())->addClass(ZBX_STYLE_OVERFLOW_ELLIPSIS);
 // Filtros =====================================================================
 if (hasRequest('filter_rst')) { // Clean the filter parameters
     $filter['filter_rst'] = NULL;
+    $filter['action'] = $moduleName;
     $filter['mode'] = "";
     $filter['nameFilter'] = "";
 }

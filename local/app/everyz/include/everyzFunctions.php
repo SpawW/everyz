@@ -889,5 +889,23 @@ function zbxeInventoryField($inventoryId) {
 }
 
 
+/**
+ * getRealPOST
+ *
+ * Get All parameters without Zabbix interference
+ * @author http://php.net/manual/en/language.variables.external.php#94607
+ * 
+ */
+function getRealPOST() {
+    $pairs = explode("&", file_get_contents("php://input"));
+    $vars = array();
+    foreach ($pairs as $pair) {
+        $nv = explode("=", $pair);
+        $name = urldecode($nv[0]);
+        $value = urldecode($nv[1]);
+        $vars[$name] = $value;
+    }
+    return $vars;
+}
 
 ?>
