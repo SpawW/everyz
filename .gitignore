@@ -1,5 +1,7 @@
 # Arquivos a ignorar
 *.php
+*.swp
+local/app/everyz/images/*-full.png
 # Arquivos a ignorar o comando de ignore
 !everyz.php
 !zbxe-logo.php
