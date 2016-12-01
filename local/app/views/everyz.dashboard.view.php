@@ -28,7 +28,7 @@ function newWidget($p_id, $p_title, $p_content, $p_expanded = true, $p_icon = []
     return (new CCollapsibleUiWidget($p_id, (new CDiv($p_content))->setName('body-' . $p_id)))
 #    return (new CUiWidget($p_id, (new CDiv($p_content))->setName('body-' . $p_id)))
                     ->setExpanded($p_expanded)
-                    ->setHeader(_($tmp[3]), [$p_icon], true);
+                    ->setHeader(_zeT($tmp[3]), [$p_icon], true);
 }
 
 function linkList($p_filter) {
@@ -44,7 +44,7 @@ function linkList($p_filter) {
         $tag = $tmp[0];
         $table->addRow([
             [(new CImg('local/app/everyz/images/' . $tag . '.png', 'no image'))->setAttribute('style', 'vertical-align:middle;')
-                , (new CLink("&nbsp;" . $name, 'everyz.php?action=' . $tag))
+                , (new CLink("&nbsp;" . _zeT($name), 'everyz.php?action=' . $tag))
         ]]);
     }
     return $table;

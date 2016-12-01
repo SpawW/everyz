@@ -52,7 +52,6 @@ function descItem($itemName, $itemKey) {
     return $itemName;
 }
 
-// Functions using my project tables ===========================================
 /**
  * _zeT
  *
@@ -71,7 +70,7 @@ function _zeT($msg, $moduleid = "") {
     $p_msg2 = quotestr($msg);
     $return = zbxeFieldValue('select tx_new from zbxe_translation where tx_original = '
             . $p_msg2 . ' and lang = ' . $lang, 'tx_new');
-    if ($return == "") { 
+    if ($return == "") {
         $sql = "insert into zbxe_translation values (" . $lang . "," . $p_msg2 . "," . $p_msg2 . ", " . quotestr($moduleid) . ")";
         prepareQuery($sql);
         $return = $msg;
@@ -888,7 +887,6 @@ function zbxeInventoryField($inventoryId) {
     return $inventoryFields[$inventoryId];
 }
 
-
 /**
  * getRealPOST
  *
@@ -906,6 +904,42 @@ function getRealPOST() {
         $vars[$name] = $value;
     }
     return $vars;
+}
+
+/**
+ * commonModuleHeader
+ *
+ * Add a standard module header
+ * Uses 2 global variables: $dashboard, $form
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param string  $module_id        module identifier
+ * @param string  $title            Title of module
+ * @param string  $allowFullScreen  Add a button to full screen view
+ */
+function commonModuleHeader($module_id, $title, $allowFullScreen = false) {
+    global $dashboard, $form;
+    $dashboard = (new CWidget())
+            ->setTitle(EZ_TITLE . _zeT($title))
+    ;
+    if ($allowFullScreen) {
+        $dashboard->setControls((new CList())
+                        ->addItem(get_icon('fullscreen', ['fullscreen' => getRequest('fullscreen')]))
+        );
+    }
+    $form = (new CForm('POST', 'everyz.php'))->setName($module_id);
+    $form->addItem(new CInput('hidden', 'action', $module_id));
+}
+
+function zbxeSQLList($query) {
+    $result = prepareQuery('SELECT * FROM `zbxe_translation`');
+    $report = [];
+    while ($row = DBfetch($result)) {
+        foreach ($row as $key => $value) {
+            $report[count($report)][$key] = $value;
+        }
+    }
+    return $report;
 }
 
 ?>
