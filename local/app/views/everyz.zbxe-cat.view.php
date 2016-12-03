@@ -19,11 +19,53 @@
  * * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  * */
 
-require_once 'include/views/js/monitoring.latest.js.php';
 
-// Configuration variables =====================================================
+/* * ***************************************************************************
+ * Module Variables
+ * ************************************************************************** */
 $moduleName = "zbxe-cat";
 $baseProfile .= $moduleName;
+$moduleTitle = 'Capacity and Trends';
+
+$intervalDesc = array('', _('Day'), _zeT('Week'), _zeT('Month'), _('Year'));
+$intervalFactor = array(0, 1, 7, 30, 365);
+$intervalFactor2 = array(0, '+1 days', '+1 week', '+1 months', '+1 years');
+$sourceAgregator = array('hu.value_max', 'hu.value_min', 'hu.value_avg');
+$intervalMask = array('', '%d/%m/%Y', '%U', '%m/%Y', '%Y');
+$intervalMask2 = array('', 'd/m/Y', 'W (d/m/Y)', 'm/Y', 'Y');
+$intervalMaskSort = array('', '%Y%m%d', '%Y%U', '%Y%m', '%Y');
+
+// Common fields
+addFilterParameter("format", T_ZBX_INT, 0, false, false, false);
+addFilterActions();
+
+// Specific fields
+
+addFilterParameter("hostids", T_ZBX_INT, [], true, true);
+//addFilterParameter("hostids", T_ZBX_INT, NULL, true, true);
+addFilterParameter("agregation", T_ZBX_INT);
+addFilterParameter("item", T_ZBX_STR);
+addFilterParameter("filter_timesince", T_ZBX_STR);
+addFilterParameter("filter_timetill", T_ZBX_STR);
+addFilterParameter("timeshiftsource", T_ZBX_INT, 2);
+addFilterParameter("timeshiftprojection", T_ZBX_INT, 2);
+
+addFilterParameter("num_projection", T_ZBX_INT, 0);
+
+check_fields($fields);
+
+// Scripts e CSS adicionais
+?>
+<?php
+
+/* * ***************************************************************************
+ * Access Control
+ * ************************************************************************** */
+checkAccessHost('hostids');
+
+/* * ***************************************************************************
+ * Module Functions
+ * ************************************************************************** */
 
 function week2date($year, $week, $weekday = 7) {
     global $filter;
@@ -72,53 +114,12 @@ order by ano, mes, momento
     return $query;
 }
 
-// Common fields
-addFilterParameter("format", T_ZBX_INT);
-addFilterActions();
-
-// Specific fields
-
-addFilterParameter("hostids", T_ZBX_INT, [], true, true);
-//addFilterParameter("hostids", T_ZBX_INT, NULL, true, true);
-addFilterParameter("agregation", T_ZBX_INT);
-addFilterParameter("item", T_ZBX_STR);
-addFilterParameter("filter_timesince", T_ZBX_STR);
-addFilterParameter("filter_timetill", T_ZBX_STR);
-addFilterParameter("timeshiftsource", T_ZBX_INT, 2);
-addFilterParameter("timeshiftprojection", T_ZBX_INT, 2);
-
-addFilterParameter("num_projection", T_ZBX_INT, 0);
-
-check_fields($fields);
-
-/*
- * Display
- */
-$dashboard = (new CWidget())
-        ->setTitle('EveryZ - ' . _zeT('Capacity and Trends'))
-        ->setControls(fullScreenIcon())
-;
-$toggle_all = (new CColHeader(
-        (new CDiv())
-                ->addClass(ZBX_STYLE_TREEVIEW)
-                ->addClass('app-list-toggle-all')
-                ->addItem(new CSpan())
-        ))->addStyle('width: 18px');
-$form = (new CForm('GET', 'everyz.php'))->setName($moduleName);
-$table = (new CTableInfo())->addClass(ZBX_STYLE_OVERFLOW_ELLIPSIS);
-
-$intervalDesc = array('', _('Day'), _zeT('Week'), _zeT('Month'), _('Year'));
-$intervalFactor = array(0, 1, 7, 30, 365);
-$intervalFactor2 = array(0, '+1 days', '+1 week', '+1 months', '+1 years');
-$sourceAgregator = array('hu.value_max', 'hu.value_min', 'hu.value_avg');
-$intervalMask = array('', '%d/%m/%Y', '%U', '%m/%Y', '%Y');
-$intervalMask2 = array('', 'd/m/Y', 'W (d/m/Y)', 'm/Y', 'Y');
-$intervalMaskSort = array('', '%Y%m%d', '%Y%U', '%Y%m', '%Y');
-
-
+/* * ***************************************************************************
+ * Get Data
+ * ************************************************************************** */
 // Filtros =====================================================================
 if (hasRequest('filter_rst')) { // Clean the filter parameters
-    $filter['hostids'] = [];
+    resetProfile('hostids', true);
     $filter['filter_timesince'] = zbxDateToTime(date(TIMESTAMP_FORMAT_ZERO_TIME, time() - (SEC_PER_DAY * 30)));
     $filter['filter_timetill'] = zbxDateToTime(date(TIMESTAMP_FORMAT_ZERO_TIME, time()));
     $filter['item'] = "";
@@ -127,66 +128,13 @@ if (hasRequest('filter_rst')) { // Clean the filter parameters
     $filter['timeshiftprojection'] = 2;
     $filter['num_projection'] = 7;
     $filter['filter_rst'] = NULL;
+    $filter['filter_set'] = NULL;
 } else { // Put the date in required format
     $filter['filter_timesince'] = zbxDateToTime($filter['filter_timesince'] ? $filter['filter_timesince'] : date(TIMESTAMP_FORMAT_ZERO_TIME, time() - (SEC_PER_DAY * 30)));
     $filter['filter_timetill'] = zbxDateToTime($filter['filter_timetill'] ? $filter['filter_timetill'] : date(TIMESTAMP_FORMAT_ZERO_TIME, time()));
 }
-// Get the multiselect hosts
-$multiSelectHostData = selectedHosts($filter['hostids']);
-// Projection data
-$cmbTimeSource = (new CRadioButtonList('timeshiftsource', (int) $filter['timeshiftsource']))->setModern(true);
-$cmbTimeProjection = (new CRadioButtonList('timeshiftprojection', (int) $filter['timeshiftprojection']))->setModern(true);
 
-for ($i = 1; $i < count($intervalDesc); $i++) {
-    $cmbTimeSource->addValue($intervalDesc[$i], $i);
-    $cmbTimeProjection->addValue($intervalDesc[$i], $i);
-}
-$cmbAgregation = (new CRadioButtonList('agregation', (int) $filter['agregation']))->setModern(true);
-$cmbAgregation->addValue(_zeT('Max'), 0)->addValue(_zeT('Min'), 1)->addValue(_zeT('Avg'), 2);
-
-$widget = (new CFilter('web.latest.filter.state'));
-
-// Source data filter
-$tmpColumn = new CFormList();
-$tmpColumn->addRow(
-                _('Hosts'), (new CMultiSelect([
-            'name' => 'hostids[]',
-            'objectName' => 'hosts',
-            'data' => $multiSelectHostData,
-            'popup' => [
-                'parameters' => 'srctbl=hosts&dstfrm=zbx_filter&dstfld1=hostids_&srcfld1=hostid' .
-                '&real_hosts=1&multiselect=1'
-            ]]))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH))
-        ->addRow(_('Key'), [ (new CTextBox('item', $filter['item']))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH),
-            (new CDiv())->addClass(ZBX_STYLE_FORM_INPUT_MARGIN),
-            (new CButton('item_name', _('Select')))
-            ->addClass(ZBX_STYLE_BTN_GREY)
-            ->onClick('return PopUp("popup.php?srctbl=items&srcfld1=key_&real_hosts=1&dstfld1=item' .
-                    '&with_items=1&dstfrm=zbx_filter");')
-        ])
-        ->addRow(_zeT('Analysis'), $cmbTimeSource)
-        ->addRow(_zeT('Function'), $cmbAgregation)
-;
-
-$tmpColumn->addItem(new CInput('hidden', 'action', $action));
-$widget->addColumn($tmpColumn);
-
-$tmpColumn = (new CFormList())
-        ->addRow(_('From'), createDateSelector('filter_timesince', $filter['filter_timesince'], 'filter_timetill'))
-        ->addRow(_('To'), createDateSelector('filter_timetill', $filter['filter_timetill'], 'filter_timesince'))
-        ->addVar('filter_timesince', date(TIMESTAMP_FORMAT, $filter['filter_timesince']))
-        ->addVar('filter_timetill', date(TIMESTAMP_FORMAT, $filter['filter_timetill']))
-        ->addRow(_zeT('Output format'), (new CRadioButtonList('format', (int) $filter['format']))->addValue('HTML', 0)->addValue('CSV', 1)->setModern(true))
-        ->addRow(_zeT('Projection'), $cmbTimeProjection)
-        ->addRow(_zeT('Amount'), (new CNumericBox('num_projection', $filter['num_projection'], 2, false, false, false))->setWidth(ZBX_TEXTAREA_2DIGITS_WIDTH))
-;
-$tmpColumn->addItem(new CInput('hidden', 'action', $filter["action"]));
-$widget->addColumn($tmpColumn);
-
-
-$dashboard->addItem($widget);
 $finalReport = Array();
-
 // Get data for report ---------------------------------------------------------
 if (hasRequest('filter_set')) {
     // Check if all required fields have values
@@ -255,35 +203,94 @@ if (hasRequest('filter_set')) {
                 $finalReport[count($finalReport)] = [$report, $ultimoHistory, $report[($cont - 1)]['valor'], ($primeiro < $ultimo ? 1 : -1)];
             }
         }
-        // Todo: Check if user have access to this hosts
     }
 } else {
-    $table->setNoDataMessage(_('Specify some filter condition to see the values.'));
+    zbxeNeedFilter(_('Specify some filter condition to see the values.'));
 }
 
-// Build the report ------------------------------------------------------------
-// Title
+/* * ***************************************************************************
+ * Display
+ * ************************************************************************** */
+
 switch ($filter["format"]) {
-    case 1;
-        $table->setHeader(array(_zeT("Data")));
+    case PAGE_TYPE_CSV:
+        echo "hostid;name;moment;value;type;\n";
         break;
-    case 0;
+    case PAGE_TYPE_JSON:
+        $jsonResult = [];
+        break;
+    default: // HTML
+        require_once 'include/views/js/monitoring.latest.js.php';
+        commonModuleHeader($moduleName, $moduleTitle, true);
+// Get the multiselect hosts
+        $multiSelectHostData = selectedHosts($filter['hostids']);
+// Projection data
+        $cmbTimeSource = (new CRadioButtonList('timeshiftsource', (int) $filter['timeshiftsource']))->setModern(true);
+        $cmbTimeProjection = (new CRadioButtonList('timeshiftprojection', (int) $filter['timeshiftprojection']))->setModern(true);
+
+        for ($i = 1; $i < count($intervalDesc); $i++) {
+            $cmbTimeSource->addValue($intervalDesc[$i], $i);
+            $cmbTimeProjection->addValue($intervalDesc[$i], $i);
+        }
+        $cmbAgregation = (new CRadioButtonList('agregation', (int) $filter['agregation']))->setModern(true);
+        $cmbAgregation->addValue(_zeT('Max'), 0)->addValue(_zeT('Min'), 1)->addValue(_zeT('Avg'), 2);
+//$widget = (new CFilter('web.latest.filter.state'));
+        // Form to filter data
+        $widget = newFilterWidget($moduleName);
+// Source data filter
+        $tmpColumn = new CFormList();
+        $tmpColumn->addRow(
+                        _('Hosts'), (new CMultiSelect([
+                    'name' => 'hostids[]',
+                    'objectName' => 'hosts',
+                    'data' => $multiSelectHostData,
+                    'popup' => [
+                        'parameters' => 'srctbl=hosts&dstfrm=zbx_filter&dstfld1=hostids_&srcfld1=hostid' .
+                        '&real_hosts=1&multiselect=1'
+                    ]]))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH))
+                ->addRow(_('Key'), [ (new CTextBox('item', $filter['item']))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH),
+                    (new CDiv())->addClass(ZBX_STYLE_FORM_INPUT_MARGIN),
+                    (new CButton('item_name', _('Select')))
+                    ->addClass(ZBX_STYLE_BTN_GREY)
+                    ->onClick('return PopUp("popup.php?srctbl=items&srcfld1=key_&real_hosts=1&dstfld1=item' .
+                            '&with_items=1&dstfrm=zbx_filter");')
+                ])
+                ->addRow(_zeT('Analysis'), $cmbTimeSource)
+                ->addRow(_zeT('Function'), $cmbAgregation)
+        ;
+
+        $tmpColumn->addItem(new CInput('hidden', 'action', $action));
+        $widget->addColumn($tmpColumn);
+
+        $tmpColumn = (new CFormList())
+                ->addRow(_('From'), createDateSelector('filter_timesince', $filter['filter_timesince'], 'filter_timetill'))
+                ->addRow(_('To'), createDateSelector('filter_timetill', $filter['filter_timetill'], 'filter_timesince'))
+                ->addVar('filter_timesince', date(TIMESTAMP_FORMAT, $filter['filter_timesince']))
+                ->addVar('filter_timetill', date(TIMESTAMP_FORMAT, $filter['filter_timetill']))
+                ->addRow(_zeT('Projection'), $cmbTimeProjection)
+                ->addRow(_zeT('Amount'), (new CNumericBox('num_projection', $filter['num_projection'], 2, false, false, false))->setWidth(ZBX_TEXTAREA_2DIGITS_WIDTH))
+                ->addRow(_zeT('Output format'), buttonOutputFormat('format', (int) $filter['format']))
+        ;
+        $tmpColumn->addItem(new CInput('hidden', 'action', $filter["action"]));
+        $widget->addColumn($tmpColumn);
+        $dashboard->addItem($widget);
+        // Build the report ------------------------------------------------------------
         $table->setHeader(array($toggle_all, (new CColHeader(_('Host')))->addStyle('width: 25%')
             , _zeT('Instant'), _zeT('Value'), _zeT('Type')));
         break;
 }
 
+
+$exportReport = [];
 // Data
 for ($iRep = 0; $iRep < count($finalReport); $iRep++) {
     $report = $finalReport[$iRep][0];
 
     $item = getItem($report[0]['itemid']);
     $state_css = ($item['state'] == ITEM_STATE_NOTSUPPORTED) ? ZBX_STYLE_GREY : null;
-    $hostName = (new CSpan([hostName([$report[0]["hostid"]]),
-        " - ", bold($item['name_expanded'])
-    ]));
 // Add the item group report
-    if ($filter["format"] == 0) {
+    if ($filter["format"] == PAGE_TYPE_HTML) {
+        $hostName = (new CSpan([hostName([$report[0]["hostid"]]), " - ", bold($item['name_expanded'])]));
         $table->addRow([
                     (new CDiv())
                     ->addClass(ZBX_STYLE_TREEVIEW)
@@ -301,16 +308,25 @@ for ($iRep = 0; $iRep < count($finalReport); $iRep++) {
     }
 
     $points = "";
+
     for ($i = 0; $i < count($report); $i++) {
         switch ($filter["format"]) {
-            case 1;
-                $table->addRow(array(quotestr(hostName($report[0]["hostid"]))
-                    . ";" . quotestr($item['name_expanded'])
-                    . ";" . quotestr($report[$i]['momento'])
-                    . ";" . quotestr($report[$i]['valor'])
-                    . ";" . quotestr($report[$i]['tipo']) . ";"));
+            case PAGE_TYPE_CSV;
+                echo zbxeToCSV([hostName($report[0]["hostid"]), $item['name_expanded']
+                    , $report[$i]['momento'], $report[$i]['valor'], $report[$i]['tipo']]);
+
+                /* echo quotestr(hostName($report[0]["hostid"]), false)
+                  . ";" . quotestr($item['name_expanded'], false)
+                  . ";" . quotestr($report[$i]['momento'], false)
+                  . ";" . quotestr($report[$i]['valor'], false)
+                  . ";" . quotestr($report[$i]['tipo'], false) . ";\n"; */
                 break;
-            case 0;
+            case PAGE_TYPE_JSON;
+                $jsonResult[count($jsonResult)] = ['host' => hostName($report[0]["hostid"])
+                    , 'item' => $item['name_expanded'], 'moment' => $report[$i]['momento']
+                    , 'value' => $report[$i]['valor'], 'type' => $report[$i]['tipo']];
+                break;
+            default;
                 $momento = new CCol($report[$i]['momento'], 1);
                 $valor = convert_units(array(
                     'value' => $report[$i]['valor'],
@@ -330,10 +346,19 @@ for ($iRep = 0; $iRep < count($finalReport); $iRep++) {
         }
     }
 }
-$form->addItem([
-    $table
-        //Todo: Make export of data possible to select and to export to CSV, JSON using JavaScript
-        //, new CActionButtonList('exportData', 'itemids', [ 0 => ['name' => _('Export as CSV')]])
-]);
 
-$dashboard->addItem($form)->show();
+
+/* * ***************************************************************************
+ * Display Footer
+ * ************************************************************************** */
+switch ($filter["format"]) {
+    case PAGE_TYPE_CSV;
+        break;
+    case PAGE_TYPE_JSON;
+        echo json_encode($jsonResult, JSON_UNESCAPED_UNICODE);
+        break;
+    default;
+        $form->addItem([ $table]);
+        $dashboard->addItem($form)->show();
+        break;
+}

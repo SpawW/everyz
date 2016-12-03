@@ -321,12 +321,19 @@ function array_sort($array, $on, $order = SORT_ASC) {
  * 
  * @param string    $p_text   Text to quote
  */
-function quotestr($p_text) {
+function quotestr($p_text, $quote = true) {
     global $DB;
-    return "'" . ($DB['TYPE'] == ZBX_DB_POSTGRESQL ?
-                    pg_escape_string($p_text) :
-                    addslashes($p_text)
-            ) . "'";
+    if ($quote) {
+        return "'" . ($DB['TYPE'] == ZBX_DB_POSTGRESQL ?
+                        pg_escape_string($p_text) :
+                        addslashes($p_text)
+                ) . "'";
+    } else {
+        return ($DB['TYPE'] == ZBX_DB_POSTGRESQL ?
+                        pg_escape_string($p_text) :
+                        addslashes($p_text)
+                );
+    }
 }
 
 /**
@@ -349,10 +356,10 @@ function ezZabbixVersion() {
  * @param string    $p_groupid   ID of hostgroup
  */
 function checkAccessGroup($p_groupid) {
-    if (getRequest($p_groupid) && !API::HostGroup()->isReadable(array($_REQUEST[$p_groupid]))) {
+    global $filter;
+    $groupids = (isset($_REQUEST[$p_groupid]) ? $_REQUEST[$p_groupid] : $filter[$p_groupid]);
+    if (getRequest($p_groupid) && !API::HostGroup()->isReadable($groupids)) {
         access_deny();
-    } else {
-        $groupids = array($_REQUEST[$p_groupid]);
     }
     return $groupids;
 }
@@ -366,11 +373,13 @@ function checkAccessGroup($p_groupid) {
  * @param string    $p_hostid   ID of host
  */
 function checkAccessHost($p_hostid) {
-    if (getRequest($p_hostid) && !API::Host()->isReadable(array($_REQUEST[$p_hostid]))) {
+    global $filter;
+    $hostids = (isset($_REQUEST[$p_hostid]) ? $_REQUEST[$p_hostid] : $filter[$p_hostid]);
+    if (getRequest($p_hostid) && !API::Host()->isReadable($hostids)) {
         access_deny();
     } else {
-        $hostids = array($_REQUEST[$p_hostid]);
-        if ($hostids[0] == 0) {
+//        var_dump($hostids);
+        if (count($hostids) > 0 && $hostids[0] == 0) {
             $hostids = array();
         }
     }
@@ -738,6 +747,9 @@ function hostName($hostid, $array_host = []) {
     }
 //var_dump($hostid);
 //var_dump($array_host);
+    if (!is_array($hostid)) {
+        $hostid = [$hostid];
+    }
     $retorno = "";
     foreach ($array_host as $rowData) {
         foreach ($hostid as $rowID) {
@@ -798,7 +810,7 @@ function buttonOptions($name, $value, $options, $values = []) {
 }
 
 function buttonOutputFormat($name, $value) {
-    return (new CRadioButtonList($name, (int) $value))->addValue('HTML', 0)->addValue('CSV', 1)->addValue('JSON', 2)->setModern(true);
+    return (new CRadioButtonList($name, (int) $value))->addValue('HTML', PAGE_TYPE_HTML)->addValue('CSV', PAGE_TYPE_CSV)->addValue('JSON', PAGE_TYPE_JSON)->setModern(true);
 }
 
 // Adiciona link para javascript externo
@@ -917,20 +929,36 @@ function getRealPOST() {
  * @param string  $title            Title of module
  * @param string  $allowFullScreen  Add a button to full screen view
  */
-function commonModuleHeader($module_id, $title, $allowFullScreen = false) {
-    global $dashboard, $form;
+function commonModuleHeader($module_id, $title, $allowFullScreen = false, $method = 'POST') {
+    global $dashboard, $form, $table;
     $dashboard = (new CWidget())
             ->setTitle(EZ_TITLE . _zeT($title))
     ;
+    $table = (new CTableInfo())->addClass(ZBX_STYLE_OVERFLOW_ELLIPSIS);
     if ($allowFullScreen) {
         $dashboard->setControls((new CList())
                         ->addItem(get_icon('fullscreen', ['fullscreen' => getRequest('fullscreen')]))
         );
+        global $toggle_all;
+        $toggle_all = (new CColHeader(
+                (new CDiv())
+                        ->addClass(ZBX_STYLE_TREEVIEW)
+                        ->addClass('app-list-toggle-all')
+                        ->addItem(new CSpan())
+                ))->addStyle('width: 18px');
     }
-    $form = (new CForm('POST', 'everyz.php'))->setName($module_id);
+    $form = (new CForm($method, 'everyz.php'))->setName($module_id);
     $form->addItem(new CInput('hidden', 'action', $module_id));
 }
 
+/**
+ * zbxeSQLList
+ *
+ * Return a array with all records from a SQL code
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param string  $query  SQL code to search dat
+ */
 function zbxeSQLList($query) {
     $result = prepareQuery('SELECT * FROM `zbxe_translation`');
     $report = [];
@@ -940,6 +968,55 @@ function zbxeSQLList($query) {
         }
     }
     return $report;
+}
+
+/**
+ * zbxeNeedFilter
+ *
+ * Universal error message. For page_type = HTML show error message using $table object, 
+ * for another case show a text message only
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param string  $message  error message
+ */
+function zbxeNeedFilter($message) {
+    global $page, $table;
+    if ($page['type'] == detect_page_type(PAGE_TYPE_HTML)) {
+        if (!isset($table)) {
+            $table = (new CTableInfo())->addClass(ZBX_STYLE_OVERFLOW_ELLIPSIS);
+        }
+        $table->setNoDataMessage($message);
+    } else {
+        echo $message;
+    }
+}
+
+/**
+ * newFilterWidget
+ *
+ * Standard filter form using zabbix native profile
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param string  $name  name of object in HTML
+ */
+function newFilterWidget($name) {
+    return (new CFilter('web.' . $name . '.filter.state'));
+}
+
+/**
+ * zbxeToCSV
+ *
+ * Standard CSV line of values
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param string  $array  Array of values
+ */
+function zbxeToCSV($array) {
+    $return = "";
+    foreach ($array as $value) {
+        $return .= quotestr($value, true) . ",";
+    }
+    return $return . "\n";
 }
 
 ?>

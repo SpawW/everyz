@@ -25,12 +25,54 @@
  * Método para limpeza de dados
  * Como calcular o VPS em coleta agendada e em intervalo flexível
  * */
+/* * ***************************************************************************
+ * Module Variables
+ * ************************************************************************** */
 
-require_once 'include/views/js/monitoring.latest.js.php';
+$moduleName = "zbxe-sc";
+$baseProfile .= $moduleName;
+$moduleTitle = "Costs";
 
 // Definitions -----------------------------------------------------------------
 define("HISTORYSIZE", 50);
 define("TRENDSIZE", 128);
+$locale = localeconv();
+$currency = (strlen($locale['currency_symbol']) > 1 ? $locale['currency_symbol'] : '$');
+$groupOptions = array(_('Item'), _('Host'), _('Host Groups'), _('Template'));
+$groupMoment = array(_('Day'), _('Week'), _('Year'));
+
+// Common fields
+addFilterParameter("format", T_ZBX_INT);
+addFilterActions();
+
+// Specific fields
+addFilterParameter("hostids", PROFILE_TYPE_STR, [], true, true);
+addFilterParameter("groupids", PROFILE_TYPE_STR, [], true, true);
+
+// Mode of report
+addFilterParameter("mode", T_ZBX_STR, "", false, false, false);
+addFilterParameter("groupView", T_ZBX_INT);
+addFilterParameter("groupTime", T_ZBX_INT);
+addFilterParameter("notMonitored", T_ZBX_INT);
+
+// Time filter
+addFilterParameter("filter_timesince", T_ZBX_STR);
+addFilterParameter("filter_timetill", T_ZBX_STR);
+addFilterParameter("timeshiftsource", T_ZBX_INT, 2);
+addFilterParameter("timeshiftprojection", T_ZBX_INT, 2);
+
+addFilterParameter("format", T_ZBX_INT);
+
+check_fields($fields);
+
+/* * ***************************************************************************
+ * Access Control
+ * ************************************************************************** */
+checkAccessHost('hostids');
+checkAccessGroup('groupids');
+/* * ***************************************************************************
+ * Module Functions
+ * ************************************************************************** */
 
 function initiateGlobalMacro($macroName, $value) {
     $currentValue = globalMacroValue($macroName, "--EVERYZ--");
@@ -60,9 +102,6 @@ function checkGlobalMacros() {
     // Macro global do referencial em VPS do processamento
     define("REFERENCE_VPS", initiateGlobalMacro('{$EVERYZ_UBM_REF_VPS}', '0.35'));
 }
-
-// Check if the basic macros have values
-checkGlobalMacros();
 
 // Function
 function totalUBM($vps, $gb) {
@@ -97,56 +136,16 @@ function valorUBM($totalUBM, $cotacao) {
     return $totalUBM * $cotacao;
 }
 
-// Configuration variables =====================================================
-$moduleName = "zbxe-sc";
-$baseProfile .= $moduleName;
+/* * ***************************************************************************
+ * Get Data
+ * ************************************************************************** */
 
-// Common fields
-addFilterParameter("format", T_ZBX_INT);
-addFilterActions();
-
-// Specific fields
-addFilterParameter("hostids", PROFILE_TYPE_STR, [], true, true);
-addFilterParameter("groupids", PROFILE_TYPE_STR, [], true, true);
-
-// Mode of report
-addFilterParameter("mode", T_ZBX_STR, "", false, false, false);
-addFilterParameter("groupView", T_ZBX_INT);
-addFilterParameter("groupTime", T_ZBX_INT);
-addFilterParameter("notMonitored", T_ZBX_INT);
-
-// Time filter
-addFilterParameter("filter_timesince", T_ZBX_STR);
-addFilterParameter("filter_timetill", T_ZBX_STR);
-addFilterParameter("timeshiftsource", T_ZBX_INT, 2);
-addFilterParameter("timeshiftprojection", T_ZBX_INT, 2);
-
-addFilterParameter("format", T_ZBX_INT);
-
-check_fields($fields);
-
-/*
- * Display
- */
-$dashboard = (new CWidget())
-        ->setTitle('EveryZ - ' . _zeT('Costs'))
-        ->setControls(fullScreenIcon());
-//$dashboard->addVar('fullscreen', $filter['fullscreen']);
-$toggle_all = (new CColHeader(
-        (new CDiv())
-                ->addClass(ZBX_STYLE_TREEVIEW)
-                ->addClass('app-list-toggle-all')
-                ->addItem(new CSpan())
-        ))->addStyle('width: 18px');
-$form = (new CForm('GET', 'everyz.php'))->setName('cat');
-$table = (new CTableInfo())->addClass(ZBX_STYLE_OVERFLOW_ELLIPSIS);
-
-$groupOptions = array(_('Item'), _('Host'), _('Host Groups'), _('Template'));
-$groupMoment = array(_('Day'), _('Week'), _('Year'));
-
+// Check if the basic macros have values
+checkGlobalMacros();
 // Filtros =====================================================================
-if (hasRequest('filter_rst')) { // Clean the filter parameters
-    $filter['hostids'] = [];
+if (hasRequest('filter_rst')) {
+    resetProfile('hostids', true);
+    resetProfile('groupids', true);
     $filter['filter_timesince'] = zbxDateToTime(date(TIMESTAMP_FORMAT_ZERO_TIME, time() - (SEC_PER_DAY * 30)));
     $filter['filter_timetill'] = zbxDateToTime(date(TIMESTAMP_FORMAT_ZERO_TIME, time()));
     $filter['groupView'] = 1;
@@ -155,46 +154,21 @@ if (hasRequest('filter_rst')) { // Clean the filter parameters
     $filter['timeshiftprojection'] = 2;
     $filter['num_projection'] = 7;
     $filter['filter_rst'] = NULL;
-} else { // Put the date in required format
+    $filter['filter_set'] = NULL;
+} else {
     $filter['filter_timesince'] = zbxDateToTime($filter['filter_timesince'] ? $filter['filter_timesince'] : date(TIMESTAMP_FORMAT_ZERO_TIME, time() - (SEC_PER_DAY * 30)));
     $filter['filter_timetill'] = zbxDateToTime($filter['filter_timetill'] ? $filter['filter_timetill'] : date(TIMESTAMP_FORMAT_ZERO_TIME, time()));
 }
 
-$widget = (new CFilter('web.latest.filter.state'));
-
-// Source data filter
-$tmpColumn = new CFormList();
-$tmpColumn->addRow(_('Host Groups'), multiSelectHostGroups(selectedHostGroups($filter['groupids'])))
-        ->addRow(_zeT('Not monitored items'), buttonOptions('notMonitored', $filter['notMonitored'], array(_("Hide"), _("Show"))))
-//        ->addRow(_zeT('Group by'), buttonOptions('groupView', $filter['groupView'], $groupOptions))
-//        ->addRow(_zeT('Time group by'), buttonOptions('groupTime', $filter['groupTime'], $groupMoment))
-;
-$tmpColumn->addItem(new CInput('hidden', 'action', $action));
-$widget->addColumn($tmpColumn);
-
-$tmpColumn = (new CFormList())
-        ->addRow(_('Hosts'), multiSelectHosts(selectedHosts($filter['hostids'])))
-//        ->addRow(_('From'), createDateSelector('filter_timesince', $filter['filter_timesince'], 'filter_timetill'))
-//        ->addRow(_('To'), createDateSelector('filter_timetill', $filter['filter_timetill'], 'filter_timesince'))
-//        ->addVar('filter_timesince', date(TIMESTAMP_FORMAT, $filter['filter_timesince']))
-//        ->addVar('filter_timetill', date(TIMESTAMP_FORMAT, $filter['filter_timetill']))
-        ->addRow(_zeT('Output format'), buttonOutputFormat('format', $filter['format']))
-
-;
-$tmpColumn->addItem(new CInput('hidden', 'action', $filter["action"]));
-$widget->addColumn($tmpColumn);
-
-
-$dashboard->addItem($widget);
 $finalReport = Array();
 
 // Get data for report ---------------------------------------------------------
 if (hasRequest('filter_set')) {
     // Check if all required fields have values
-//    checkRequiredField("hostids", "You need to provide a least one host in filter!");
+    checkRequiredField("groupids", "You need to provide a least one host group in filter!");
 
     if ($requiredMissing == false) {
-        $hostFilter = zeDBConditionInt('it.hostid', getRequest("hostids"));
+        $hostFilter = zeDBConditionInt('it.hostid', $filter["hostids"]);
         $hostGroupFilter = zbxeDBConditionInt('hg.groupid', $filter["groupids"]);
         if ($hostGroupFilter !== "") {
             $hostGroupFilter = "\n inner join hosts_groups hg \n on (hg.hostid = it.hostid) AND " . $hostGroupFilter;
@@ -263,25 +237,16 @@ if (hasRequest('filter_set')) {
             $lastItemID = $row['itemid'];
         }
     }
-    //var_dump($hostsReport);
 } else {
-    $table->setNoDataMessage(_('Specify some filter condition to see the values.'));
+    zbxeNeedFilter(_('Specify some filter condition to see the values.'));
 }
 
-// Build the report header -----------------------------------------------------
 
-$toggle_all = (new CColHeader(
-        (new CDiv())
-                ->addClass(ZBX_STYLE_TREEVIEW)
-                ->addClass('app-list-toggle-all')
-                ->addItem(new CSpan())
-        ))->addStyle('width: 18px');
-
-$locale = localeconv();
-$currency = (strlen($locale['currency_symbol']) > 1 ? $locale['currency_symbol'] : '$');
+/* * ***************************************************************************
+ * Display
+ * ************************************************************************** */
 switch ($filter["format"]) {
-    case 1;
-        $table->setHeader(array(_zeT("Data")));
+    case PAGE_TYPE_CSV;
         $fieldsExport = array("Host", "Item", "Key"
             , "Delay Average", "History Average", "Trends Average"
             , "Status"
@@ -290,17 +255,37 @@ switch ($filter["format"]) {
             , _zeT($currency)
         );
         break;
-    case 2;
+    case PAGE_TYPE_JSON;
         $fieldsExport = array("Host", "Item", "Key"
             , ["Delay", "History", "Trends"]
-            , "Status"
-            #, "Rows [
-            , ["HistoryRows", "TrendsRows"]
+            , "Status", ["HistoryRows", "TrendsRows"]
             , "Storage", "VPS", "BMU"
             , _zeT($currency)
         );
         break;
-    case 0;
+    default;
+        require_once 'include/views/js/monitoring.latest.js.php';
+        commonModuleHeader($moduleName, $moduleTitle, true);
+        $widget = newFilterWidget($moduleName);
+
+        // Source data filter
+        $tmpColumn = new CFormList();
+        $tmpColumn->addRow(_('Host Groups'), multiSelectHostGroups(selectedHostGroups($filter['groupids'])))
+                ->addRow(_zeT('Not monitored items'), buttonOptions('notMonitored', $filter['notMonitored'], array(_("Hide"), _("Show"))))
+        ;
+        $tmpColumn->addItem(new CInput('hidden', 'action', $action));
+        $widget->addColumn($tmpColumn);
+
+        $tmpColumn = (new CFormList())
+                ->addRow(_('Hosts'), multiSelectHosts(selectedHosts($filter['hostids'])))
+                ->addRow(_zeT('Output format'), buttonOutputFormat('format', $filter['format']))
+
+        ;
+        $tmpColumn->addItem(new CInput('hidden', 'action', $filter["action"]));
+        $widget->addColumn($tmpColumn);
+
+        $dashboard->addItem($widget);
+        // Report title
         $table->setHeader(array($toggle_all, _("Host"), _("Item"), _("Key")
             , (new CColHeader(_("Delay") . " / " . _("History") . " / " . _("Trends")))->addStyle('width: 15%')
             , (new CColHeader(_("Status")))->addStyle('width: 5%')
@@ -308,8 +293,10 @@ switch ($filter["format"]) {
             , _zeT("Storage"), _zeT("VPS"), _zeT("BMU")
             , _zeT($currency)
         ));
+
         break;
 }
+
 // Building the report ---------------------------------------------------------
 if (isset($cont)) {
     $linha = array('', '');
@@ -319,7 +306,61 @@ if (isset($cont)) {
     $exportData = "";
     for ($i = 0; $i < $cont; $i++) {
         switch ($filter["format"]) {
-            case 0; // HTML
+            case PAGE_TYPE_CSV; // CSV
+                $linhaExport = [];
+                for ($x = 0; $x <= $cont2; $x++) {
+                    switch ($x) {
+                        case 3:
+                            $fieldValue = explode("/", str_replace(" ", "", $report[$i][$x]));
+//                            $fieldValue = $fieldValue[0] . "," . $fieldValue[1] . "," . $fieldValue[2];
+                            $linhaExport[count($linhaExport)] = $fieldValue[0];
+                            $linhaExport[count($linhaExport)] = $fieldValue[1];
+                            $linhaExport[count($linhaExport)] = $fieldValue[2];
+                            break;
+                        case 5:
+                            $fieldValue = explode("/", str_replace(" ", "", str_replace("rows", "", str_replace("[", "", str_replace("]", "", $report[$i][$x])))));
+//                            $fieldValue = $fieldValue[0] . "," . $fieldValue[1];
+                            $linhaExport[count($linhaExport)] = $fieldValue[0];
+                            $linhaExport[count($linhaExport)] = $fieldValue[1];
+                            break;
+                        default:
+                            $linhaExport[count($linhaExport)] = $report[$i][$x];
+                            break;
+                    }
+                }
+                $linhaExport[count($linhaExport)] = $report[$i][-1];
+                $exportData .= zbxeToCSV($linhaExport);
+                break;
+            case PAGE_TYPE_JSON; // JSON aqui
+                $linhaExport = "";
+                for ($x = 0; $x <= $cont2; $x++) {
+                    $fieldTitle = $fieldsExport[$x];
+                    switch ($x) {
+                        case 3:
+                            $fieldValue = explode("/", str_replace(" ", "", $report[$i][$x]));
+                            $linhaExport .= ", " . zbxeJSONKey($fieldTitle[0], $fieldValue[0])
+                                    . ", " . zbxeJSONKey($fieldTitle[1], $fieldValue[1])
+                                    . ", " . zbxeJSONKey($fieldTitle[2], $fieldValue[2])
+                            ;
+
+                            break;
+                        case 5:
+                            $fieldValue = explode("/", str_replace(" ", "", str_replace("rows", "", str_replace("[", "", str_replace("]", "", $report[$i][$x])))));
+                            $linhaExport .= ", " . zbxeJSONKey($fieldTitle[0], $fieldValue[0])
+                                    . ", " . zbxeJSONKey($fieldTitle[1], $fieldValue[1])
+                            ;
+                            break;
+                        default:
+                            $fieldValue = quotestr($report[$i][$x]);
+                            $linhaExport .= ($x == 0 ? "" : ", ") . zbxeJSONKey($fieldTitle, $fieldValue);
+                            break;
+                    }
+                    //. "\"" . $fieldTitle . "\": \"" . $fieldValue . "\"";
+                }
+                $exportData .= ($exportData === "" ? "" : ",") . "{" . $linhaExport
+                        . ", " . zbxeJSONKey("hostid", $report[$i][-1]) . "}\n";
+                break;
+            default; // HTML
                 for ($x = 1; $x <= $cont2; $x++) {
                     $linha[$x + 1] = new CCol($report[$i][$x], 1);
                 }
@@ -353,81 +394,44 @@ if (isset($cont)) {
                 $row->setAttribute('parent_app_id', $report[$i][-1]);
                 $table->addRow($row);
                 break;
-            case 1; // CSV
-                $linhaExport = "";
-                for ($x = 0; $x <= $cont2; $x++) {
-                    switch ($x) {
-                        case 3:
-                            $fieldValue = explode("/", str_replace(" ", "", $report[$i][$x]));
-                            $fieldValue = quotestr($fieldValue[0]) . ";" . quotestr($fieldValue[1]) . ";" . quotestr($fieldValue[2]);
-                            break;
-                        case 5:
-                            $fieldValue = explode("/", str_replace(" ", "", str_replace("rows", "", str_replace("[", "", str_replace("]", "", $report[$i][$x])))));
-                            $fieldValue = quotestr($fieldValue[0]) . ";" . quotestr($fieldValue[1]);
-                            break;
-                        default:
-                            $fieldValue = quotestr($report[$i][$x]);
-                            break;
-                    }
-                    $linhaExport .= $fieldValue . ";";
-                }
-                $exportData .= $linhaExport . $report[$i][-1] . ";" . "\n";
-                break;
-            case 2; // JSON
-                $linhaExport = "";
-                for ($x = 0; $x <= $cont2; $x++) {
-                    $fieldTitle = $fieldsExport[$x];
-                    switch ($x) {
-                        case 3:
-                            $fieldValue = explode("/", str_replace(" ", "", $report[$i][$x]));
-                            //$fieldValue = quotestr($fieldValue[0]) . ";" . quotestr($fieldValue[1]) . ";" . quotestr($fieldValue[2]);
-                            $linhaExport .= ", " . zbxeJSONKey($fieldTitle[0], $fieldValue[0])
-                                    . ", " . zbxeJSONKey($fieldTitle[1], $fieldValue[1])
-                                    . ", " . zbxeJSONKey($fieldTitle[2], $fieldValue[2])
-                            ;
-
-                            break;
-                        case 5:
-                            $fieldValue = explode("/", str_replace(" ", "", str_replace("rows", "", str_replace("[", "", str_replace("]", "", $report[$i][$x])))));
-//                            $fieldValue = quotestr($fieldValue[0]) . ";" . quotestr($fieldValue[1]);
-                            $linhaExport .= ", " . zbxeJSONKey($fieldTitle[0], $fieldValue[0])
-                                    . ", " . zbxeJSONKey($fieldTitle[1], $fieldValue[1])
-                            ;
-                            break;
-                        default:
-                            $fieldValue = quotestr($report[$i][$x]);
-                            $linhaExport .= ($x == 0 ? "" : ", ") . zbxeJSONKey($fieldTitle, $fieldValue);
-                            break;
-                    }
-                    //. "\"" . $fieldTitle . "\": \"" . $fieldValue . "\"";
-                }
-                $exportData .= ($exportData === "" ? "" : ",") . "{" . $linhaExport
-                        . ", " . zbxeJSONKey("hostid", $report[$i][-1]) . "}\n";
-                break;
         }
-    }
-    if ($filter["format"] > 0) {
-        switch ($filter["format"]) {
-            case 1;
-                $titleCSV = "";
-                for ($x = 0; $x < count($fieldsExport); $x++) {
-                    $titleCSV .= quotestr($fieldsExport[$x]) . ";";
-                }
-                $textArea = (new CTextArea('exportData', $titleCSV . "\n" . $exportData));
-                break;
-            case 2;
-                $textArea = (new CTextArea('exportData', '{"data":[' . $exportData . ']}'));
-                break;
-        }
-        $textArea->setWidth(800);
-        $textArea->setRows(10);
-        $table->addRow($textArea);
     }
 }
-$form->addItem([
-    $table
-        //Todo: Make export of data possible to select and to export to CSV, JSON using JavaScript
-        //, new CActionButtonList('exportData', 'itemids', [ 0 => ['name' => _('Export as CSV')]])
-]);
 
-$dashboard->addItem($form)->show();
+/* * ***************************************************************************
+ * Display Footer
+ * ************************************************************************** */
+/*   if ($filter["format"] > 0) {
+  switch ($filter["format"]) {
+  case 1;
+  $titleCSV = "";
+  for ($x = 0; $x < count($fieldsExport); $x++) {
+  $titleCSV .= quotestr($fieldsExport[$x]) . ";";
+  }
+  $textArea = (new CTextArea('exportData', $titleCSV . "\n" . $exportData));
+  break;
+  case 2;
+  $textArea = (new CTextArea('exportData', '{"data":[' . $exportData . ']}'));
+  break;
+  }
+  $textArea->setWidth(800);
+  $textArea->setRows(10);
+  $table->addRow($textArea);
+  } */
+switch ($filter["format"]) {
+    case PAGE_TYPE_CSV;
+        $titleCSV = "";
+        for ($x = 0; $x < count($fieldsExport); $x++) {
+            $titleCSV .= quotestr($fieldsExport[$x]) . ",";
+        }
+        echo $titleCSV . "\n" . $exportData;
+        break;
+    case PAGE_TYPE_JSON;
+        echo "[" . $exportData . "]";
+        break;
+    default;
+        $form->addItem([ $table]);
+        $dashboard->addItem($form)->show();
+        break;
+}
+

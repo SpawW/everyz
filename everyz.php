@@ -1,7 +1,7 @@
 <?php
 
 /*
- * * Purpose: Create a custom dashboard for plugins in Zabbix
+ * * Purpose: Add support for external modules to extend Zabbix native functions
  * * Adail Horst - http://spinola.net.br/blog
  * *
  * * This program is free software; you can redistribute it and/or modify
@@ -32,7 +32,19 @@ $baseProfile = "everyz.";
 $page['title'] = _('EveryZ');
 $page['file'] = 'everyz.php';
 //Todo: Make this module to accept 4 modes: html, report, csv, json
-$page['type'] = detect_page_type(PAGE_TYPE_HTML);
+switch (getRequest('format')) {
+    case PAGE_TYPE_CSV:
+        $page['file'] = 'everyz_export.csv';
+        $page['type'] = detect_page_type(PAGE_TYPE_CSV);
+        break;
+    case PAGE_TYPE_JSON:
+        $page['file'] = 'everyz_export.json';
+        $page['type'] = detect_page_type(PAGE_TYPE_CSV);
+        break;
+    default:
+        $page['type'] = detect_page_type(PAGE_TYPE_HTML);
+        break;
+}
 $page['scripts'] = array('class.calendar.js', 'multiselect.js', 'gtlc.js');
 
 $filter = $fields = [];
@@ -57,7 +69,7 @@ while ($row = DBfetch($res)) {
     $module = $tmp[0];
 }
 if ($module == "dashboard") {
-    include_once     dirname(__FILE__) . "/local/app/views/everyz.dashboard.view.php";
+    include_once dirname(__FILE__) . "/local/app/views/everyz.dashboard.view.php";
 } else {
     $file = dirname(__FILE__) . "/local/app/views/everyz." . $module . ".view.php";
     if (file_exists($file)) {

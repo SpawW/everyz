@@ -18,12 +18,12 @@
  * * along with this program; if not, write to the Free Software
  * * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  * */
-
-require_once 'include/views/js/monitoring.latest.js.php';
-
-// Configuration variables =====================================================
+/* * ***************************************************************************
+ * Module Variables
+ * ************************************************************************** */
 $moduleName = "zbxe-ns";
 $baseProfile .= $moduleName;
+$moduleTitle = 'Not Supported Items';
 
 // Common fields
 addFilterParameter("format", T_ZBX_INT);
@@ -33,36 +33,24 @@ addFilterActions();
 addFilterParameter("hostids", PROFILE_TYPE_STR, [], true, true);
 addFilterParameter("item", T_ZBX_STR);
 addFilterParameter("groupids", PROFILE_TYPE_STR, [], true, true);
-//addFilterParameter("application", T_ZBX_STR);
 
 check_fields($fields);
-/*
- * Security
- */
-if (getRequest('groupids') && !API::HostGroup()->isReadable(getRequest('groupids'))) {
-    access_deny();
-}
-if (getRequest('hostids') && !API::Host()->isReadable(getRequest('hostids'))) {
-    access_deny();
-}
-/*
- * Display
- */
-$dashboard = (new CWidget())
-        ->setTitle('EveryZ - ' . _zeT('Not Supported Items'))
-        ->setControls(fullScreenIcon()
-);
-$toggle_all = (new CColHeader(
-        (new CDiv())
-                ->addClass(ZBX_STYLE_TREEVIEW)
-                ->addClass('app-list-toggle-all')
-                ->addItem(new CSpan())
-        ))->addStyle('width: 18px');
-$form = (new CForm('POST', 'everyz.php'))->setName('ns');
-//$form = (new CForm('GET', 'everyz.php?action=zbxe-ns'))->setName('ns');
-$table = (new CTableInfo())->addClass(ZBX_STYLE_OVERFLOW_ELLIPSIS);
+// Indicated area for external files -------------------------------------------
+?>
+<?php
 
-// Filtros =====================================================================
+/* * ***************************************************************************
+ * Access Control
+ * ************************************************************************** */
+checkAccessHost('hostids');
+checkAccessGroup('groupids');
+/* * ***************************************************************************
+ * Module Functions
+ * ************************************************************************** */
+
+/* * ***************************************************************************
+ * Get Data
+ * ************************************************************************** */
 if (hasRequest('filter_rst')) { // Clean the filter parameters
     resetProfile('hostids', true);
     resetProfile('groupids', true);
@@ -71,41 +59,17 @@ if (hasRequest('filter_rst')) { // Clean the filter parameters
     $filter['filter_rst'] = NULL;
     $filter['filter_set'] = NULL;
 }
-// Get the multiselect hosts
-$multiSelectHostData = selectedHosts($filter['hostids']);
-// Get the multiselect hosts
-$multiSelectHostGroupData = selectedHostGroups($filter['groupids']);
+$finalReport = Array();
+switch ($filter["format"]) {
+    case PAGE_TYPE_CSV:
+        break;
+    case PAGE_TYPE_JSON:
+        $jsonResult = []; // Array for JSON Export
+        break;
+    default: // HTML
+        break;
+}
 
-$widget = (new CFilter('web.latest.filter.state'));
-
-// Source data filter
-$tmpColumn = new CFormList();
-$tmpColumn->addRow(_('Host Groups'), multiSelectHostGroups($multiSelectHostGroupData))
-        ->addRow(_('Key'), [ (new CTextBox('item', $filter['item']))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH),
-            (new CDiv())->addClass(ZBX_STYLE_FORM_INPUT_MARGIN),
-            (new CButton('item_name', _('Select')))
-            ->addClass(ZBX_STYLE_BTN_GREY)
-            ->onClick('return PopUp("popup.php?srctbl=items&srcfld1=key_&real_hosts=1&dstfld1=item' .
-                    '&with_items=1&dstfrm=zbx_filter");')
-        ])
-;
-$tmpColumn->addItem(new CInput('hidden', 'action', $filter["action"]));
-$widget->addColumn($tmpColumn);
-
-$tmpColumn = (new CFormList())
-        ->addRow(_('Hosts'), multiSelectHosts($multiSelectHostData))
-        /* ->addRow(_('Application'), [ (new CTextBox('application', $filter['application']))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH),
-          (new CDiv())->addClass(ZBX_STYLE_FORM_INPUT_MARGIN),
-          (new CButton('application_name', _('Select')))
-          ->addClass(ZBX_STYLE_BTN_GREY)
-          ->onClick('return PopUp("popup.php?srctbl=applications&srcfld1=name&real_hosts=1&dstfld1=application&with_applications=1&dstfrm=zbx_filter");')
-          ]) */
-        ->addRow(_zeT('Output format'), (new CRadioButtonList('format', (int) $filter['format']))->addValue('HTML', 0)->addValue('CSV', 1)->setModern(true))
-;
-$widget->addColumn($tmpColumn);
-
-
-$dashboard->addItem($widget);
 $report = Array();
 $hostCont = Array();
 // Get data for report ---------------------------------------------------------
@@ -136,7 +100,6 @@ if (hasRequest('filter_set')) {
             . ($filter["item"] == "" ? "" : ' AND ite.name like ' . quotestr($filter["item"] . "%"))
             . ' order by hos.host, ite.name'
     ;
-    //var_dump ("<br>".$query."<br>");
     // Build a list of items with required key ---------------------------------
     $result = DBselect($query);
     $cont = 0;
@@ -148,28 +111,62 @@ if (hasRequest('filter_set')) {
         $report[$cont]['key_'] = $rowItem["key_"];
         $cont++;
     }
-    // Todo: Check if user have access to this hosts
 } else {
-    $table->setNoDataMessage(_('Specify some filter condition to see the values.'));
+    zbxeNeedFilter(_('Specify some filter condition to see the values.'));
 }
 
-// Build the report ------------------------------------------------------------
+/* * ***************************************************************************
+ * Display
+ * ************************************************************************** */
 switch ($filter["format"]) {
-    case 1;
-        $table->setHeader(array(_zeT("Data")));
+    case PAGE_TYPE_CSV:
+        echo zbxeToCSV(["Host", "Item", "Key", "Error Message"]);
         break;
-    case 0;
+    case PAGE_TYPE_JSON:
+        $jsonResult = []; // Array for JSON Export
+        break;
+    default: // HTML
+        require_once 'include/views/js/monitoring.latest.js.php';
+        commonModuleHeader($moduleName, $moduleTitle, true);
+        // Filtros =====================================================================
+        // Get the multiselect hosts
+        $multiSelectHostData = selectedHosts($filter['hostids']);
+        // Get the multiselect hosts
+        $multiSelectHostGroupData = selectedHostGroups($filter['groupids']);
+        $widget = newFilterWidget($moduleName);
+
+// Source data filter
+        $tmpColumn = new CFormList();
+        $tmpColumn->addRow(_('Host Groups'), multiSelectHostGroups($multiSelectHostGroupData))
+                ->addRow(_('Key'), [ (new CTextBox('item', $filter['item']))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH),
+                    (new CDiv())->addClass(ZBX_STYLE_FORM_INPUT_MARGIN),
+                    (new CButton('item_name', _('Select')))
+                    ->addClass(ZBX_STYLE_BTN_GREY)
+                    ->onClick('return PopUp("popup.php?srctbl=items&srcfld1=key_&real_hosts=1&dstfld1=item' .
+                            '&with_items=1&dstfrm=zbx_filter");')
+        ]);
+        $tmpColumn->addItem(new CInput('hidden', 'action', $filter["action"]));
+        $widget->addColumn($tmpColumn);
+
+        $tmpColumn = (new CFormList())
+                ->addRow(_('Hosts'), multiSelectHosts($multiSelectHostData))
+//                ->addRow(_zeT('Output format'), (new CRadioButtonList('format', (int) $filter['format']))->addValue('HTML', 0)->addValue('CSV', 1)->setModern(true))
+                ->addRow(_zeT('Output format'), buttonOutputFormat('format', (int) $filter['format']))
+        ;
+        $widget->addColumn($tmpColumn);
+        $dashboard->addItem($widget);
         $table->setHeader(array($toggle_all, (new CColHeader(_('Host')))
             //->addStyle('width: 15%')
             , _('Item'), _('Key'), _('Error'), _('Actions')));
+
         break;
 }
-$lastHostID = -1;
 
+$lastHostID = -1;
 foreach ($report as $row) {
     $item = getItem($row['itemid']);
     $state_css = ($item['state'] == ITEM_STATE_NOTSUPPORTED) ? ZBX_STYLE_GREY : null;
-    if ($filter["format"] == 0 && $row['hostid'] !== $lastHostID) {
+    if ($filter["format"] == PAGE_TYPE_HTML && $row['hostid'] !== $lastHostID) {
         $resumo = zbxeFieldValue("select count(*) as total from items ite "
                 . "where ite.state = 1 and ite.status = 0 and ite.hostid = " . $row['hostid']
                 . ($filter["item"] == "" ? "" : ' AND ite.name like ' . quotestr($filter["item"] . "%"))
@@ -188,27 +185,43 @@ foreach ($report as $row) {
     }
     $lastHostID = $row["hostid"];
     switch ($filter["format"]) {
-        case 1;
-            $table->addRow(quotestr($row["host_name"])
-                    . ";" . quotestr($item['name_expanded'])
-                    . ";" . quotestr($item['key_'])
-                    . ";" . quotestr($row['error'])
-            )
-            ;
+        case PAGE_TYPE_CSV;
+            echo zbxeToCSV([$row["host_name"], $item['name_expanded']
+                , $item['key_'], $row['error']]);
             break;
-        case 0;
+        case PAGE_TYPE_JSON;
+            $jsonResult[count($jsonResult)] = ['host' => $row["host_name"]
+                , 'item' => $item['name_expanded'], 'key_' => $item['key_']
+                , 'error' => $row['error']];
+            break;
+        default;
             $tableRow = new CRow([
                 '', ''
                 , (new CCol($item["name_expanded"], 1))->addClass($state_css)
                 , (new CCol($item["key_"], 1))->addClass($state_css)
                 , (new CCol($row["error"], 1))->addClass($state_css)
-                , [new CLink(_('Disable'), 'items.php?group_itemid=' . $row['itemid'] . '&hostid=' . $row['hostid'] . '&action=item.massdisable')]
+                , [(new CLink(_('Disable'), ""))->onClick("javascript: return redirect('items.php?group_itemid=" . $row['itemid']
+                            . "&hostid=" . $row['hostid'] . "&action=item.massdisable&sid=180b233e4008f20e', 'post', 'sid', true);")]
+                
+                    //'items.php?group_itemid=' . $row['itemid'] . '&hostid=' . $row['hostid'] . '&action=item.massdisable')]
             ]);
             $tableRow->setAttribute('parent_app_id', $row['hostid']);
             $table->addRow($tableRow);
             break;
     }
 }
-$form->addItem([ $table]);
+/* * ***************************************************************************
+ * Display Footer
+ * ************************************************************************** */
+switch ($filter["format"]) {
+    case PAGE_TYPE_CSV;
+        break;
+    case PAGE_TYPE_JSON;
+        echo json_encode($jsonResult, JSON_UNESCAPED_UNICODE);
+        break;
+    default;
+        $form->addItem([ $table]);
+        $dashboard->addItem($form)->show();
+        break;
+}
 
-$dashboard->addItem($form)->show();
