@@ -94,7 +94,7 @@ $linesPackage = "";
 foreach ($hostData as $host) {
     if (array_key_exists("location_lat", $host)) {
         // Add host
-        echo "\n addHost(" . $host["location_lat"] . "," . $host["location_lon"] . "," . $host["iconid"] . ",'" . $host["name"] . "');";
+        echo "\n addHost(" . $host["location_lat"] . "," . $host["location_lon"] . "," . $host["iconid"] . ",'Host: " . $host["name"]."<br>Latitude: ". $host["location_lat"]."<br>Longitute: ". $host["location_lon"]  . "');";
         /* echo "L.marker([" . $host["location_lat"] . ", "
           . $host["location_lon"] . "], {icon: zbxImage(" . $host["iconid"] . ")}).addTo(ZabGeomap).bindPopup('" . $host["name"]
           //        . $host["location_lon"] . "], {icon: zbxIconOk}).addTo(ZabGeomap).bindPopup('" . $host["name"]
