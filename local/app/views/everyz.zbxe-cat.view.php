@@ -314,12 +314,6 @@ for ($iRep = 0; $iRep < count($finalReport); $iRep++) {
             case PAGE_TYPE_CSV;
                 echo zbxeToCSV([hostName($report[0]["hostid"]), $item['name_expanded']
                     , $report[$i]['momento'], $report[$i]['valor'], $report[$i]['tipo']]);
-
-                /* echo quotestr(hostName($report[0]["hostid"]), false)
-                  . ";" . quotestr($item['name_expanded'], false)
-                  . ";" . quotestr($report[$i]['momento'], false)
-                  . ";" . quotestr($report[$i]['valor'], false)
-                  . ";" . quotestr($report[$i]['tipo'], false) . ";\n"; */
                 break;
             case PAGE_TYPE_JSON;
                 $jsonResult[count($jsonResult)] = ['host' => hostName($report[0]["hostid"])

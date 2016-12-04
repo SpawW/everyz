@@ -365,6 +365,23 @@ function checkAccessGroup($p_groupid) {
 }
 
 /**
+ * checkAccessTrigger
+ *
+ * Check if current user can access (read) trigger data.
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param string    $p_triggerid   ID of trigger
+ */
+function checkAccessTrigger($p_triggerid) {
+    global $filter;
+    $triggerids = array(isset($_REQUEST[$p_triggerid]) ? $_REQUEST[$p_triggerid] : $filter[$p_triggerid]);
+    if (getRequest($p_triggerid) && !API::Trigger()->isReadable($triggerids)) {
+        access_deny();
+    }
+    return $triggerids;
+}
+
+/**
  * checkAccessHost
  *
  * Check if current user can access (read) host data.
@@ -929,16 +946,14 @@ function getRealPOST() {
  * @param string  $title            Title of module
  * @param string  $allowFullScreen  Add a button to full screen view
  */
-function commonModuleHeader($module_id, $title, $allowFullScreen = false, $method = 'POST') {
+function commonModuleHeader($module_id, $title, $allowFullScreen = false, $method = 'POST', $customControls = null) {
     global $dashboard, $form, $table;
     $dashboard = (new CWidget())
             ->setTitle(EZ_TITLE . _zeT($title))
     ;
     $table = (new CTableInfo())->addClass(ZBX_STYLE_OVERFLOW_ELLIPSIS);
     if ($allowFullScreen) {
-        $dashboard->setControls((new CList())
-                        ->addItem(get_icon('fullscreen', ['fullscreen' => getRequest('fullscreen')]))
-        );
+        $dashboard->setControls(($customControls == null ? (new CList())->addItem(get_icon('fullscreen', ['fullscreen' => getRequest('fullscreen')])) : $customControls));
         global $toggle_all;
         $toggle_all = (new CColHeader(
                 (new CDiv())

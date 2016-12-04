@@ -401,23 +401,6 @@ if (isset($cont)) {
 /* * ***************************************************************************
  * Display Footer
  * ************************************************************************** */
-/*   if ($filter["format"] > 0) {
-  switch ($filter["format"]) {
-  case 1;
-  $titleCSV = "";
-  for ($x = 0; $x < count($fieldsExport); $x++) {
-  $titleCSV .= quotestr($fieldsExport[$x]) . ";";
-  }
-  $textArea = (new CTextArea('exportData', $titleCSV . "\n" . $exportData));
-  break;
-  case 2;
-  $textArea = (new CTextArea('exportData', '{"data":[' . $exportData . ']}'));
-  break;
-  }
-  $textArea->setWidth(800);
-  $textArea->setRows(10);
-  $table->addRow($textArea);
-  } */
 switch ($filter["format"]) {
     case PAGE_TYPE_CSV;
         $titleCSV = "";
