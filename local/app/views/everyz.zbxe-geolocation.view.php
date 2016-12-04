@@ -162,6 +162,12 @@ $tmpColumn = new CFormList();
 if ($filter['map'] == "") {
     $filter['map'] = 1;
 }
+if ($filter['centerLat'] == "") {
+    $filter['centerLat'] = -12.8;
+}
+if ($filter['centerLong'] == "") {
+    $filter['centerLong'] = -44.8;
+}
 $tmpColumn->addRow(_('Host Groups'), multiSelectHostGroups(selectedHostGroups($filter['groupids'])))
         ->addRow(_zeT('Automatic icon mapping'), [zbxeComboIconMap('iconmapid', $filter['iconmapid'])])
         ->addRow(_zeT('Default tile'), [newComboFilterArray(
@@ -173,7 +179,7 @@ $widget->addColumn($tmpColumn);
 // Left collumn
 $tmpColumn = new CFormList();
 $radioZoom = (new CRadioButtonList('zoomLevel', (int) $filter['zoomLevel']))->setModern(true);
-for ($i = 11; $i < 19; $i++) {
+for ($i = 5; $i < 14; $i++) {
     $radioZoom->addValue(_($i), $i);
 }
 $tmpColumn->addRow(_('Center'), [
@@ -193,11 +199,16 @@ $dashboard->addItem($widget);
 // Get data for report ---------------------------------------------------------
 if (hasRequest('filter_set')) {
     // Sample Check if all required fields have values
-//    checkRequiredField("hostids", "You need to provide a least one host in filter!");
-    // $count variable for check if the report has results
+    //checkRequiredField("hostids", _zeT("You need to provide a least one host in filter!"));
+    checkRequiredField("centerLat", _zeT("You need to entered center Latitude data!"));
+    checkRequiredField("centerLong", _zeT("You need to entered center Longitude data!"));        
     // $report for store the report data
     if ($requiredMissing == false) {
-        // Build your report
+        
+    }
+    if ($requiredMissing == true) {
+        error("check data required!");
+        //checkRequiredField("centerLat", _zeT("You need to entered center Latitude data!"));  
     }
 } else {
     $table->setNoDataMessage(_zeT('Specify some filter condition to see the geolocation.'));
