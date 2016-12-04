@@ -83,7 +83,7 @@ echo $mapBackgroud[$filter["map"]]; //"streets"
         L.circle([lat, lon], {color: borderColor, fillColor: fillColor, fillOpacity: 0.2, radius: radiusSize}).addTo(ZabGeocircle);
     }
     function addHost(lat, lon, hostid, name, description) {
-        L.marker([lat, lon], {icon: zbxImage(hostid)}).addTo(ZabGeomap).bindPopup(name.description);
+        L.marker([lat, lon], {icon: zbxImage(hostid)}).addTo(ZabGeomap).bindPopup(name+description);
     }
     //
     //Change for repeat to read JSON and add Markers if lat and long exist
@@ -94,8 +94,8 @@ $linesPackage = "";
 foreach ($hostData as $host) {
     if (array_key_exists("location_lat", $host)) {
         // Add host
-        echo "\n addHost(" . $host["location_lat"] . "," . $host["location_lon"] . "," . $host["iconid"] . ",'Host: " . $host["name"]."<br>Latitude: ". $host["location_lat"]."<br>Longitute: ". $host["location_lon"]  . "');";
-        /* echo "L.marker([" . $host["location_lat"] . ", "
+     echo "\n addHost(" . $host["location_lat"] . "," . $host["location_lon"] . "," . $host["iconid"] . ",'Host: " . $host["name"] . "','<br>Latitude: " . $host["location_lat"] ."<br>Longitute: ". $host["location_lon"] . "<br>Event: " .$event["description"] . "' );";
+    /* echo "L.marker([" . $host["location_lat"] . ", "
           . $host["location_lon"] . "], {icon: zbxImage(" . $host["iconid"] . ")}).addTo(ZabGeomap).bindPopup('" . $host["name"]
           //        . $host["location_lon"] . "], {icon: zbxIconOk}).addTo(ZabGeomap).bindPopup('" . $host["name"]
           . "<br>IP: 192.168.1.100');\n"; */
