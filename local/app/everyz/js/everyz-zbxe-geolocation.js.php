@@ -90,8 +90,8 @@ echo $mapBackgroud[$filter["map"]]; //"streets"
 <?php
 
 function showTitle($host) {
-    return "'<b>" . $host["name"]
-            . "</b>(" . $host["location_lat"] . "," . $host["location_lon"] . ")','"
+    return "'<a href=\'hosts.php?form=update&hostid=" . $host["id"] . "\'>" . $host["name"]
+            . "</a>(" . $host["location_lat"] . "," . $host["location_lon"] . ")','"
     ;
 }
 
@@ -101,7 +101,8 @@ function showEvents($host) {
         $eventList = "";
         foreach ($host["events"] as $key => $value) {
             $eventList .= "<li style=\'background: #" . getSeverityColor($value["priority"], [$config])
-                    . "; list-style:square;\'>" . $value["description"] . "</li>";
+                    . "; list-style:square;\'><a href=\'/tr_events.php?triggerid="
+                    . $value["triggerid"] . "&eventid=" . $value["eventid"] . "\'>" . $value["description"] . "</a></li>";
             $bigPriority = ($bigPriority > $value["priority"] ? $bigPriority : $value["priority"]);
         }
         return "<hr width=\'99%\' color=\'gray\'><ul>" . $eventList . "</ul>";
