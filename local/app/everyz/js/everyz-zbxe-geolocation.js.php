@@ -17,8 +17,6 @@
  * * along with this program; if not, write to the Free Software
  * * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  * */
-
-// Scripts e CSS adicionais
 ?>
 
 <script type="text/javascript">
@@ -34,7 +32,7 @@
     var setViewZoom = <?php echo getRequest2("zoomLevel", 19) ?>;
     var showCircles = <?php echo ( in_array($filter["layers"], [3, 99]) ? 1 : 0); ?>; //(0=disable/1=enable)
     var showLines = <?php echo ( in_array($filter["layers"], [2, 99]) ? 1 : 0); ?>; //(0=disable/1=enable)
-    
+
     vDiv = document.getElementById("mapid");
 
     vDiv.style.width = screen.availWidth;
@@ -83,19 +81,35 @@ echo $mapBackgroud[$filter["map"]]; //"streets"
         L.circle([lat, lon], {color: borderColor, fillColor: fillColor, fillOpacity: 0.2, radius: radiusSize}).addTo(ZabGeocircle);
     }
     function addHost(lat, lon, hostid, name, description) {
-        L.marker([lat, lon], {icon: zbxImage(hostid)}).addTo(ZabGeomap).bindPopup(name+description);
+        L.marker([lat, lon], {icon: zbxImage(hostid)}).addTo(ZabGeomap).bindPopup(name + description);
     }
     //
     //Change for repeat to read JSON and add Markers if lat and long exist
     //Put marker in Map
 <?php
+
+function showEvents($host) {
+    if (isset($host["events"])) {
+        $eventList = "";
+        foreach ($host["events"] as $key => $value) {
+            $eventList .= "<li style=\'color:red; list-style:square;\'>" . $value["description"] . "</li>";
+        }
+        return "<br><ul>" . $eventList . "</ul>";
+    } else {
+        return "";
+    }
+}
+
 // Cria os hosts no mapa
 $linesPackage = "";
 foreach ($hostData as $host) {
     if (array_key_exists("location_lat", $host)) {
         // Add host
-     echo "\n addHost(" . $host["location_lat"] . "," . $host["location_lon"] . "," . $host["iconid"] . ",'Host: " . $host["name"] . "','<br>Latitude: " . $host["location_lat"] ."<br>Longitude: ". $host["location_lon"] . "<br>Event: " .$event["description"] . "' );";
-    /* echo "L.marker([" . $host["location_lat"] . ", "
+        echo "\n addHost(" . $host["location_lat"] . "," . $host["location_lon"] . "," . $host["iconid"] . ",'Host: " . $host["name"]
+        . "','<br>Latitude: " . $host["location_lat"] . "<br>Longitude: " . $host["location_lon"]
+        . showEvents($host) . "' );"
+        ;
+        /* echo "L.marker([" . $host["location_lat"] . ", "
           . $host["location_lon"] . "], {icon: zbxImage(" . $host["iconid"] . ")}).addTo(ZabGeomap).bindPopup('" . $host["name"]
           //        . $host["location_lon"] . "], {icon: zbxIconOk}).addTo(ZabGeomap).bindPopup('" . $host["name"]
           . "<br>IP: 192.168.1.100');\n"; */
