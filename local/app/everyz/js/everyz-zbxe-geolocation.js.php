@@ -77,24 +77,34 @@ echo $mapBackgroud[$filter["map"]]; //"streets"
             popupAnchor: [2, -38],
         });
     }
-    function addCircle (lat, lon, radiusSize, fillColor = '#303', borderColor = ''){
-        L.circle([lat, lon], {color: borderColor, fillColor: fillColor, fillOpacity: 0.2, radius: radiusSize}).addTo(ZabGeocircle);
+    function addCircle (lat, lon, radiusSize, fillColor = '#303', borderColor = '', opacity = 0.2){
+        L.circle([lat, lon], {color: borderColor, fillColor: fillColor, fillOpacity: opacity, radius: radiusSize}).addTo(ZabGeocircle);
     }
     function addHost(lat, lon, hostid, name, description) {
         L.marker([lat, lon], {icon: zbxImage(hostid)}).addTo(ZabGeomap).bindPopup(name + description);
     }
+
     //
     //Change for repeat to read JSON and add Markers if lat and long exist
     //Put marker in Map
 <?php
 
+function showTitle($host) {
+    return "'<b>" . $host["name"]
+            . "</b>(" . $host["location_lat"] . "," . $host["location_lon"] . ")','"
+    ;
+}
+
 function showEvents($host) {
+    global $bigPriority, $config;
     if (isset($host["events"])) {
         $eventList = "";
         foreach ($host["events"] as $key => $value) {
-            $eventList .= "<li style=\'color:red; list-style:square;\'>" . $value["description"] . "</li>";
+            $eventList .= "<li style=\'background: #" . getSeverityColor($value["priority"], [$config])
+                    . "; list-style:square;\'>" . $value["description"] . "</li>";
+            $bigPriority = ($bigPriority > $value["priority"] ? $bigPriority : $value["priority"]);
         }
-        return "<br><ul>" . $eventList . "</ul>";
+        return "<hr width=\'99%\' color=\'gray\'><ul>" . $eventList . "</ul>";
     } else {
         return "";
     }
@@ -104,26 +114,19 @@ function showEvents($host) {
 $linesPackage = "";
 foreach ($hostData as $host) {
     if (array_key_exists("location_lat", $host)) {
+        $bigPriority = 0;
         // Add host
-        echo "\n addHost(" . $host["location_lat"] . "," . $host["location_lon"] . "," . $host["iconid"] . ",'Host: " . $host["name"]
-        . "','<br>Latitude: " . $host["location_lat"] . "<br>Longitude: " . $host["location_lon"]
-        . showEvents($host) . "' );"
-        ;
-        /* echo "L.marker([" . $host["location_lat"] . ", "
-          . $host["location_lon"] . "], {icon: zbxImage(" . $host["iconid"] . ")}).addTo(ZabGeomap).bindPopup('" . $host["name"]
-          //        . $host["location_lon"] . "], {icon: zbxIconOk}).addTo(ZabGeomap).bindPopup('" . $host["name"]
-          . "<br>IP: 192.168.1.100');\n"; */
+        echo "\n addHost(" . $host["location_lat"] . "," . $host["location_lon"] . "," . $host["iconid"] . "," . showTitle($host) . showEvents($host) . "' );";
         // Add circles
         if (isset($host["circle"])) {
             foreach ($host["circle"] as $circles) {
                 echo "addCircle(" . $host["location_lat"] . "," . $host["location_lon"] . "," . $circles[1] . ",'" . $circles[2] . "');";
-                /*
-                  echo "L.circle([" . $host["location_lat"] . ", "
-                  . $host["location_lon"] . "], {color: '" . $circles[2]
-                  . "', fillColor: '#303', fillOpacity: 0.2, radius: " . $circles[1] . "}).addTo(ZabGeocircle);\n";
-                 * 
-                 */
             }
+        }
+        if ($bigPriority > 0) {
+            $color = getSeverityColor($bigPriority, [$config]);
+            echo "\n addCircle (" . $host["location_lat"] . "," . $host["location_lon"] . ",2000,'#"
+            . $color . "','#" . $color . "',0.7);\n";
         }
         // Add lines
         if (isset($host["line"])) {
@@ -141,7 +144,6 @@ foreach ($hostData as $host) {
     }
 }
 ?>
-
     //Change for repeat to read JSON and add Circle inf note exist
     //If radius exist add Circle [use lat and long more radius]
     //Capture point in map using double click 
