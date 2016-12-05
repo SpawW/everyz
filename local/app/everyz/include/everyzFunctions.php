@@ -948,9 +948,7 @@ function getRealPOST() {
  */
 function commonModuleHeader($module_id, $title, $allowFullScreen = false, $method = 'POST', $customControls = null) {
     global $dashboard, $form, $table;
-    $dashboard = (new CWidget())
-            ->setTitle(EZ_TITLE . _zeT($title))
-    ;
+    $dashboard = (new CWidget())->setTitle(EZ_TITLE . _zeT($title));
     $table = (new CTableInfo())->addClass(ZBX_STYLE_OVERFLOW_ELLIPSIS);
     if ($allowFullScreen) {
         $dashboard->setControls(($customControls == null ? (new CList())->addItem(get_icon('fullscreen', ['fullscreen' => getRequest('fullscreen')])) : $customControls));
@@ -1015,7 +1013,7 @@ function zbxeNeedFilter($message) {
  * @param string  $name  name of object in HTML
  */
 function newFilterWidget($name) {
-    return (new CFilter('web.' . $name . '.filter.state'));
+    return (new CFilter('web.' . $name . '.filter.state'))->addVar('fullscreen', getRequest('fullscreen'));
 }
 
 /**

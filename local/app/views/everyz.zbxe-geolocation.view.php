@@ -19,19 +19,19 @@
  * TodoS: ===========================================================================
  * */
 
-// Scripts e CSS adicionais
-?>
-<link rel="stylesheet" href="local/app/everyz/css/leaflet.css" />
-<script src="local/app/everyz/js/leaflet.js"></script>
-<?php
-// Definitions -----------------------------------------------------------------
-// Module Functions 
+/* * ***************************************************************************
+ * Module Variables
+ * ************************************************************************** */
 // Configuration variables =====================================================
 $moduleName = "zbxe-geolocation";
 $baseProfile .= $moduleName;
+$moduleTitle = 'Geolocation';
+
+// Zabbix configuration
+$config = select_config();
 
 // Common fields
-addFilterParameter("format", T_ZBX_INT);
+//addFilterParameter("format", T_ZBX_INT);
 addFilterActions();
 
 // Specific fields
@@ -45,6 +45,29 @@ addFilterParameter("map", T_ZBX_STR, "1", false, false);
 addFilterParameter("layers", T_ZBX_INT);
 
 check_fields($fields);
+
+
+/* * ***************************************************************************
+ * Access Control
+ * ************************************************************************** */
+checkAccessGroup('groupids');
+
+/* * ***************************************************************************
+ * Module Functions
+ * ************************************************************************** */
+
+/* * ***************************************************************************
+ * Get Data
+ * ************************************************************************** */
+// Filtros =====================================================================
+if (hasRequest('filter_rst')) { // Clean the filter parameters
+    resetProfile('groupids', true);
+    resetProfile('iconmapid', true);
+    $filter['filter_rst'] = NULL;
+} else { // Put the date in required format
+    //var_dump($filter["groupids"]);
+    //var_dump(selectHostsByGroup($filter["groupids"],['location_lat', 'location_lon', 'location']));
+}
 
 // Buscar o mapeamento de ícones ====================================================================
 // Verificar a lista de campos do inventário que são utilizados =====================================
@@ -81,11 +104,10 @@ foreach ($hostData as $host) {
             }
         }
         if ($related) {
-            //$duration = ((new DateTime())->getTimestamp()) - $event["lastEvent"]["clock"];
-            //var_dump($event);
             $hostData[$cont]["events"][count($hostData[$cont]["events"])] = [
-                $event["triggerid"], $event["description"], $event["priority"],
-                zbx_date2age($event["lastEvent"]["clock"])
+            "triggerid" => $event["triggerid"], "description" => $event["description"]
+            , "priority" => $event["priority"], "moment" => zbx_date2age($event["lastEvent"]["clock"])
+            , "eventid" => $event["lastEvent"]["eventid"]
             ];
             if ($hostData[$cont]["maxPriority"] < $event["priority"]) {
                 $hostData[$cont]["maxPriority"] = $event["priority"];
@@ -109,9 +131,6 @@ foreach ($hostData as $host) {
     } else {
         $hostData[$cont]["iconid"] = zbxeConfigValue('geo_default_poi', 0, "zbxe_default_icon");
     }
-    /* if (!array_key_exists("imageid", $host)) {
-      $hostData[$cont]["imageid"] = $iconMapping[0]["default_iconid"];
-      } */
     // Varrer o notes e transferir o metadado para os arrays
     if (isset($host["notes"])) {
         $tmp2 = explode("\n", $host["notes"]);
@@ -128,34 +147,16 @@ foreach ($hostData as $host) {
     }
     $cont++;
 }
-//var_dump($hostData);
-/*
+
+/* * ***************************************************************************
  * Display
- */
-
-$dashboard = (new CWidget())
-        ->setTitle('EveryZ - ' . _zeT('Geolocation'))
-        ->setControls((new CList())
-        ->addItem(get_icon('fullscreen', ['fullscreen' => getRequest('fullscreen')]))
-);
-$toggle_all = (new CColHeader(
-        (new CDiv())
-                ->addClass(ZBX_STYLE_TREEVIEW)
-                ->addClass('app-list-toggle-all')
-                ->addItem(new CSpan())
-        ))->addStyle('width: 18px');
-$form = (new CForm('GET', 'everyz.php'))->setName('geo');
-$table = (new CTableInfo())->addClass(ZBX_STYLE_OVERFLOW_ELLIPSIS);
-
-// Filtros =====================================================================
-if (hasRequest('filter_rst')) { // Clean the filter parameters
-    $filter['filter_rst'] = NULL;
-} else { // Put the date in required format
-    //var_dump($filter["groupids"]);
-    //var_dump(selectHostsByGroup($filter["groupids"],['location_lat', 'location_lon', 'location']));
-}
-
-$widget = (new CFilter('web.latest.filter.state'));
+ * ************************************************************************** */
+?>
+<link rel="stylesheet" href="local/app/everyz/css/leaflet.css" />
+<script src="local/app/everyz/js/leaflet.js"></script>
+<?php
+commonModuleHeader($moduleName, $moduleTitle, true);
+$widget = newFilterWidget($moduleName);
 
 // Left collumn
 $tmpColumn = new CFormList();
@@ -199,33 +200,47 @@ $dashboard->addItem($widget);
 // Get data for report ---------------------------------------------------------
 if (hasRequest('filter_set')) {
     // Sample Check if all required fields have values
-    //checkRequiredField("hostids", _zeT("You need to provide a least one host in filter!"));
     checkRequiredField("centerLat", _zeT("You need to entered center Latitude data!"));
-    checkRequiredField("centerLong", _zeT("You need to entered center Longitude data!"));        
-    // $report for store the report data
-    if ($requiredMissing == false) {
-        
-    }
-    if ($requiredMissing == true) {
+    checkRequiredField("centerLong", _zeT("You need to entered center Longitude data!"));
+    if ($requiredMissing) {
         error("check data required!");
         //checkRequiredField("centerLat", _zeT("You need to entered center Latitude data!"));  
     }
 } else {
-    $table->setNoDataMessage(_zeT('Specify some filter condition to see the geolocation.'));
+    zbxeNeedFilter(_zeT('Specify some filter condition to see the geolocation.'));
 }
 
 $table->addRow((new CDiv())
                 ->setAttribute('id', "mapid")
-                ->setAttribute('style', "width:100%; height: 600px;")
-        //->addClass("smallmap")
-        //->addItem("oi")
+                ->setAttribute('style', "width:100%; height: 700px;")
 );
-$form->addItem([
-    $table
-        //Todo: Make export of data possible to select and to export to CSV, JSON using JavaScript
-        //, new CActionButtonList('exportData', 'itemids', [ 0 => ['name' => _('Export as CSV')]])
-]);
-
+$form->addItem([ $table]);
 $dashboard->addItem($form)->show();
 
 require_once 'local/app/everyz/js/everyz-zbxe-geolocation.js.php';
+?>
+<script language="JavaScript">
+    var filterButton = document.getElementById('filter-mode');
+    var titleBar = document.getElementsByClassName("header-title");
+    var filterDIV = document.getElementById('filter-space');
+    for (i = 0; i <= titleBar[0].children.length - 1; i++) {
+        if (titleBar[0].children[i].tagName.toLowerCase() == 'ul') {
+            titleUL = titleBar[0].children[i];
+            var newItem = document.createElement("LI");
+            var textnode = document.createTextNode(" ")
+            //newItem.appendChild(textnode);
+//            titleUL.appendChild(newItem);
+            titleUL.appendChild(filterButton);
+            btnMin = document.getElementsByClassName("btn-min");
+            if (btnMin.length > 0) {
+                filterDIV.style = 'display: none;'
+            }
+            //titleUL.insertBefore(filterButton,titleUL.childNodes[0]);
+//            alert($titleBar[0].children[i].innerHTML);
+        }
+    }
+    //$titleBar[0].appendChild($filterButton);
+    //alert($titleBar[0].children);
+</script>
+
+<?php

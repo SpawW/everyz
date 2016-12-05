@@ -47,7 +47,8 @@ check_fields($fields);
 $report = [];
 $report['translation'] = zbxeSQLList('SELECT * FROM `zbxe_translation` order by lang, tx_original');
 $report['preferences'] = zbxeSQLList('SELECT * FROM `zbxe_preferences` order by userid, tx_option');
-show_message(json_encode($report));
+show_message(json_encode($report, JSON_UNESCAPED_UNICODE));
+//show_message(json_encode($report,JSON_PRETTY_PRINT));
 
 
 /*
