@@ -30,11 +30,10 @@ $moduleTitle = 'Groups Management';
 $report = [];
 
 // Common fields
-//addFilterParameter("format", T_ZBX_INT);
+addFilterParameter("format", T_ZBX_INT);
 addFilterActions();
 
 // Specific fields
-
 // Field validation
 check_fields($fields);
 
@@ -50,17 +49,17 @@ check_fields($fields);
  * Get Data
  * ************************************************************************** */
 
-if (hasRequest('filter_rst')) { 
+if (hasRequest('filter_rst')) {
     //resetProfile('hostids', true);
     //resetProfile('groupids', true);
     $filter['filter_rst'] = NULL;
     $filter['filter_set'] = NULL;
-} else { 
+} else {
+    
 }
 
 $report['translation'] = zbxeSQLList('SELECT * FROM `zbxe_translation` order by lang, tx_original');
 $report['preferences'] = zbxeSQLList('SELECT * FROM `zbxe_preferences` order by userid, tx_option');
-
 ?>
 <?php
 
@@ -69,7 +68,8 @@ $report['preferences'] = zbxeSQLList('SELECT * FROM `zbxe_preferences` order by 
  * ************************************************************************** */
 commonModuleHeader($moduleName, $moduleTitle, true);
 
-show_message(json_encode($report, JSON_UNESCAPED_UNICODE));
+//show_message(json_encode($report, JSON_UNESCAPED_UNICODE));
+require_once 'local/app/everyz/js/everyz-zbxe-groups.js.php';
 
 
 /* * ***************************************************************************
@@ -83,7 +83,7 @@ switch ($filter["format"]) {
         echo "[" . $jsonResult . "]";
         break;
     default;
-        $form->addItem([ $table]);
+//        $form->addItem([ $table]);
         $dashboard->addItem($form)->show();
         break;
 }

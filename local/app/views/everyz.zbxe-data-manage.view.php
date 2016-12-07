@@ -20,16 +20,16 @@
  * TodoS: ===========================================================================
  * */
 
-// Scripts e CSS adicionais
-?>
-<?php
-
+/* * ***************************************************************************
+ * Module Variables
+ * ************************************************************************** */
 // Definitions -----------------------------------------------------------------
 // Module Functions 
 // Configuration variables =====================================================
 $moduleName = "zbxe-data-manage";
 $baseProfile .= $moduleName;
 $moduleTitle = 'Data manager';
+$report = [];
 
 // Common fields
 addFilterParameter("format", T_ZBX_INT);
@@ -39,26 +39,52 @@ addFilterActions();
 
 check_fields($fields);
 
-/*
+/* * ***************************************************************************
+ * Access Control
+ * ************************************************************************** */
+
+/* * ***************************************************************************
+ * Module Functions
+ * ************************************************************************** */
+
+/* * ***************************************************************************
  * Get Data
- */
+ * ************************************************************************** */
 
+if (hasRequest('filter_rst')) { 
+    //resetProfile('hostids', true);
+    //resetProfile('groupids', true);
+    $filter['filter_rst'] = NULL;
+    $filter['filter_set'] = NULL;
+} else { 
+}
 
-$report = [];
 $report['translation'] = zbxeSQLList('SELECT * FROM `zbxe_translation` order by lang, tx_original');
 $report['preferences'] = zbxeSQLList('SELECT * FROM `zbxe_preferences` order by userid, tx_option');
-show_message(json_encode($report, JSON_UNESCAPED_UNICODE));
-//show_message(json_encode($report,JSON_PRETTY_PRINT));
 
+?>
+<?php
 
-/*
+/* * ***************************************************************************
  * Display
- */
+ * ************************************************************************** */
 commonModuleHeader($moduleName, $moduleTitle, true);
 
+show_message(json_encode($report, JSON_UNESCAPED_UNICODE));
 
 
-$form->addItem([$dataTab]);
-
-$dashboard->addItem($form)->show();
-
+/* * ***************************************************************************
+ * Display Footer 
+ * ************************************************************************** */
+switch ($filter["format"]) {
+    case PAGE_TYPE_CSV;
+        echo zbxeToCSV($csvRows);
+        break;
+    case PAGE_TYPE_JSON;
+        echo "[" . $jsonResult . "]";
+        break;
+    default;
+        $form->addItem([ $table]);
+        $dashboard->addItem($form)->show();
+        break;
+}
