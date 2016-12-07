@@ -43,8 +43,11 @@
     //Create layerGroup Circle
     var ZabGeocircle = new L.LayerGroup();
 
-    //Create layerGroup Circle
+    //Create layerGroup Lines
     var ZabGeolines = new L.LayerGroup();
+
+    //Create layerGroup Alert
+    var ZabGeoalert = new L.LayerGroup();
 
 
     //User will need change this token for the theirs token, acquire in https://www.mapbox.com/studio/account/
@@ -82,6 +85,10 @@ echo $mapBackgroud[$filter["map"]]; //"streets"
     }
     function addHost(lat, lon, hostid, name, description) {
         L.marker([lat, lon], {icon: zbxImage(hostid)}).addTo(ZabGeomap).bindPopup(name + description);
+    }
+
+    function addAlert (lat, lon, radiusSize, fillColor = '#303', borderColor = '', opacity = 0.2){
+        L.circle([lat, lon], {color: borderColor, fillColor: fillColor, fillOpacity: opacity, radius: radiusSize}).addTo(ZabGeoalert);
     }
 
     //
@@ -126,7 +133,7 @@ foreach ($hostData as $host) {
         }
         if ($bigPriority > 0) {
             $color = getSeverityColor($bigPriority, [$config]);
-            echo "\n addCircle (" . $host["location_lat"] . "," . $host["location_lon"] . ",2000,'#"
+            echo "\n addAlert (" . $host["location_lat"] . "," . $host["location_lon"] . ",2000,'#"
             . $color . "','#" . $color . "',0.7);\n";
         }
         // Add lines
@@ -184,17 +191,23 @@ foreach ($hostData as $host) {
     var overlayMaps = {
         "Circles": ZabGeocircle,
         "Lines": ZabGeolines,
+        "Alert": ZabGeoalert,
     };
 
     layerControl = L.control.layers(baseMaps).addTo(ZabGeomap);
 
+    //If filter Circle Actived show Circles 
     if (showCircles == 1) {
         ZabGeomap.addLayer(ZabGeocircle);
     }
-
+    
+    //If filter Lines Actived show Lines 
     if (showLines == 1) {
         ZabGeomap.addLayer(ZabGeolines);
     }
+
+    //Active layer Alert
+    ZabGeomap.addLayer(ZabGeoalert);
 
     layerControl.addOverlay(ZabGeocircle, "Circle");
     layerControl.addOverlay(ZabGeolines, "Lines");
