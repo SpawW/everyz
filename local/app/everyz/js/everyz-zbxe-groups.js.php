@@ -19,6 +19,7 @@
   <script src="local/app/everyz/js/jquery3.1.1.js"></script>
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
   <script src="local/app/everyz/js/jstree.min.js"></script>
+ 
  * */
 ?>
 <link rel="stylesheet" href="local/app/everyz/css/style.min.css" />
