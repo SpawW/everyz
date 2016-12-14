@@ -1,7 +1,7 @@
 <?php
 
 /*
- * * Purpose: Manage hostgroups and permissions
+ * * Purpose: Import hosts from CSV data
  * * Adail Horst - http://spinola.net.br/blog
  * *
  * * This program is free software; you can redistribute it and/or modify
@@ -23,10 +23,9 @@
 /* * ***************************************************************************
  * Module Variables
  * ************************************************************************** */
-// Configuration variables =====================================================
-$moduleName = "zbxe-groups";
+$moduleName = "zbxe-csvhost";
 $baseProfile .= $moduleName;
-$moduleTitle = 'Groups Management';
+$moduleTitle = 'CSV Host import';
 $requiredFields = ['host.host', 'interface.type', 'group.1', 'template.1'];
 $requiredIndex = [];
 $groupCount = $templateCount = 1;
@@ -135,7 +134,7 @@ if (hasRequest('hostData')) {
                 for ($i = 0; $i < count($templateIndex); $i++) {
                     if (!isset($templateArray[$linhaCSV[$templateIndex[$i]]])) {
                         error(_('Template missing') . ' - ' . $linhaCSV[$templateIndex[$i]]);
-                    } else {
+                    } else { 
                         $templates[] = ['templateid' => $templateArray[$linhaCSV[$templateIndex[$i]]]];
                     }
                 }
@@ -187,46 +186,8 @@ if (hasRequest('hostData')) {
         }
     } // Fim dados validos
 }
-if (hasRequest('filter_rst')) {
-    //resetProfile('hostids', true);
-    //resetProfile('groupids', true);
-    $filter['filter_rst'] = NULL;
-    $filter['filter_set'] = NULL;
-} else {
-    
-}
 
 $groups = API::HostGroup()->get([ 'output' => 'extend', 'sortfield' => 'name']);
-//$report['translation'] = zbxeSQLList('SELECT * FROM `zbxe_translation` order by lang, tx_original');
-//$report['preferences'] = zbxeSQLList('SELECT * FROM `zbxe_preferences` order by userid, tx_option');
-/* $host = [
-  'host' => getRequest('host'),
-  'name' => getRequest('visiblename'),
-  'status' => getRequest('status', HOST_STATUS_NOT_MONITORED),
-  'description' => getRequest('description'),
-  'proxy_hostid' => getRequest('proxy_hostid', 0),
-  'ipmi_authtype' => getRequest('ipmi_authtype'),
-  'ipmi_privilege' => getRequest('ipmi_privilege'),
-  'ipmi_username' => getRequest('ipmi_username'),
-  'ipmi_password' => getRequest('ipmi_password'),
-  'tls_connect' => getRequest('tls_connect', HOST_ENCRYPTION_NONE),
-  'tls_accept' => getRequest('tls_accept', HOST_ENCRYPTION_NONE),
-  'tls_issuer' => getRequest('tls_issuer'),
-  'tls_subject' => getRequest('tls_subject'),
-  'tls_psk_identity' => getRequest('tls_psk_identity'),
-  'tls_psk' => getRequest('tls_psk'),
-  'groups' => $groups,
-  'templates' => $templates,
-  'interfaces' => $interfaces,
-  'macros' => $macros,
-  'inventory_mode' => getRequest('inventory_mode'),
-  'inventory' => (getRequest('inventory_mode') == HOST_INVENTORY_DISABLED)
-  ? []
-  : getRequest('host_inventory', [])
-  ];
- */
-?>
-<?php
 
 /* * ***************************************************************************
  * Display
@@ -238,30 +199,11 @@ $tmpColumn->addRow(_('Data fields'), (new CTextArea('dataFields', $filter['dataF
 $tmpColumn->addRow(_('Host Data'), (new CTextArea('hostData', $filter['hostData']))->setWidth(ZBX_TEXTAREA_BIG_WIDTH));
 $tmpColumn->addRow(new CSubmit('form', _('Create hosts')));
 
-//show_message(json_encode($report, JSON_UNESCAPED_UNICODE));
-$table->addRow([$tmpColumn, [(new CDiv())
-                ->setAttribute('id', "groupsNow")
-//->setAttribute('style', "width:10%;")
-        , (new CDiv())
-                ->setAttribute('id', "groupsNow2")
-//->setAttribute('style', "width:10%;")
-    ]
-]);
+$table->addRow([$tmpColumn]);
 
 
 /* * ***************************************************************************
  * Display Footer 
  * ************************************************************************** */
-switch ($filter["format"]) {
-    case PAGE_TYPE_CSV;
-        echo zbxeToCSV($csvRows);
-        break;
-    case PAGE_TYPE_JSON;
-        echo "[" . $jsonResult . "]";
-        break;
-    default;
-        $form->addItem([ $table]);
-        $dashboard->addItem($form)->show();
-        break;
-}
-require_once 'local/app/everyz/js/everyz-zbxe-groups.js.php';
+$form->addItem([ $table]);
+$dashboard->addItem($form)->show();

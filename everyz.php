@@ -31,7 +31,7 @@ $baseProfile = "everyz.";
 
 $page['title'] = _('EveryZ');
 $page['file'] = 'everyz.php';
-//Todo: Make this module to accept 4 modes: html, report, csv, json
+
 switch (getRequest('format')) {
     case PAGE_TYPE_CSV:
         $page['file'] = 'everyz_export.csv';
@@ -43,6 +43,9 @@ switch (getRequest('format')) {
         break;
     default:
         $page['type'] = detect_page_type(PAGE_TYPE_HTML);
+        ?>
+<link href="local/app/everyz/css/everyz.css" rel="stylesheet" type="text/css" id="skinSheet">
+        <?php
         break;
 }
 $page['scripts'] = array('class.calendar.js', 'multiselect.js', 'gtlc.js');

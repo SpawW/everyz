@@ -155,7 +155,7 @@ function zbxeInsert($table, $fields, $values) {
 }
 
 /**
- * zbxeUpdate
+ * zbxeUpdate 
  *
  * Return SQL query to update records in a table.
  * @author Adail Horst <the.spaww@gmail.com>
@@ -1030,6 +1030,12 @@ function zbxeToCSV($array) {
         $return .= quotestr($value, true) . ",";
     }
     return $return . "\n";
+}
+
+function zbxeJSLoad($scripts, $path = 'local/app/everyz/js/') {
+    foreach ($scripts as $value) {
+        echo '<script src="' . $path . '/' . $value . '" type="text/javascript"></script>';
+    }
 }
 
 ?>

@@ -18,27 +18,9 @@
  * * along with this program; if not, write to the Free Software
  * * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  * */
-
-// Definitions -----------------------------------------------------------------
-// Module Functions 
-function getWidgetItemData() {
-    global $filter;
-    $query = 'SELECT tx_value, tx_option from zbxe_preferences where '
-            . ($filter["item"] !== "" ? ' tx_option = ' . quotestr($filter["item"]) : ' tx_option like ' . quotestr($filter['widget'] . '_link_%'))
-            . ' order by tx_value';
-    $result = DBselect($query);
-    $cont = 0;
-    $report = [["name" => "", "title" => "", "row" => "", "order" => ""]];
-    while ($row = DBfetch($result)) {
-        $tmp = explode("|", $row['tx_value']);
-        $report[$cont]['name'] = $tmp[0];
-        $report[$cont]['title'] = $tmp[1];
-        $report[$cont]['itemid'] = $row["tx_option"];
-        $cont++;
-    }
-    return $report;
-}
-
+/* * ***************************************************************************
+ * Module Variables
+ * ************************************************************************** */
 // Configuration variables =====================================================
 $moduleName = "zbxe-widgets";
 $baseProfile .= $moduleName;
@@ -64,6 +46,39 @@ addFilterParameter("mode", T_ZBX_STR, "", false, false, false);
 
 check_fields($fields);
 
+/* * ***************************************************************************
+ * Access Control
+ * ************************************************************************** */
+
+/* * ***************************************************************************
+ * Module Functions
+ * ************************************************************************** */
+
+// Definitions -----------------------------------------------------------------
+// Module Functions 
+function getWidgetItemData() {
+    global $filter;
+    $query = 'SELECT tx_value, tx_option, st_ativo from zbxe_preferences where '
+            . ($filter["item"] !== "" ? ' tx_option = ' . quotestr($filter["item"]) : ' tx_option like ' . quotestr($filter['widget'] . '_link_%'))
+            . ' order by tx_value';
+    $result = DBselect($query);
+    $cont = 0;
+    $report = [["name" => "", "title" => "", "row" => "", "order" => ""]];
+    while ($row = DBfetch($result)) {
+        $tmp = explode("|", $row['tx_value']);
+        $report[$cont]['name'] = $tmp[0];
+        $report[$cont]['title'] = $tmp[1];
+        $report[$cont]['itemid'] = $row["tx_option"];
+        $report[$cont]['status'] = $row["st_ativo"];
+        $cont++;
+    }
+    return $report;
+}
+
+/* * ***************************************************************************
+ * Get Data
+ * ************************************************************************** */
+
 // DML actions
 if (hasRequest('dml')) {
     switch ($filter['mode']) {
@@ -79,7 +94,7 @@ if (hasRequest('dml')) {
                 $sql = "insert into zbxe_preferences (userid, tx_option, tx_value, st_ativo) values (0," . quotestr($name) . "," . quotestr($title) . "," . $filter['status'] . ")";
             } else {
 // Update
-                $sql = "update zbxe_preferences set tx_value = " . quotestr($title) . ", st_ativo = " . $filter['status'] . "" . " where tx_option = " . quotestr($filter["widget"]);
+                $sql = "update zbxe_preferences set tx_value = " . quotestr($title) . ", st_ativo = " . $filter['status'] . " where tx_option = " . quotestr($filter["widget"]);
             }
             show_messages(prepareQuery($sql), _zeT('Widget ' . ($filter["mode"] == "widget.add" ? "added" : "updated")));
             $filter['mode'] = '';
@@ -99,10 +114,10 @@ if (hasRequest('dml')) {
                 }
                 $name = $filter["widget"] . '_link_' . $last; //. "_" . $name;
 // Insert
-                $sql = "insert into zbxe_preferences values (0," . quotestr($name) . "," . quotestr($title) . ",1)";
+                $sql = "insert into zbxe_preferences values (0," . quotestr($name) . "," . quotestr($title) . "," . $filter['status'] . ")";
             } else {
 // Update
-                $sql = "update zbxe_preferences set tx_value = " . quotestr($title) . " where tx_option = " . quotestr($filter["item"]);
+                $sql = "update zbxe_preferences set tx_value = " . quotestr($title) . ", st_ativo = " . $filter['status'] . " where tx_option = " . quotestr($filter["item"]);
             }
 
             show_messages(prepareQuery($sql), _zeT('Widget item ' . ($filter["mode"] == "widget.add" ? "added" : "updated")));
@@ -131,19 +146,14 @@ if (hasRequest('dml')) {
             $filter['mode'] = 'widget.items';
             $filter['item'] = '';
             break;
-        default:
-            /* if ($filter["mode"] == "") {
-              $filter["filter_set"] = "Filter";
-              } */
-            break;
     }
 }
 // End DML
 
 
-/*
+/* * ***************************************************************************
  * Display
- */
+ * ************************************************************************** */
 if (strpos($filter['mode'], "edit") > 0 || strpos($filter['mode'], "add") > 0) {
     $createButton = null;
 } else {
@@ -236,7 +246,7 @@ if ($filter['mode'] !== "") {
                         , '&nbsp;', _('Order'), '&nbsp;', (new CNumericBox('order', $data['order'], 2))->setWidth(ZBX_TEXTAREA_NUMERIC_STANDARD_WIDTH)])
                     ->addRow(bold('Type of widget'), [(new CRadioButtonList('widgettype', (int) $filter['widgettype']))->setModern(true)
                         ->addValue(_zeT('Links'), 0)->addValue(_zeT('jQuery'), 1)->addValue(_zeT('Custom DIV'), 2)])
-                    ->addRow(bold(_zeT('Visibility')), buttonOptions("status", $data["status"], [_('Hide'),_('Show')]))
+                    ->addRow(bold(_zeT('Visibility')), buttonOptions("status", $data["status"], [_('Hide'), _('Show')]))
                     ->addItem(new CInput('hidden', 'action', $filter["action"]))
                     ->addItem(new CInput('hidden', 'mode', $filter['mode']))
                     ->addItem(new CInput('hidden', 'widget', $filter["widget"]))
@@ -257,7 +267,7 @@ if ($filter['mode'] !== "") {
         case "widget.item.add":
         case "widget.item.edit":
             if ($filter['mode'] == "widget.item.add") { // Recover widget data aqui2
-                $data = [["name" => "", "title" => "", "row" => "", "order" => ""]];
+                $data = [["name" => "", "title" => "", "row" => "", "order" => "", "status" => "1"]];
             } else {
                 $data = getWidgetItemData();
             }
@@ -268,6 +278,7 @@ if ($filter['mode'] !== "") {
                     ->addRow(_('Title')
                             , (new CTextBox('title', $data[0]["title"], false, 64))->setWidth(ZBX_TEXTAREA_STANDARD_WIDTH)
                     )
+                    ->addRow(bold(_zeT('Visibility')), buttonOptions("status", $data[0]["status"], [_('Hide'), _('Show')]))
                     ->addItem(new CInput('hidden', 'action', $filter["action"]))
                     ->addItem(new CInput('hidden', 'mode', $filter['mode']))
                     ->addItem(new CInput('hidden', 'widget', $filter["widget"]))
@@ -345,7 +356,7 @@ if ($filter['mode'] !== "") {
             $table->setHeader(array(_("Name"), _("Title"), _("Actions")));
             break;
     }
-// Building the report ---------------------------------------------------------
+
     if ($cont > 0) {
         $linha = array();
         $cont2 = count($report[0]) - 1;
@@ -381,6 +392,11 @@ if ($filter['mode'] !== "") {
         }
     }
 }
+
+/* * ***************************************************************************
+ * Display Footer 
+ * ************************************************************************** */
+
 $form->addItem([ $table]);
 
 $dashboard->addItem($form)->show();
