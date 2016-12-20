@@ -62,6 +62,8 @@ function descItem($itemName, $itemKey) {
  * @param string  $moduleid   module identifier
  */
 function _zeT($msg, $moduleid = "") {
+    if (trim($msg) == "")
+        return $msg;
     if ($moduleid == "") {
         global $moduleName;
         $moduleid = $moduleName;
@@ -973,7 +975,7 @@ function commonModuleHeader($module_id, $title, $allowFullScreen = false, $metho
  * @param string  $query  SQL code to search dat
  */
 function zbxeSQLList($query) {
-    $result = prepareQuery('SELECT * FROM `zbxe_translation`');
+    $result = prepareQuery($query);
     $report = [];
     while ($row = DBfetch($result)) {
         foreach ($row as $key => $value) {

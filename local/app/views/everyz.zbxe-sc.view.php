@@ -42,7 +42,7 @@ $groupOptions = array(_('Item'), _('Host'), _('Host Groups'), _('Template'));
 $groupMoment = array(_('Day'), _('Week'), _('Year'));
 
 // Common fields
-addFilterParameter("format", T_ZBX_INT);
+addFilterParameter("format", T_ZBX_INT, 0, false, false, false);
 addFilterActions();
 
 // Specific fields

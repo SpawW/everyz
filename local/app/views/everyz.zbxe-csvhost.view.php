@@ -25,7 +25,7 @@
  * ************************************************************************** */
 $moduleName = "zbxe-csvhost";
 $baseProfile .= $moduleName;
-$moduleTitle = 'CSV Host import';
+$moduleTitle = 'Host import';
 $requiredFields = ['host.host', 'interface.type', 'group.1', 'template.1'];
 $requiredIndex = [];
 $groupCount = $templateCount = 1;
@@ -35,7 +35,6 @@ addFilterActions();
 
 // Specific fields
 addFilterParameter("format", T_ZBX_INT);
-//"host.name;interface.type;interface.ip;interface.port;group.1;host.status;"
 addFilterParameter("dataFields", T_ZBX_STR, implode(",", $requiredFields), true, false, false);
 addFilterParameter("hostData", T_ZBX_STR, "Past your data here!", true, false, false);
 // Field validation
@@ -44,6 +43,10 @@ check_fields($fields);
 /* * ***************************************************************************
  * Access Control
  * ************************************************************************** */
+if (CWebUser::getType() < USER_TYPE_SUPER_ADMIN) {
+    error(_('You need to be a Zabbix Super Admin to access this module!'));
+    access_deny(ACCESS_DENY_PAGE);
+}
 
 /* * ***************************************************************************
  * Module Functions
