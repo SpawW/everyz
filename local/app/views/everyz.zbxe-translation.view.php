@@ -20,12 +20,20 @@
  * TodoS: ===========================================================================
  * */
 
+
+/* * ***************************************************************************
+ * Module Functions
+ * ************************************************************************** */
+
+
+
 // Scripts e CSS adicionais
 ?>
 <?php
 
-// Definitions -----------------------------------------------------------------
-// Configuration variables =====================================================
+/* * ***************************************************************************
+ * Module Variables
+ * ************************************************************************** */
 $moduleName = "zbxe-translation";
 $baseProfile .= $moduleName;
 $moduleTitle = 'Translation';
@@ -41,15 +49,20 @@ $filter['stringTranslation'] = [T_ZBX_STR, O_OPT, P_SYS, null, null];
 
 check_fields($fields);
 
-/*
- * Get Data
- */
-
 $dataTab = new CTabView();
 $lang = CWebUser::$data['lang'];
 
+/* * ***************************************************************************
+ * Access Control
+ * ************************************************************************** */
+if (CWebUser::getType() < USER_TYPE_SUPER_ADMIN) {
+//    access_deny(ACCESS_DENY_PAGE);
+}
+
+/* * ***************************************************************************
+ * Change Data
+ * ************************************************************************** */
 /* Update user translations if needed */
-//var_dump(getRequest("stringTranslation",[]));
 parse_str(file_get_contents('php://input'), $httpParams);
 $updated = false;
 $dml = false;
@@ -72,6 +85,10 @@ if (isset($httpParams['stringTranslation'])) {
 if ($dml) {
     show_message('Strings de tradução atualiadas!');
 }
+
+/* * ***************************************************************************
+ * Get Data
+ * ************************************************************************** */
 
 $query = 'SELECT tx_original, module_id FROM `zbxe_translation` zet where lang="en_GB" and tx_original <> "Everyz" order by module_id';
 $result = prepareQuery($query);
@@ -98,7 +115,7 @@ foreach ($strings as $key => $value) {
 /*
  * Display
  */
-commonModuleHeader($moduleName, $moduleTitle, true) ;
+commonModuleHeader($moduleName, $moduleTitle, true);
 
 function addTab($key, $value, $dataTab) {
     global $lang;
@@ -108,7 +125,11 @@ function addTab($key, $value, $dataTab) {
     $tabContent = new CFormList();
     $tabContent->addRow(bold(_zeT("Source")), bold(_zeT("Translation")));
     foreach ($value as $tmp2) {
-        $tabContent->addRow($tmp2[0], ( $lang == "en_GB" ? $tmp2[1] : (new CTextBox('stringTranslation[]', $tmp2[1]))->setWidth(ZBX_TEXTAREA_FILTER_BIG_WIDTH)));
+        $tabContent->addRow($tmp2[0], ( $lang == "en_GB" ? $tmp2[1] :
+                        (new CTextBox('stringTranslation[]', $tmp2[1]))->setWidth(ZBX_TEXTAREA_FILTER_BIG_WIDTH)
+                                ->setAttribute('style', ($tmp2[0] == $tmp2[1] ? 'background-color: #f7e360;' : '') . ' width: 400px')
+                )
+        );
         $tabContent->addItem(new CInput('hidden', 'sourceTranslation[]', $tmp2[0]));
     }
     $dataTab->addTab($key, $desc, $tabContent);
@@ -119,7 +140,7 @@ foreach ($report as $key => $value) {
         addTab($key, $value, $dataTab);
     }
 }
-addTab(_($otherGroup), $report[$otherGroup], $dataTab);
+addTab($otherGroup, $report[$otherGroup], $dataTab);
 // Deve possuir botão para exportar e para importar
 $dataTab->setFooter(makeFormFooter(new CSubmit('update', _('Update'))));
 //$dataTab->addItem(new CInput('hidden', 'action', $filter['action']));

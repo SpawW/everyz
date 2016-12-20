@@ -43,33 +43,16 @@ $dashboard = (new CWidget())->setTitle(_zeT('Customization'));
 $dashboardGrid = [[], [], []];
 
 function newWidget($p_id, $p_title, $p_content, $p_expanded = true, $p_icon = []) {
-    return (new CUiWidget($p_id, (new CDiv($p_content))->setName('body-' . $p_id)->setAttribute("style", "border: 1; margin: 0px 10px 10px 10px;")
-                    ))
-                    //   ->setExpanded($p_expanded)
+    return (new CUiWidget($p_id, (new CDiv($p_content))->setName('body-' . $p_id)->setAttribute("style", "border: 1; margin: 0px 10px 10px 10px;")))
                     ->setHeader(_($p_title), [$p_icon], false);
-    /*    return (new CCollapsibleUiWidget($p_id, (new CDiv($p_content))->setName('body-' . $p_id)))
-      ->setExpanded($p_expanded)
-      ->setHeader(_($p_title), [$p_icon], true);
-     */
 }
-
-/*                ->addRow(_('Links'), (new CDiv(
-  (new CTable())
-  ->setHeader([_('Element name'), _('Link indicators'), _('Action')])
-  ->setAttribute('style', 'width: 100%;')
-  ->setId('element-links')
-  ))
-  ->addClass(ZBX_STYLE_TABLE_FORMS_SEPARATOR)
-  ->setAttribute('style', 'min-width: ' . ZBX_TEXTAREA_BIG_WIDTH . 'px;'), null, 'element-links'
-  ) */
 
 // Mapas =======================================================================
 $table = (new CTable());
 $table->addRow(
         (new CFormList())
-                ->addRow(_('Show'),
-                        //(new CCheckBox('cnf_map_title_show'))->setChecked(zbxeConfigValue('map_title_show') == 1)
-                        newComboFilterArray([_("Show"), _("Hide")], 'cnf_map_title_show', zbxeConfigValue('map_title_show'), false)
+                ->addRow(_zeT('Title', $moduleName),
+                        newComboFilterArray([_("Show"), _zeT("Hide")], 'cnf_map_title_show', zbxeConfigValue('map_title_show'), false)
                 )
                 ->addRow(_('Color'), new CColor('cnf_map_title_color', zbxeConfigValue('map_title_color'), false))
                 ->addRow(_zeT('White mark Color'), new CColor('cnf_map_wmark_color', zbxeConfigValue('map_wmark_color'), false))

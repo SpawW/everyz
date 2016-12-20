@@ -61,7 +61,7 @@ function descItem($itemName, $itemKey) {
  * @param string  $msg        text to translate
  * @param string  $moduleid   module identifier
  */
-function _zeT($msg, $moduleid = "") {
+function _zeT($msg, $moduleid = "", $autoinsert = true) {
     if (trim($msg) == "")
         return $msg;
     if ($moduleid == "") {
@@ -73,8 +73,10 @@ function _zeT($msg, $moduleid = "") {
     $return = zbxeFieldValue('select tx_new from zbxe_translation where tx_original = '
             . $p_msg2 . ' and lang = ' . $lang, 'tx_new');
     if ($return == "") {
-        $sql = "insert into zbxe_translation values (" . $lang . "," . $p_msg2 . "," . $p_msg2 . ", " . quotestr($moduleid) . ")";
-        prepareQuery($sql);
+        if ($autoinsert) {
+            $sql = "insert into zbxe_translation values (" . $lang . "," . $p_msg2 . "," . $p_msg2 . ", " . quotestr($moduleid) . ")";
+            prepareQuery($sql);
+        }
         $return = $msg;
     }
     return $return;
@@ -274,10 +276,10 @@ function getBetweenStrings($start, $end, $str) {
  * @param boolean   $p_debug  True - Show message, False - Dont show
  * @param string    $p_color  Background color of message
  */
-function debugInfo($p_text, $p_debug = false, $p_color = "gray") {
+function debugInfo($p_text, $p_debug = false, $p_color = "") {
     global $VG_DEBUG;
     if ($p_debug == true || $VG_DEBUG == true) {
-        echo '<div style="background-color:' . $p_color . ';"><pre>' . $p_text . "</pre></div>";
+        echo '<div style="background-color:' . $p_color . ';"><pre>' . print_r($p_text, true) . "</pre></div>";
     }
 }
 
@@ -1035,10 +1037,38 @@ function zbxeToCSV($array) {
     return $return . "\n";
 }
 
+/**
+ * zbxeJSLoad
+ *
+ * Add HTML tag for external JS file
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param array  $scripts  Array of scripts
+ * @param string $path     Path to scripts
+ */
 function zbxeJSLoad($scripts, $path = 'local/app/everyz/js/') {
     foreach ($scripts as $value) {
         echo '<script src="' . $path . '/' . $value . '" type="text/javascript"></script>';
     }
+}
+
+/**
+ * zbxeArraySearch
+ *
+ * Search for values in a named array
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param array  $array  Array
+ * @param string $key    Key to check
+ * @param string $value  Required value
+ */
+function zbxeArraySearch($array, $key, $value) {
+    foreach ($array as $k => $v) {
+        if ($v[$key] == $value) {
+            return $k;
+        }
+    }
+    return null;
 }
 
 ?>

@@ -35,7 +35,7 @@ $report = [];
 addFilterActions();
 
 // Specific fields
-addFilterParameter("typeExport", T_ZBX_INT, 1, false, false, false);
+addFilterParameter("typeExport", T_ZBX_INT, 0, false, false, false);
 addFilterParameter("langExport", T_ZBX_STR, '', false, false, false);
 addFilterParameter("actionType", T_ZBX_INT, 0, false, false, false);
 addFilterParameter("format", T_ZBX_INT, 0, false, false, false);
@@ -57,15 +57,6 @@ function newText($text, $class = ZBX_STYLE_GREEN, $margin = "10px") {
     return (new CSpan($text))->addClass($class)->setAttribute('style', 'margin: ' . $margin);
 }
 
-function arraySearch($array, $key, $value) {
-    foreach ($array as $k => $v) {
-        if ($v[$key] == $value) {
-            return $k;
-        }
-    }
-    return null;
-}
-
 /* * ***************************************************************************
  * Change Data
  * ************************************************************************** */
@@ -76,18 +67,37 @@ if (isset($_FILES['import_file']) && $filter['actionType'] == 0) {
     try {
         $file = new CUploadFile($_FILES['import_file']);
         $json = json_decode($file->getContent(), true);
-
+        // Translation import process
+        $resultOK = true;
+        $sql = '';
+        DBstart();
+        if (isset($json["config"])) {
+            $config = zbxeSQLList('SELECT * FROM `zbxe_preferences` order by userid, tx_option');
+            foreach ($json["config"] as $row) {
+                $cIndex = zbxeArraySearch($config, 'tx_option', $row['tx_option']);
+                if (!isset($config[$cIndex]['tx_option'])) {
+                    $sql = zbxeInsert("zbxe_preferences", ['userid', 'tx_option', 'tx_value', 'st_ativo']
+                            , [$row['userid'], $row['tx_option'], $row['tx_value'], $row['st_ativo']]);
+                } else {
+                    $sql = ($config[$cIndex]['tx_value'] == $row['tx_value'] ? '' :
+                                    zbxeUpdate("zbxe_preferences", ['userid', 'tx_option', 'tx_value', 'st_ativo']
+                                            , [$row['userid'], $row['tx_option'], $row['tx_value'], $row['st_ativo']]
+                                            , ['tx_option'], [$row['tx_option']]));
+                }
+                debugInfo($sql, true);
+                if (trim($sql) !== '') {
+                    $resultOK = $resultOK && (prepareQuery($sql) != false);
+                }
+            }
+        }
         if (isset($json["translation"])) {
-            //$translations = [];
-            $resultOK = true;
-            DBstart();
             foreach ($json["translation"] as $row) {
                 // Populate translations array
                 if (!isset($translations[$row['lang']])) {
                     $translations[$row['lang']] = zbxeSQLList('SELECT * FROM `zbxe_translation` '
                             . ' where lang = ' . quotestr($row['lang']) . ' order by tx_original');
                 }
-                $translate = arraySearch($translations[$row['lang']], 'tx_original', $row['tx_original']);
+                $translate = zbxeArraySearch($translations[$row['lang']], 'tx_original', $row['tx_original']);
                 if (!isset($translations[$row['lang']][$translate])) {
                     $sql = "insert into zbxe_translation (lang, tx_original, tx_new, module_id) values ("
                             . quotestr($row['lang']) . "," . quotestr($row['tx_original'])
@@ -100,15 +110,12 @@ if (isset($_FILES['import_file']) && $filter['actionType'] == 0) {
                                     . ' where lang = ' . quotestr($row['lang']) . ' and tx_original = '
                                     . quotestr($row['tx_original']));
                 }
-                // Find required
                 if (trim($sql) !== '') {
                     $resultOK = $resultOK && (prepareQuery($sql) != false);
                 }
             }
-            DBend($resultOK);
-
-            //echo '<pre>' . print_r($translations, true) . '</pre>';
         }
+        DBend($resultOK);
     } catch (Exception $e) {
         error($e->getMessage());
     }
@@ -123,7 +130,7 @@ switch ($filter['actionType']) {
     case 1;
         switch ($filter['typeExport']) {
             case 1:
-                $report['export'] = zbxeSQLList('SELECT * FROM `zbxe_preferences` order by userid, tx_option');
+                $report['export'] = ['config' => zbxeSQLList('SELECT * FROM `zbxe_preferences` order by userid, tx_option')];
                 break;
             case 0:
                 $report['export'] = ['translation' => zbxeSQLList('SELECT * FROM `zbxe_translation` '
@@ -138,6 +145,9 @@ switch ($filter['actionType']) {
             function changeAction() {
                 document.getElementById("import_file").disabled = document.getElementById("actionType_1").checked;
                 document.getElementById("format").value = (document.getElementById("actionType_1").checked ? 6 : 0);
+                document.getElementById("langExport").disabled = document.getElementById("typeExport_1").checked;
+                document.getElementById("typeExport_1").disabled = document.getElementById("actionType_0").checked;
+                document.getElementById("typeExport_2").disabled = document.getElementById("actionType_0").checked;
             }
         </script>
         <?php
@@ -161,6 +171,7 @@ switch ($filter["format"]) {
     default;
         commonModuleHeader($moduleName, $moduleTitle, true);
         $groupDataButtons = buttonOptions("typeExport", $filter['typeExport'], ['Translation', 'Configuration'], [0, 1]);
+        $groupDataButtons->onChange('changeAction();');
 
         $actionTypeButtons = buttonOptions("actionType", $filter['actionType'], ['Import', 'Export'], [0, 1]);
         $actionTypeButtons->onChange('changeAction();');
@@ -188,7 +199,7 @@ switch ($filter["format"]) {
         $langComboBox = newComboFilterArray($langs, 'langExport', CWebUser::$data['lang'], false);
 
         $subTable = (new CTableInfo())->setHeader([ _('Action'), _('Group data'), _('Language'), '']);
-        $subTable->addRow([$actionTypeButtons, $groupDataButtons, (new CDiv($langComboBox))->setAttribute('id', "langButtons")]);
+        $subTable->addRow([$actionTypeButtons, $groupDataButtons, (new CDiv($langComboBox))->setAttribute('id', "langOptions")]);
 
         $tmpColumn1->addRow($subTable);
         $tmpColumn1->addRow(_('Import file'), (new CDiv($inputImport))->setAttribute('id', "importDIV"));
@@ -202,5 +213,11 @@ switch ($filter["format"]) {
         $form->setAttribute('enctype', 'multipart/form-data');
         $form->addItem([ $table]);
         $dashboard->addItem($form)->show();
+        ?>
+        <script language="JavaScript">
+            changeAction();
+        </script>
+        <?php
+
         break;
 }
