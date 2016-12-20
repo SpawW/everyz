@@ -277,7 +277,7 @@ function getBetweenStrings($start, $end, $str) {
 function debugInfo($p_text, $p_debug = false, $p_color = "gray") {
     global $VG_DEBUG;
     if ($p_debug == true || $VG_DEBUG == true) {
-        echo '<div style="background-color:' . $p_color . ';">' . $p_text . "</div>";
+        echo '<div style="background-color:' . $p_color . ';"><pre>' . $p_text . "</pre></div>";
     }
 }
 
@@ -976,11 +976,12 @@ function commonModuleHeader($module_id, $title, $allowFullScreen = false, $metho
  */
 function zbxeSQLList($query) {
     $result = prepareQuery($query);
-    $report = [];
+    $tmp = [];
     while ($row = DBfetch($result)) {
         foreach ($row as $key => $value) {
-            $report[count($report)][$key] = $value;
+            $tmp[$key] = $value;
         }
+        $report[] = $tmp;
     }
     return $report;
 }

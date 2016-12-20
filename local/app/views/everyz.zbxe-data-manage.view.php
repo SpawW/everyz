@@ -57,6 +57,64 @@ function newText($text, $class = ZBX_STYLE_GREEN, $margin = "10px") {
     return (new CSpan($text))->addClass($class)->setAttribute('style', 'margin: ' . $margin);
 }
 
+function arraySearch($array, $key, $value) {
+    foreach ($array as $k => $v) {
+        if ($v[$key] == $value) {
+            return $k;
+        }
+    }
+    return null;
+}
+
+/* * ***************************************************************************
+ * Change Data
+ * ************************************************************************** */
+// Import de dados -----------------------------------------------------
+if (isset($_FILES['import_file']) && $filter['actionType'] == 0) {
+    $result = false;
+
+    try {
+        $file = new CUploadFile($_FILES['import_file']);
+        $json = json_decode($file->getContent(), true);
+
+        if (isset($json["translation"])) {
+            //$translations = [];
+            $resultOK = true;
+            DBstart();
+            foreach ($json["translation"] as $row) {
+                // Populate translations array
+                if (!isset($translations[$row['lang']])) {
+                    $translations[$row['lang']] = zbxeSQLList('SELECT * FROM `zbxe_translation` '
+                            . ' where lang = ' . quotestr($row['lang']) . ' order by tx_original');
+                }
+                $translate = arraySearch($translations[$row['lang']], 'tx_original', $row['tx_original']);
+                if (!isset($translations[$row['lang']][$translate])) {
+                    $sql = "insert into zbxe_translation (lang, tx_original, tx_new, module_id) values ("
+                            . quotestr($row['lang']) . "," . quotestr($row['tx_original'])
+                            . "," . quotestr($row['tx_new']) . ", " . quotestr($row['module_id']) . ")";
+                } else {
+                    $translate = $translations[$row['lang']][$translate];
+                    //var_dump($translate);
+                    $sql = ($translate['tx_new'] == $row['tx_new'] ? '' :
+                                    'update zbxe_translation set tx_new = ' . quotestr($row['tx_new'])
+                                    . ' where lang = ' . quotestr($row['lang']) . ' and tx_original = '
+                                    . quotestr($row['tx_original']));
+                }
+                // Find required
+                if (trim($sql) !== '') {
+                    $resultOK = $resultOK && (prepareQuery($sql) != false);
+                }
+            }
+            DBend($resultOK);
+
+            //echo '<pre>' . print_r($translations, true) . '</pre>';
+        }
+    } catch (Exception $e) {
+        error($e->getMessage());
+    }
+    show_messages($resultOK, _('Imported successfully'), _('Import failed'));
+}
+
 /* * ***************************************************************************
  * Get Data
  * ************************************************************************** */
@@ -68,8 +126,9 @@ switch ($filter['actionType']) {
                 $report['export'] = zbxeSQLList('SELECT * FROM `zbxe_preferences` order by userid, tx_option');
                 break;
             case 0:
-                $report['export'] = zbxeSQLList('SELECT * FROM `zbxe_translation` '
-                        . ($filter['langExport'] != '' ? ' where lang = ' . quotestr($filter['langExport']) : '' ) . ' order by lang, tx_original');
+                $report['export'] = ['translation' => zbxeSQLList('SELECT * FROM `zbxe_translation` '
+                            . ($filter['langExport'] != '' ? ' where lang = ' . quotestr($filter['langExport']) : '' ) . ' order by lang, tx_original')
+                ];
                 break;
         }
         break;
@@ -87,6 +146,7 @@ switch ($filter['actionType']) {
         $report['links'] = zbxeFieldValue("SELECT count(*) as total FROM `zbxe_preferences` where tx_option like '%_%link%'  ", 'total');
         $report['strings'] = zbxeFieldValue("SELECT count(*) as total FROM `zbxe_translation` where lang = 'en_GB' ", 'total');
         $report['languages'] = zbxeFieldValue("SELECT COUNT(DISTINCT(lang)) as total FROM `zbxe_translation` ", 'total');
+
         break;
 }
 
@@ -96,7 +156,7 @@ switch ($filter['actionType']) {
 
 switch ($filter["format"]) {
     case PAGE_TYPE_JSON;
-        echo "[" . json_encode($report["export"], JSON_UNESCAPED_UNICODE) . "]";
+        echo json_encode($report["export"], JSON_UNESCAPED_UNICODE);
         break;
     default;
         commonModuleHeader($moduleName, $moduleTitle, true);
@@ -134,9 +194,12 @@ switch ($filter["format"]) {
         $tmpColumn1->addRow(_('Import file'), (new CDiv($inputImport))->setAttribute('id', "importDIV"));
         $tmpColumn1->addRow([new CSubmit('form', _('Run'))]);
         $tmpColumn1->setAttribute('style', 'width: 50%;');
-        $tmpColumn1->addItem(new CInput('hidden', 'format', PAGE_TYPE_JSON));
+        $tmpColumn1->addItem(new CInput('hidden', 'format', PAGE_TYPE_HTML));
 
         $table->addRow([$tmpColumn1]);
+        //$imageForm = (new CForm('post', null, 'multipart/form-data'))
+        //->addVar('form', $this->data['form']);
+        $form->setAttribute('enctype', 'multipart/form-data');
         $form->addItem([ $table]);
         $dashboard->addItem($form)->show();
         break;

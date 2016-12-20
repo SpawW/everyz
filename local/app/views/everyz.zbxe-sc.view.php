@@ -252,7 +252,7 @@ switch ($filter["format"]) {
             , "Status"
             , "History rows", "Trends rows"
             , "Storage", "VPS", "BMU", "HostID"
-            , _zeT($currency)
+            , $currency
         );
         break;
     case PAGE_TYPE_JSON;
@@ -260,7 +260,7 @@ switch ($filter["format"]) {
             , ["Delay", "History", "Trends"]
             , "Status", ["HistoryRows", "TrendsRows"]
             , "Storage", "VPS", "BMU"
-            , _zeT($currency)
+            , $currency
         );
         break;
     default;
@@ -291,7 +291,7 @@ switch ($filter["format"]) {
             , (new CColHeader(_("Status")))->addStyle('width: 5%')
             , (new CColHeader(_("History") . " / " . _("Trends")))->addStyle('width: 12%')
             , _zeT("Storage"), _zeT("VPS"), _zeT("BMU")
-            , _zeT($currency)
+            , $currency
         ));
 
         break;
