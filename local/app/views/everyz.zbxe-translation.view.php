@@ -20,17 +20,6 @@
  * TodoS: ===========================================================================
  * */
 
-
-/* * ***************************************************************************
- * Module Functions
- * ************************************************************************** */
-
-
-
-// Scripts e CSS adicionais
-?>
-<?php
-
 /* * ***************************************************************************
  * Module Variables
  * ************************************************************************** */
@@ -51,6 +40,28 @@ check_fields($fields);
 
 $dataTab = new CTabView();
 $lang = CWebUser::$data['lang'];
+
+/* * ***************************************************************************
+ * Module Functions
+ * ************************************************************************** */
+
+function addTab($key, $value, $dataTab) {
+    global $lang;
+    $tmp = explode("|", zbxeFieldValue("SELECT tx_value FROM zbxe_preferences where tx_option like 'widget_%_link_%' and tx_value like '" .
+                    $key . "|%' ", "tx_value"));
+    $desc = (count($tmp) == 2 ? $tmp[1] : $key);
+    $tabContent = new CFormList();
+    $tabContent->addRow(bold(_zeT("Source")), bold(_zeT("Translation")));
+    foreach ($value as $tmp2) {
+        $tabContent->addRow($tmp2[0], ( $lang == "en_GB" ? $tmp2[1] :
+                        (new CTextBox('stringTranslation[]', $tmp2[1]))->setWidth(ZBX_TEXTAREA_FILTER_BIG_WIDTH)
+                                ->setAttribute('style', ($tmp2[0] == $tmp2[1] ? 'background-color: #f7e360;' : '') . ' width: 400px')
+                )
+        );
+        $tabContent->addItem(new CInput('hidden', 'sourceTranslation[]', $tmp2[0]));
+    }
+    $dataTab->addTab($key, $desc, $tabContent);
+}
 
 /* * ***************************************************************************
  * Access Control
@@ -112,28 +123,10 @@ foreach ($strings as $key => $value) {
 
 
 
-/*
+/* * ***************************************************************************
  * Display
- */
+ * ************************************************************************** */
 commonModuleHeader($moduleName, $moduleTitle, true);
-
-function addTab($key, $value, $dataTab) {
-    global $lang;
-    $tmp = explode("|", zbxeFieldValue("SELECT tx_value FROM zbxe_preferences where tx_option like 'widget_%_link_%' and tx_value like '" .
-                    $key . "|%' ", "tx_value"));
-    $desc = (count($tmp) == 2 ? $tmp[1] : $key);
-    $tabContent = new CFormList();
-    $tabContent->addRow(bold(_zeT("Source")), bold(_zeT("Translation")));
-    foreach ($value as $tmp2) {
-        $tabContent->addRow($tmp2[0], ( $lang == "en_GB" ? $tmp2[1] :
-                        (new CTextBox('stringTranslation[]', $tmp2[1]))->setWidth(ZBX_TEXTAREA_FILTER_BIG_WIDTH)
-                                ->setAttribute('style', ($tmp2[0] == $tmp2[1] ? 'background-color: #f7e360;' : '') . ' width: 400px')
-                )
-        );
-        $tabContent->addItem(new CInput('hidden', 'sourceTranslation[]', $tmp2[0]));
-    }
-    $dataTab->addTab($key, $desc, $tabContent);
-}
 
 foreach ($report as $key => $value) {
     if ($key !== $otherGroup) {
@@ -141,10 +134,13 @@ foreach ($report as $key => $value) {
     }
 }
 addTab($otherGroup, $report[$otherGroup], $dataTab);
-// Deve possuir botão para exportar e para importar
-$dataTab->setFooter(makeFormFooter(new CSubmit('update', _('Update'))));
-//$dataTab->addItem(new CInput('hidden', 'action', $filter['action']));
+if ($lang !== "en_GB") {
+    $dataTab->setFooter(makeFormFooter(new CSubmit('update', _('Update'))));
+}
 
+/* * ***************************************************************************
+ * Display Footer 
+ * ************************************************************************** */
 
 $form->addItem([$dataTab]);
 

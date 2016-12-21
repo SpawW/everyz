@@ -279,7 +279,7 @@ function getBetweenStrings($start, $end, $str) {
 function debugInfo($p_text, $p_debug = false, $p_color = "") {
     global $VG_DEBUG;
     if ($p_debug == true || $VG_DEBUG == true) {
-        echo '<div style="background-color:' . $p_color . ';"><pre>' . print_r($p_text, true) . "</pre></div>";
+        echo (php_sapi_name() == 'cli' ? "\nDEBUG: " : '<div style="background-color:' . $p_color . ';"><pre>') . print_r($p_text, true) . (php_sapi_name() == 'cli' ? "\n" : "</pre></div>");
     }
 }
 
@@ -790,33 +790,6 @@ function zbxeDBConditionInt($p_field, $p_array) {
     }
 }
 
-// End Functions
-// Enviroment configuration
-try {
-    $result = DBselect('select 1 from zbxe_translation where 0 = 1');
-    if (!$result) {
-        $url = baseURL() . "/local/app/everyz/include/initDBEverys.php?p_versao_zbx=" . ezZabbixVersion() . "&p_modo_install=N";
-//{$_SERVER['REQUEST_URI']}
-        echo "bd nao iniciado!" . $url;
-        $ch = curl_init();
-// set url 
-        curl_setopt($ch, CURLOPT_URL, $url);
-
-//return the transfer as a string 
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-
-// $output contains the output string 
-        $output = curl_exec($ch);
-
-        echo "[" . $output . "]";
-// close curl resource to free up system resources 
-        curl_close($ch);
-    }
-} catch (Exception $e) {
-// We got an exception == table not found
-    return FALSE;
-}
-
 function zeDBConditionInt($fieldName, array $values, $notIn = false, $sort = true) {
     return (count($values) > 0 ? dbConditionInt($fieldName, $values) : "");
 }
@@ -1071,4 +1044,85 @@ function zbxeArraySearch($array, $key, $value) {
     return null;
 }
 
+function zbxeUpdateTranslation($json, $resultOK, $debug = false) {
+    if (isset($json["translation"])) {
+        foreach ($json["translation"] as $row) {
+            // Populate translations array
+            if (!isset($translations[$row['lang']])) {
+                $translations[$row['lang']] = zbxeSQLList('SELECT * FROM `zbxe_translation` '
+                        . ' where lang = ' . quotestr($row['lang']) . ' order by tx_original');
+            }
+            $translate = zbxeArraySearch($translations[$row['lang']], 'tx_original', $row['tx_original']);
+            if (!isset($translations[$row['lang']][$translate])) {
+                $sql = "insert into zbxe_translation (lang, tx_original, tx_new, module_id) values ("
+                        . quotestr($row['lang']) . "," . quotestr($row['tx_original'])
+                        . "," . quotestr($row['tx_new']) . ", " . quotestr($row['module_id']) . ")";
+            } else {
+                $translate = $translations[$row['lang']][$translate];
+                //var_dump($translate);
+                $sql = ($translate['tx_new'] == $row['tx_new'] ? '' :
+                                'update zbxe_translation set tx_new = ' . quotestr($row['tx_new'])
+                                . ' where lang = ' . quotestr($row['lang']) . ' and tx_original = '
+                                . quotestr($row['tx_original']));
+            }
+            if (trim($sql) !== '') {
+                if ($debug)
+                    debugInfo($sql, true);
+                else
+                    return $resultOK && (prepareQuery($sql) != false);
+            }
+        }
+    }
+}
+
+function zbxeUpdateConfig($json, $resultOK, $debug = false) {
+    if (isset($json["config"])) {
+        $config = zbxeSQLList('SELECT * FROM `zbxe_preferences` order by userid, tx_option');
+        foreach ($json["config"] as $row) {
+            $cIndex = zbxeArraySearch($config, 'tx_option', $row['tx_option']);
+            if (!isset($config[$cIndex]['tx_option'])) {
+                $sql = zbxeInsert("zbxe_preferences", ['userid', 'tx_option', 'tx_value', 'st_ativo']
+                        , [$row['userid'], $row['tx_option'], $row['tx_value'], $row['st_ativo']]);
+            } else {
+                $sql = ($config[$cIndex]['tx_value'] == $row['tx_value'] ? '' :
+                                zbxeUpdate("zbxe_preferences", ['userid', 'tx_option', 'tx_value', 'st_ativo']
+                                        , [$row['userid'], $row['tx_option'], $row['tx_value'], $row['st_ativo']]
+                                        , ['tx_option'], [$row['tx_option']]));
+            }
+            if (trim($sql) !== '') {
+                if ($debug)
+                    debugInfo($sql, true);
+                else
+                    return $resultOK && (prepareQuery($sql) != false);
+            }
+        }
+    }
+}
+
+// End Functions
+// Enviroment configuration
+try {
+    $result = DBselect('select 1 from zbxe_translation where 0 = 1');
+    if (!$result) {
+        $url = baseURL() . "/local/app/everyz/include/initDBEverys.php?p_versao_zbx=" . ezZabbixVersion() . "&p_modo_install=N";
+//{$_SERVER['REQUEST_URI']}
+        echo "bd nao iniciado!" . $url;
+        $ch = curl_init();
+// set url 
+        curl_setopt($ch, CURLOPT_URL, $url);
+
+//return the transfer as a string 
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+// $output contains the output string 
+        $output = curl_exec($ch);
+
+        echo "[" . $output . "]";
+// close curl resource to free up system resources 
+        curl_close($ch);
+    }
+} catch (Exception $e) {
+// We got an exception == table not found
+    return FALSE;
+}
 ?>

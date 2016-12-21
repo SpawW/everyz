@@ -18,9 +18,42 @@
  * * along with this program; if not, write to the Free Software
  * * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  * */
+/* * ***************************************************************************
+ * Module Variables
+ * ************************************************************************** */
 
 require_once 'local/app/everyz/js/everyz.zbxe-customization.js.php';
 $moduleName = "zbxe-config";
+$baseProfile .= $moduleName;
+$moduleTitle = 'Customization';
+$dashboardGrid = [[], [], []];
+
+/* * ***************************************************************************
+ * Module Functions
+ * ************************************************************************** */
+
+function newWidget($p_id, $p_title, $p_content, $p_expanded = true, $p_icon = []) {
+    return (new CUiWidget($p_id, (new CDiv($p_content))->setName('body-' . $p_id)->setAttribute("style", "border: 1; margin: 0px 10px 10px 10px;")))
+                    ->setHeader(_($p_title), [$p_icon], false);
+}
+
+// Constroi combo padrão para seleção de imagem
+function comboImageSelect($name, $value) {
+    $tmp = new CComboBox('cnf_' . $name, $value);
+    $tmp->onChange('javascript:getZbxImage(this.value,"img_' . $name . '");');
+    return $tmp;
+}
+
+/* * ***************************************************************************
+ * Access Control
+ * ************************************************************************** */
+if (CWebUser::getType() < USER_TYPE_SUPER_ADMIN) {
+//    access_deny(ACCESS_DENY_PAGE);
+}
+
+/* * ***************************************************************************
+ * Change Data
+ * ************************************************************************** */
 // ----------------- Update data -----------------------------------------------
 $updated = false;
 foreach ($_REQUEST as $key => $value) {
@@ -34,25 +67,24 @@ foreach ($_REQUEST as $key => $value) {
 if ($updated) {
     show_message(_zeT('New configuration stored on EveryZ!'));
 }
+
+/* * ***************************************************************************
+ * Get Data
+ * ************************************************************************** */
+
 // -----------------------------------------------------------------------------
 
-$formData = (new CForm())->cleanItems()->setId('frmConfig');
+//$form = (new CForm())->cleanItems()->setId('frmConfig');
+//$dashboard = (new CWidget())->setTitle(_zeT('Customization'));
+
+commonModuleHeader($moduleName, $moduleTitle, true);
 $buttonSave = (new CList())->addItem((new CSubmit('btnUpdate', _('Update'))));
-$dashboard = (new CWidget())->setTitle(_zeT('Customization'));
-
-$dashboardGrid = [[], [], []];
-
-function newWidget($p_id, $p_title, $p_content, $p_expanded = true, $p_icon = []) {
-    return (new CUiWidget($p_id, (new CDiv($p_content))->setName('body-' . $p_id)->setAttribute("style", "border: 1; margin: 0px 10px 10px 10px;")))
-                    ->setHeader(_($p_title), [$p_icon], false);
-}
 
 // Mapas =======================================================================
 $table = (new CTable());
 $table->addRow(
         (new CFormList())
-                ->addRow(_zeT('Title', $moduleName),
-                        newComboFilterArray([_("Show"), _zeT("Hide")], 'cnf_map_title_show', zbxeConfigValue('map_title_show'), false)
+                ->addRow(_zeT('Title', $moduleName), newComboFilterArray([_("Show"), _zeT("Hide")], 'cnf_map_title_show', zbxeConfigValue('map_title_show'), false)
                 )
                 ->addRow(_('Color'), new CColor('cnf_map_title_color', zbxeConfigValue('map_title_color'), false))
                 ->addRow(_zeT('White mark Color'), new CColor('cnf_map_wmark_color', zbxeConfigValue('map_wmark_color'), false))
@@ -72,12 +104,6 @@ $idLogoSite = zbxeConfigValue('company_logo_site', 0, "company_logo_site");
 $idLogoLogin = zbxeConfigValue('company_logo_login', 0, "company_logo_login");
 $idGeoDefaultPOI = zbxeConfigValue('geo_default_poi', 0, "geo_default_poi");
 
-// Constroi combo padrão para seleção de imagem
-function comboImageSelect($name, $value) {
-    $tmp = new CComboBox('cnf_' . $name, $value);
-    $tmp->onChange('javascript:getZbxImage(this.value,"img_' . $name . '");');
-    return $tmp;
-}
 
 // Combos com logotipos ========================================================
 $cmbLogoSite = comboImageSelect('company_logo_site', $idLogoSite);
@@ -103,19 +129,19 @@ $table->addRow(
                 ->addRow(_zeT('Login Logo'), $cmbLogoLogin)
                 ->addRow((new CImg('imgstore.php?iconid=' . $idLogoLogin, 'company_logo_img', 120, 25))->setId("img_company_logo_login"))
 );
-$dashboardGrid[1][0] = newWidget('company', _zeT("Company"), $table);
+$dashboardGrid[0][1] = newWidget('company', _zeT("Company"), $table);
 
 // Options for zab-geo
 $table = (new CTable());
 $table->addRow(
         (new CFormList())
                 ->addRow(_('Token'), (new CTextBox('cnf_geo_token'
-                        , zbxeConfigValue('geo_token')))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH))
+                        , zbxeConfigValue('geo_token')))->setWidth(ZBX_TEXTAREA_FILTER_BIG_WIDTH))
                 ->addRow(_zeT('Default POI'), [$cmbDefaultPoi,
                     (new CImg('imgstore.php?iconid=' . $idGeoDefaultPOI
                     , 'cnf_geo_default_poi', 32, 32))->setId("img_geo_default_poi")])
 );
-$dashboardGrid[0][1] = newWidget('geo', _zeT("ZabGeo"), $table);
+$dashboardGrid[1][0] = newWidget('geo', _zeT("ZabGeo",''), $table);
 
 $dashboardRow = [];
 for ($row = 0; $row < count($dashboardGrid); $row++) {
@@ -128,10 +154,11 @@ $dashboardTable = (new CDiv($dashboardRow))
         ->addClass('table')
         ->addClass('widget-placeholder');
 
-
-$formData->addItem($dashboardTable)
-        // Itens hidden para identificar o modulo   
+/* * ***************************************************************************
+ * Display Footer 
+ * ************************************************************************** */
+$form->addItem($dashboardTable)
         ->addItem(new CInput('hidden', 'action', $action))
         ->addItem((new CDiv($buttonSave))->addClass('cell')->addClass('row'))
 ;
-$dashboard->addItem($formData)->show();
+$dashboard->addItem($form)->show();

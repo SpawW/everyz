@@ -34,6 +34,7 @@ registra() {
     echo $(date)" - $1" >> $TMP_DIR/logInstall.log; 
     echo "-->Mensagem $1";
 }
+
 installMgs() {
     if [ "$1" = "U" ]; then
         tipo="Upgrade";
@@ -44,7 +45,6 @@ installMgs() {
 }
 
 identificaDistro() {
-#    if [ -f /etc/redhat-release ]; then
     if [ -f /etc/redhat-release -o -f /etc/system-release ]; then
         PATHDEF="/var/www/html";
         GERENCIADOR_PACOTES='yum ';
@@ -66,12 +66,14 @@ identificaDistro() {
             PARAMETRO_INSTALL=' install -y ';
         fi
     fi
+
     if [ -f /tmp/upgZabbix/logInstall.log ]; then
         TMP=`cat /tmp/upgZabbix/logInstall.log | grep "Path do frontend" | tail -n1 | awk -F[ '{print $2}' | awk -F] '{print $1}'`;
         if [ ! -z $TMP ]; then
             PATHDEF=$TMP;
         fi
     fi
+
     case $LINUX_DISTRO in
 	"ubuntu" | "debian" | "red hat" | "red" | "centos" | "opensuse" | "opensuse" | "amazon" | "oracle" )
             CAMINHO_RCLOCAL="/etc/rc.local";
@@ -99,6 +101,7 @@ identificaDistro() {
             #registra "Distribucao nao prevista ($LINUX_DISTRO)... favor contactar $AUTOR"; exit 1; 
         ;;
     esac
+
 }
 
 # Pre-requisitos para o funcionamento do instalador ============================
@@ -225,7 +228,7 @@ idioma() {
 caminhoFrontend() {
     dialog --inputbox "$M_BASE\n$M_CAMINHO" 0 0 "$PATHDEF" 2> $TMP_DIR/resposta_dialog.txt;
     CAMINHO_FRONTEND=`cat $TMP_DIR/resposta_dialog.txt`;
-    if [ ! -d "$CAMINHO_FRONTEND" ]; then
+    if [ ! -d "$CAMINHO_FRONTEND" ]; then        
         registra " $M_ERRO_CAMINHO ($CAMINHO_FRONTEND). $M_ERRO_ABORT";
         exit;
     else
@@ -233,6 +236,8 @@ caminhoFrontend() {
         if [ ! -f "$CAMINHO_FRONTEND/zabbix.php" ]; then
             registra " $M_ERRO_CAMINHO2 ($CAMINHO_FRONTEND). $M_ERRO_ABORT.";
             exit;
+        else
+            DBUSER=`cat "$CAMINHO_FRONTEND/conf/zabbix.conf.php" | `;
         fi
     fi
     cd $CAMINHO_FRONTEND;
@@ -448,11 +453,16 @@ exit;
     FIMINST=$(($FIMINST+1));
 }
 
+verificaArquivos() {
+
+}
 
 if [ $(alias  | grep rm | wc -l ) == "1" ]; then
     echo "Removendo alias do rm...";
     unalias rm;
 fi
+
+
 
 ####### Parametros de instalacao -----------------------------------------------
 
@@ -462,6 +472,7 @@ preReq;
 idioma;
 tipoInstallZabbix;
 caminhoFrontend;
+verificaArquivos;
 
 
 ####### Instalacao -------------------------------------------------------------
