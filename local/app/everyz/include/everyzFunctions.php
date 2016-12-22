@@ -62,6 +62,9 @@ function descItem($itemName, $itemKey) {
  * @param string  $moduleid   module identifier
  */
 function _zeT($msg, $moduleid = "", $autoinsert = true) {
+    global $VG_BANCO_OK;
+    if (!$VG_BANCO_OK)
+        return $msg;
     if (trim($msg) == "")
         return $msg;
     if ($moduleid == "") {
@@ -1044,6 +1047,16 @@ function zbxeArraySearch($array, $key, $value) {
     return null;
 }
 
+/**
+ * zbxeUpdateTranslation
+ *
+ * Importa traduções do EveryZ e de seus módulos
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param array  $json      JSON data converted to PHP array
+ * @param boolean $resultOK  Variable with information about problems runing SQL commands
+ * @param boolean $debug     If true the function will show debug messages instead run sql commands
+ */
 function zbxeUpdateTranslation($json, $resultOK, $debug = false) {
     if (isset($json["translation"])) {
         foreach ($json["translation"] as $row) {
@@ -1068,15 +1081,30 @@ function zbxeUpdateTranslation($json, $resultOK, $debug = false) {
             if (trim($sql) !== '') {
                 if ($debug)
                     debugInfo($sql, true);
-                else
-                    return $resultOK && (prepareQuery($sql) != false);
+                else {
+                    $resultOK = DBexecute($sql);
+                    if (!$resultOK)
+                        return false;
+                }
             }
         }
+        return count($json["translation"]);
     }
 }
 
+/**
+ * zbxeUpdateConfig
+ *
+ * Importa configurações do EveryZ e de seus módulos
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param array   $json      JSON data converted to PHP array
+ * @param boolean $resultOK  Variable with information about problems runing SQL commands
+ * @param boolean $debug     If true the function will show debug messages instead run sql commands
+ */
 function zbxeUpdateConfig($json, $resultOK, $debug = false) {
     if (isset($json["config"])) {
+        echo "aqui caralho";
         $config = zbxeSQLList('SELECT * FROM `zbxe_preferences` order by userid, tx_option');
         foreach ($json["config"] as $row) {
             $cIndex = zbxeArraySearch($config, 'tx_option', $row['tx_option']);
@@ -1089,40 +1117,52 @@ function zbxeUpdateConfig($json, $resultOK, $debug = false) {
                                         , [$row['userid'], $row['tx_option'], $row['tx_value'], $row['st_ativo']]
                                         , ['tx_option'], [$row['tx_option']]));
             }
+            //var_dump([$sql, $resultOK]);
             if (trim($sql) !== '') {
                 if ($debug)
                     debugInfo($sql, true);
-                else
-                    return $resultOK && (prepareQuery($sql) != false);
+                else {
+                    $resultOK = DBexecute($sql);
+                    if (!$resultOK)
+                        return false;
+                }
             }
         }
     }
 }
 
+/**
+ * zbxeUpdateConfig
+ *
+ * Importa configurações do EveryZ e de seus módulos
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param string  $query     JSON data converted to PHP array
+ * @param string $resultOK  Variable with information about problems runing SQL commands
+ * @param string $debug     If true the function will show debug messages instead run sql commands
+ */
+function zbxeStandardDML($query) {
+    global $DB;
+    if ($DB['TYPE'] == ZBX_DB_POSTGRESQL) {
+        $query = str_replace('varchar', 'character varying', $query);
+        $query = str_replace('int', 'integer', $query);
+        $query = str_replace('`', '', $query);
+    }
+    return $query;
+}
+
 // End Functions
 // Enviroment configuration
 try {
-    $result = DBselect('select 1 from zbxe_translation where 0 = 1');
-    if (!$result) {
-        $url = baseURL() . "/local/app/everyz/include/initDBEverys.php?p_versao_zbx=" . ezZabbixVersion() . "&p_modo_install=N";
-//{$_SERVER['REQUEST_URI']}
-        echo "bd nao iniciado!" . $url;
-        $ch = curl_init();
-// set url 
-        curl_setopt($ch, CURLOPT_URL, $url);
-
-//return the transfer as a string 
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-
-// $output contains the output string 
-        $output = curl_exec($ch);
-
-        echo "[" . $output . "]";
-// close curl resource to free up system resources 
-        curl_close($ch);
+    global $VG_BANCO_OK;
+    $VG_BANCO_OK = false;
+    $regExp = DBfetch(DBselect('select tx_value from zbxe_preferences where tx_option = "everyz_version"'));
+    if (empty($regExp)) {
+        require_once dirname(__FILE__) . '/../init/everyz.initdb.php';
+    } else {
+        $VG_BANCO_OK = true;
     }
 } catch (Exception $e) {
-// We got an exception == table not found
     return FALSE;
 }
 ?>

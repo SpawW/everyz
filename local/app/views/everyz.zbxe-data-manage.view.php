@@ -73,52 +73,7 @@ if (isset($_FILES['import_file']) && $filter['actionType'] == 0) {
         DBstart();
         zbxeUpdateConfig($json, $resultOK);
         zbxeUpdateTranslation($json, $resultOK);
-
-        /*
-          if (isset($json["config"])) {
-          $config = zbxeSQLList('SELECT * FROM `zbxe_preferences` order by userid, tx_option');
-          foreach ($json["config"] as $row) {
-          $cIndex = zbxeArraySearch($config, 'tx_option', $row['tx_option']);
-          if (!isset($config[$cIndex]['tx_option'])) {
-          $sql = zbxeInsert("zbxe_preferences", ['userid', 'tx_option', 'tx_value', 'st_ativo']
-          , [$row['userid'], $row['tx_option'], $row['tx_value'], $row['st_ativo']]);
-          } else {
-          $sql = ($config[$cIndex]['tx_value'] == $row['tx_value'] ? '' :
-          zbxeUpdate("zbxe_preferences", ['userid', 'tx_option', 'tx_value', 'st_ativo']
-          , [$row['userid'], $row['tx_option'], $row['tx_value'], $row['st_ativo']]
-          , ['tx_option'], [$row['tx_option']]));
-          }
-          debugInfo($sql, true);
-          if (trim($sql) !== '') {
-          $resultOK = $resultOK && (prepareQuery($sql) != false);
-          }
-          }
-          }
-          if (isset($json["translation"])) {
-          foreach ($json["translation"] as $row) {
-          // Populate translations array
-          if (!isset($translations[$row['lang']])) {
-          $translations[$row['lang']] = zbxeSQLList('SELECT * FROM `zbxe_translation` '
-          . ' where lang = ' . quotestr($row['lang']) . ' order by tx_original');
-          }
-          $translate = zbxeArraySearch($translations[$row['lang']], 'tx_original', $row['tx_original']);
-          if (!isset($translations[$row['lang']][$translate])) {
-          $sql = "insert into zbxe_translation (lang, tx_original, tx_new, module_id) values ("
-          . quotestr($row['lang']) . "," . quotestr($row['tx_original'])
-          . "," . quotestr($row['tx_new']) . ", " . quotestr($row['module_id']) . ")";
-          } else {
-          $translate = $translations[$row['lang']][$translate];
-          //var_dump($translate);
-          $sql = ($translate['tx_new'] == $row['tx_new'] ? '' :
-          'update zbxe_translation set tx_new = ' . quotestr($row['tx_new'])
-          . ' where lang = ' . quotestr($row['lang']) . ' and tx_original = '
-          . quotestr($row['tx_original']));
-          }
-          if (trim($sql) !== '') {
-          $resultOK = $resultOK && (prepareQuery($sql) != false);
-          }
-          }
-          } */
+        var_dump([$json,$resultOK]);
         DBend($resultOK);
     } catch (Exception $e) {
         error($e->getMessage());

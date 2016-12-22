@@ -453,9 +453,54 @@ exit;
     FIMINST=$(($FIMINST+1));
 }
 
-verificaArquivos() {
-
+downloadPackage() {
+    ARQ_TMP="$1";
+    REPOS="$2";
+    if [ "$DOWNLOADFILES" = "S" ]; then
+        if [ -f $ARQ_TMP ]; then
+            rm $ARQ_TMP;
+        fi
+        # Baixa repositorio
+        wget $REPOS -O $ARQ_TMP --no-check-certificate;
+    fi
 }
+
+unzipPackage() {
+    ARQ_TMP="$1";
+    DIR_TMP="$2";
+    DIR_DEST="$3";
+    
+    cd /tmp;
+    # Descompacta em TMP
+    if [ -e $DIR_TMP ]; then
+        rm -rf $DIR_TMP;
+    fi
+    unzip $ARQ_TMP > /tmp/tmp_unzip_ze.log;
+    cd $DIR_TMP
+    if [ ! -e "$DIR_DEST" ]; then
+        mkdir -p "$DIR_DEST";
+    fi
+}
+
+
+instalaGit() {
+    REPOS="https://github.com/SpawW/zabbix-extras/archive/$BRANCH.zip";
+    ARQ_TMP_BD="/tmp/pluginExtrasBD.htm";
+    ARQ_TMP="/tmp/EveryZ.zip";
+    DIR_TMP="/tmp/EveryZ-$BRANCH/";
+
+    downloadPackage "$ARQ_TMP" "$REPOS";
+    unzipPackage "$ARQ_TMP" "$DIR_TMP" "$CAMINHO_FRONTEND";
+
+    #cp -Rp * "$CAMINHO_FRONTEND";
+    registra "Iniciando banco de dados...";
+
+    #if [ -f "$ARQ_TMP_BD" ]; then
+    #    rm "$ARQ_TMP_BD";
+    #fi
+#    wget "$URL_FRONTEND/zbxe-inicia-bd.php?p_modo_install=$UPDATEBD&p_versao_zbx=$VERSAO_ZBX" -O $ARQ_TMP_BD  --no-check-certificate;
+}
+
 
 if [ $(alias  | grep rm | wc -l ) == "1" ]; then
     echo "Removendo alias do rm...";
@@ -472,12 +517,12 @@ preReq;
 idioma;
 tipoInstallZabbix;
 caminhoFrontend;
-verificaArquivos;
+#verificaArquivos;
 
+####### Download de arquivos ---------------------------------------------------
 
 ####### Instalacao -------------------------------------------------------------
-clear;
-
+instalaGit;
 instalaMenus;
 customLogo;
 instalaLiteral;
