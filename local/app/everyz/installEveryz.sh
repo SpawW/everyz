@@ -515,7 +515,7 @@ confirmaDownload() {
         N   "$M_DOWNLOAD_NAO"  off   \
         2> $TMP_DIR/resposta_dialog.txt
     DOWNLOADFILES=`cat $TMP_DIR/resposta_dialog.txt `;
-    if [ "$CONTINUA" != "S" ]; then
+    if [ "$CONTINUA" !== "S" ]; then
         clear;
         exit 1;
     fi
