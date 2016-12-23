@@ -8,7 +8,7 @@ AUTOR="the.spaww@gmail.com";
 TMP_DIR="/tmp/upgZabbix";
 VERSAO_INST="3.0.0";
 UPDATEBD="S";
-BRANCH="ZE3.0.0";
+BRANCH="beta-0.1";
 NOME_PLUGIN="EVERYZ";
 HORARIO_BKP=$(date +"%Y_%d_%m_%H-%M");
 BKP_FILE="/tmp/zeBackup$HORARIO_BKP.tgz";
@@ -190,6 +190,9 @@ idioma() {
       M_ERRO_DISTRO="Distribucao nao prevista ($LINUX_DISTRO)... favor contactar ";
       M_DISTRO_SIM="SIM, continue mesmo sem o suporte a instalacao de pacotes (necessario wget, dialog e unzip).";
       M_DISTRO_NAO="NAO, aborte a instalacao.";
+      M_DOWNLOAD_FILE="Baixar a última versão?";
+      M_DOWNLOAD_SIM="SIM, baixe a última versão a partir do github (acesso a internet necessario).";
+      M_DOWNLOAD_NAO="NAO, aborte a instalacao.";
             ;;
 	*) 
       M_BASE="This installer will add an extra menu to the end of the menu bar of your environment. For installation are needed to inform some parameters.";
@@ -221,6 +224,9 @@ idioma() {
       M_ERRO_DISTRO="Unkown linux version ($LINUX_DISTRO)... please contact for support: ";
       M_DISTRO_SIM="YES, continue without support to install OS packages (required wget, dialog and unzip) (S = YES).";
       M_DISTRO_NAO="NO, stop install.";
+      M_DOWNLOAD_FILE="Download the latest version?";
+      M_DOWNLOAD_SIM="YES, download the latest version from github (internet access required).";
+      M_DOWNLOAD_NAO="NO, stop intall.";
         ;;
     esac
 }
@@ -454,6 +460,7 @@ exit;
 }
 
 downloadPackage() {
+set -x
     ARQ_TMP="$1";
     REPOS="$2";
     if [ "$DOWNLOADFILES" = "S" ]; then
@@ -484,24 +491,36 @@ unzipPackage() {
 
 
 instalaGit() {
-    REPOS="https://github.com/SpawW/zabbix-extras/archive/$BRANCH.zip";
+    REPOS="https://github.com/SpawW/everyz/archive/$BRANCH.zip";
     ARQ_TMP_BD="/tmp/pluginExtrasBD.htm";
     ARQ_TMP="/tmp/EveryZ.zip";
-    DIR_TMP="/tmp/EveryZ-$BRANCH/";
+    DIR_TMP="/tmp/everyz-$BRANCH/";
 
     downloadPackage "$ARQ_TMP" "$REPOS";
     unzipPackage "$ARQ_TMP" "$DIR_TMP" "$CAMINHO_FRONTEND";
 
-    #cp -Rp * "$CAMINHO_FRONTEND";
-    registra "Iniciando banco de dados...";
+    cp -Rp * "$CAMINHO_FRONTEND";
 
-    #if [ -f "$ARQ_TMP_BD" ]; then
-    #    rm "$ARQ_TMP_BD";
-    #fi
+    if [ -f "$ARQ_TMP_BD" ]; then
+        rm "$ARQ_TMP_BD";
+    fi
 #    wget "$URL_FRONTEND/zbxe-inicia-bd.php?p_modo_install=$UPDATEBD&p_versao_zbx=$VERSAO_ZBX" -O $ARQ_TMP_BD  --no-check-certificate;
 }
 
-
+confirmaDownload() {
+    dialog \
+        --title 'Download /tmp/EveryZ.zip'        \
+        --radiolist "$M_DOWNLOAD_FILE"  \
+        0 0 0                                    \
+        S   "$M_DOWNLOAD_SIM"  on    \
+        N   "$M_DOWNLOAD_NAO"  off   \
+        2> $TMP_DIR/resposta_dialog.txt
+    DOWNLOADFILES=`cat $TMP_DIR/resposta_dialog.txt `;
+    if [ "$CONTINUA" != "S" ]; then
+        clear;
+        exit 1;
+    fi
+}
 if [ $(alias  | grep rm | wc -l ) == "1" ]; then
     echo "Removendo alias do rm...";
     unalias rm;
@@ -517,8 +536,7 @@ preReq;
 idioma;
 tipoInstallZabbix;
 caminhoFrontend;
-#verificaArquivos;
-
+confirmaDownload;
 ####### Download de arquivos ---------------------------------------------------
 
 ####### Instalacao -------------------------------------------------------------
