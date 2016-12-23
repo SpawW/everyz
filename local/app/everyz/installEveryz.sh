@@ -8,7 +8,7 @@ AUTOR="the.spaww@gmail.com";
 TMP_DIR="/tmp/upgZabbix";
 VERSAO_INST="3.0.0";
 UPDATEBD="S";
-BRANCH="beta-0.1";
+BRANCH="master";
 NOME_PLUGIN="EVERYZ";
 HORARIO_BKP=$(date +"%Y_%d_%m_%H-%M");
 BKP_FILE="/tmp/zeBackup$HORARIO_BKP.tgz";
@@ -504,7 +504,6 @@ instalaGit() {
     if [ -f "$ARQ_TMP_BD" ]; then
         rm "$ARQ_TMP_BD";
     fi
-#    wget "$URL_FRONTEND/zbxe-inicia-bd.php?p_modo_install=$UPDATEBD&p_versao_zbx=$VERSAO_ZBX" -O $ARQ_TMP_BD  --no-check-certificate;
 }
 
 confirmaDownload() {
