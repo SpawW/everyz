@@ -1104,7 +1104,6 @@ function zbxeUpdateTranslation($json, $resultOK, $debug = false) {
  */
 function zbxeUpdateConfig($json, $resultOK, $debug = false) {
     if (isset($json["config"])) {
-        echo "aqui caralho";
         $config = zbxeSQLList('SELECT * FROM `zbxe_preferences` order by userid, tx_option');
         foreach ($json["config"] as $row) {
             $cIndex = zbxeArraySearch($config, 'tx_option', $row['tx_option']);
