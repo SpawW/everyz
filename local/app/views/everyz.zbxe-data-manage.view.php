@@ -59,7 +59,6 @@ function newText($text, $class = ZBX_STYLE_GREEN, $margin = "10px") {
 /* * ***************************************************************************
  * Change Data
  * ************************************************************************** */
-// Import de dados -----------------------------------------------------
 if (isset($_FILES['import_file']) && $filter['actionType'] == 0) {
     $result = false;
 
@@ -72,7 +71,6 @@ if (isset($_FILES['import_file']) && $filter['actionType'] == 0) {
         DBstart();
         zbxeUpdateConfig($json, $resultOK);
         zbxeUpdateTranslation($json, $resultOK);
-        var_dump([$json,$resultOK]);
         DBend($resultOK);
     } catch (Exception $e) {
         error($e->getMessage());
@@ -83,12 +81,23 @@ if (isset($_FILES['import_file']) && $filter['actionType'] == 0) {
 /* * ***************************************************************************
  * Get Data
  * ************************************************************************** */
-
 switch ($filter['actionType']) {
     case 1;
         switch ($filter['typeExport']) {
             case 1:
-                $report['export'] = ['config' => zbxeSQLList('SELECT * FROM `zbxe_preferences` order by userid, tx_option')];
+                $zbxeConfig = zbxeSQLList('SELECT * FROM `zbxe_preferences` order by userid, tx_option');
+                $report['export'] = ['config' => $zbxeConfig];
+                $zbxeImageIDs = zbxeSQLList('SELECT DISTINCT tx_value FROM `zbxe_preferences` where tx_option in ('
+                        . '"company_logo_login","company_logo_site","geo_default_poi"'
+                        . ') order by userid, tx_option');
+                foreach ($zbxeImageIDs as $value) {
+                    $imagesIds[] = $value['tx_value'];
+                }
+                $result = DBselect('select imageid, imagetype, name, image from images where imageid IN (' . implode(',', $imagesIds) . ')');
+                while ($row = DBfetch($result)) {
+                    $images[] = ['imageid' => $row['imageid'], 'imagetype' => $row['imagetype'], 'name' => $row['name'], 'image' => base64_encode($row['image'])];
+                }
+                $report['export']['images'] = $images;
                 break;
             case 0:
                 $report['export'] = ['translation' => zbxeSQLList('SELECT * FROM `zbxe_translation` '

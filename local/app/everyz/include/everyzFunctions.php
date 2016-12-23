@@ -1128,17 +1128,21 @@ function zbxeUpdateConfig($json, $resultOK, $debug = false) {
             }
         }
     }
+    // Import images
+    if (isset($json["images"])) {
+        foreach ($json["images"] as $row) {
+            updateImage($row);
+        }
+    }
 }
 
 /**
- * zbxeUpdateConfig
+ * zbxeStandardDML
  *
- * Importa configurações do EveryZ e de seus módulos
+ * Normaliza comandos DML entre o MySQL e o PostgreSQL
  * @author Adail Horst <the.spaww@gmail.com>
  * 
- * @param string  $query     JSON data converted to PHP array
- * @param string $resultOK  Variable with information about problems runing SQL commands
- * @param string $debug     If true the function will show debug messages instead run sql commands
+ * @param string  $query     SQL Statement
  */
 function zbxeStandardDML($query) {
     global $DB;
@@ -1148,6 +1152,47 @@ function zbxeStandardDML($query) {
         $query = str_replace('`', '', $query);
     }
     return $query;
+}
+
+/**
+ * getImageId
+ *
+ * Return the imageid from a image name
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param string $name     Name of image
+ */
+function getImageId($name) {
+    return zbxeFieldValue("select imageid from images where name = " . quotestr($name), "imageid");
+}
+
+/**
+ * getImageName
+ *
+ * Return the imageid from a image name
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param string $name     Name of image
+ */
+function getImageName($imageid) {
+    return zbxeFieldValue("select name from images where imageid = " . quotestr($imageid), "name");
+}
+
+function updateImage($image) {
+    $imageid = getImageId($image['name']);
+    if (intval($imageid) > 0) {
+        $result = API::Image()->update([
+            'name' => $image['name'],
+            'imageid' => $image['imageid'],
+            'image' => $image['image']
+        ]);
+    } else {
+        $result = API::Image()->create([
+            'name' => $image['name'],
+            'imagetype' => $image['imagetype'],
+            'image' => $image['image']
+        ]);
+    }
 }
 
 // End Functions
