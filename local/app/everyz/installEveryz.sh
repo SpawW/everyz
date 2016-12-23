@@ -248,21 +248,21 @@ caminhoFrontend() {
     fi
     cd $CAMINHO_FRONTEND;
 
-    URLZABBIX="http://localhost";
-    if [ -f /tmp/upgZabbix/logInstall.log ]; then
-        TMP=`cat /tmp/upgZabbix/logInstall.log | grep "URL do" | tail -n1 | awk -F[ '{print $2}' | awk -F] '{print $1}'`;
-        if [ ! -z $TMP ]; then
-            URLZABBIX=$TMP;
-        fi
-    fi
-    dialog --inputbox "$M_BASE\n$M_URL" 0 0 $URLZABBIX 2> $TMP_DIR/resposta_dialog.txt;
-    URL_FRONTEND=`cat $TMP_DIR/resposta_dialog.txt`;
-
-    VALID_URL=`curl -s $URL_FRONTEND | grep "Zabbix" | grep Author | awk -F\" '{print $4}'`;
-    if [ "$VALID_URL" != "Zabbix SIA" ]; then
-        registra " $M_ERRO_FRONT ($URL_FRONTEND). $M_ERRO_ABORT.";
-        exit;
-    fi    
+#    URLZABBIX="http://localhost";
+#    if [ -f /tmp/upgZabbix/logInstall.log ]; then
+#        TMP=`cat /tmp/upgZabbix/logInstall.log | grep "URL do" | tail -n1 | awk -F[ '{print $2}' | awk -F] '{print $1}'`;
+#        if [ ! -z $TMP ]; then
+#            URLZABBIX=$TMP;
+#        fi
+#    fi
+#    dialog --inputbox "$M_BASE\n$M_URL" 0 0 $URLZABBIX 2> $TMP_DIR/resposta_dialog.txt;
+#    URL_FRONTEND=`cat $TMP_DIR/resposta_dialog.txt`;
+#
+#    VALID_URL=`curl -s $URL_FRONTEND | grep "Zabbix" | grep Author | awk -F\" '{print $4}'`;
+#    if [ "$VALID_URL" != "Zabbix SIA" ]; then
+#        registra " $M_ERRO_FRONT ($URL_FRONTEND). $M_ERRO_ABORT.";
+#        exit;
+#    fi    
 }
 
 tipoInstallZabbix(){
