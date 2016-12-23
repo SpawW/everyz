@@ -54,7 +54,7 @@ function addTab($key, $value, $dataTab) {
     $tabContent->addRow(bold(_zeT("Source")), bold(_zeT("Translation")));
     foreach ($value as $tmp2) {
         $tabContent->addRow($tmp2[0], ( $lang == "en_GB" ? $tmp2[1] :
-                        (new CTextBox('stringTranslation[]', $tmp2[1]))->setWidth(ZBX_TEXTAREA_FILTER_BIG_WIDTH)
+                        (new CTextBox('stringTranslation[]', $tmp2[1]))->setWidth(ZBX_TEXTAREA_BIG_WIDTH)
                                 ->setAttribute('style', ($tmp2[0] == $tmp2[1] ? 'background-color: #f7e360;' : '') . ' width: 400px')
                 )
         );

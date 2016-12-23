@@ -30,7 +30,6 @@ $moduleName = "zbxe-data-manage";
 $baseProfile .= $moduleName;
 $moduleTitle = 'Data manager';
 $report = [];
-
 // Common fields
 addFilterActions();
 
@@ -145,7 +144,7 @@ switch ($filter["format"]) {
 
         $tmpColumn1 = new CFormList();
 
-        $subTable = (new CTableInfo())->setHeader([ _('Widgets'), _('Modules'), _('Strings'), _('Languages'), '']);
+        $subTable = (new CTableInfo())->setHeader([ _zeT('Widgets'), _zeT('Modules'), _zeT('Strings'), _zeT('Languages'), '']);
         $subTable->addRow([ newText($report['widgets']), newText($report['links']), newText($report['strings']), newText($report['languages'])]);
 
         $tmpColumn1->addRow([_('Your EveryZ installation currently have:'), $subTable]);

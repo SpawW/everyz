@@ -198,9 +198,9 @@ $groups = API::HostGroup()->get([ 'output' => 'extend', 'sortfield' => 'name']);
 commonModuleHeader($moduleName, $moduleTitle, true);
 
 $tmpColumn = new CFormList();
-$tmpColumn->addRow(_('Data fields'), (new CTextArea('dataFields', $filter['dataFields']))->setWidth(ZBX_TEXTAREA_BIG_WIDTH));
-$tmpColumn->addRow(_('Host Data'), (new CTextArea('hostData', $filter['hostData']))->setWidth(ZBX_TEXTAREA_BIG_WIDTH));
-$tmpColumn->addRow(new CSubmit('form', _('Create hosts')));
+$tmpColumn->addRow(_zeT('Data fields'), (new CTextArea('dataFields', $filter['dataFields']))->setWidth(ZBX_TEXTAREA_BIG_WIDTH));
+$tmpColumn->addRow(_zeT('Host Data'), (new CTextArea('hostData', $filter['hostData']))->setWidth(ZBX_TEXTAREA_BIG_WIDTH));
+$tmpColumn->addRow(new CSubmit('form', _zeT('Create hosts')));
 
 $table->addRow([$tmpColumn]);
 

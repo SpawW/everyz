@@ -119,7 +119,7 @@ foreach ($iconList as $icon) {
 $table->addRow(
         (new CFormList())
                 ->addRow(_('Name'), (new CTextBox('cnf_company_name'
-                        , zbxeConfigValue('company_name')))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH))
+                        , zbxeConfigValue('company_name')))->setWidth(ZBX_TEXTAREA_STANDARD_WIDTH))
                 ->addRow(_zeT('Site Logo'), [$cmbLogoSite
                     , SPACE
                     , (new CNumericBox('cnf_company_logo_width', zbxeConfigValue('company_logo_width'), 3))
@@ -136,7 +136,7 @@ $table = (new CTable());
 $table->addRow(
         (new CFormList())
                 ->addRow(_('Token'), (new CTextBox('cnf_geo_token'
-                        , zbxeConfigValue('geo_token')))->setWidth(ZBX_TEXTAREA_FILTER_BIG_WIDTH))
+                        , zbxeConfigValue('geo_token')))->setWidth(ZBX_TEXTAREA_BIG_WIDTH))
                 ->addRow(_zeT('Default POI'), [$cmbDefaultPoi,
                     (new CImg('imgstore.php?iconid=' . $idGeoDefaultPOI
                     , 'cnf_geo_default_poi', 32, 32))->setId("img_geo_default_poi")])
