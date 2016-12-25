@@ -24,8 +24,6 @@ define("ZE_VER", "3.0");
 define("EZ_TITLE", 'EveryZ - ');
 define("ZE_COPY", ", ZE " . ZE_VER);
 
-require_once dirname(__FILE__) . '../../../../conf/zabbix.conf.php';
-
 if (isset($DB)) {
     if ($DB['TYPE'] == ZBX_DB_POSTGRESQL) {
         define("ZE_DBFQ", "");
