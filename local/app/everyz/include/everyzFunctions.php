@@ -1213,7 +1213,7 @@ function updateImage($image) {
 
 function zbxeStartDefinitions() {
     global $DB;
-    if (isset($DB)) {
+    if (isset($DB) && !defined("ZE_DBFQ")) {
         if ($DB['TYPE'] == ZBX_DB_POSTGRESQL) {
             define("ZE_DBFQ", "");
             define("ZE_QUOTECHAR", "'");
