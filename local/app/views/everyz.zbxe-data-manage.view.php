@@ -85,14 +85,21 @@ switch ($filter['actionType']) {
     case 1;
         switch ($filter['typeExport']) {
             case 1:
-                $zbxeConfig = zbxeSQLList('SELECT * FROM `zbxe_preferences` order by userid, tx_option');
+                $zbxeConfig = zbxeSQLList('SELECT * FROM `zbxe_preferences` where not like "zbxe_default_icon_%" order by userid, tx_option');
                 $report['export'] = ['config' => $zbxeConfig];
+                // Parameters with imageids
                 $zbxeImageIDs = zbxeSQLList('SELECT DISTINCT tx_value FROM `zbxe_preferences` where tx_option in ('
                         . '"company_logo_login","company_logo_site","geo_default_poi"'
                         . ') order by userid, tx_option');
                 foreach ($zbxeImageIDs as $value) {
                     $imagesIds[] = $value['tx_value'];
                 }
+                // Parameters with image names
+                $zbxeImageIDs = zbxeSQLList('SELECT DISTINCT tx_value FROM `zbxe_preferences` where tx_option like "zbxe_default_icon_%" order by userid, tx_option');
+                foreach ($zbxeImageIDs as $value) {
+                    $imagesIds[] = getImageId($value['tx_value']);
+                }
+
                 $result = DBselect('select imageid, imagetype, name, image from images where imageid IN (' . implode(',', $imagesIds) . ')');
                 while ($row = DBfetch($result)) {
                     $images[] = ['imageid' => $row['imageid'], 'imagetype' => $row['imagetype'], 'name' => $row['name'], 'image' => base64_encode($row['image'])];

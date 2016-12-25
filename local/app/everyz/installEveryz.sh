@@ -45,8 +45,9 @@ installMgs() {
 }
 
 identificaDistro() {
+    PATHDEF=$(find / -name zabbix.php | head -n1 | sed 's/\/zabbix.php//g');
     if [ -f /etc/redhat-release -o -f /etc/system-release ]; then
-        PATHDEF="/var/www/html";
+#        PATHDEF="/var/www/html";
         GERENCIADOR_PACOTES='yum ';
         PARAMETRO_INSTALL=' install -y ';
         TMP=`cat /etc/redhat-release | head -n1 | tr "[:upper:]" "[:lower:]"`;
@@ -57,11 +58,11 @@ identificaDistro() {
         LINUX_DISTRO=`echo $TMP | head -n1 | awk -F' ' '{print $1}'` ;
         LINUX_VER=`echo $TMP | sed 's/release//g' | awk -F' ' '{print $2}'`;
         if [ `which zypper 2>&-  | wc -l` -eq 1 ]; then
-            PATHDEF="/usr/share/zabbix";
+#            PATHDEF="/usr/share/zabbix";
             GERENCIADOR_PACOTES='zypper ';
             PARAMETRO_INSTALL=' install -y ';
         else
-            PATHDEF="/var/www";
+#            PATHDEF="/var/www";
             GERENCIADOR_PACOTES='apt-get ';
             PARAMETRO_INSTALL=' install -y ';
         fi
@@ -91,7 +92,8 @@ identificaDistro() {
             CONTINUA=`cat $TMP_DIR/resposta_dialog.txt `;
             registra " Distribuicao nao prevista, continuar [$DOWNLOADFILES [$LINUX_DISTRO - $LINUX_VER] ";
             if [ "$CONTINUA" = "S" ]; then
-                PATHDEF="/var/www";
+                PATHDEF=$(find / -name zabbix.php | head -n1 | sed 's/\/zabbix.php//g');
+                #PATHDEF="/var/www";
                 GERENCIADOR_PACOTES='echo ';
                 CAMINHO_RCLOCAL="/etc/rc.local";
                 $LINUX_DISTRO="OUTROS";
@@ -192,7 +194,7 @@ idioma() {
       M_DISTRO_NAO="NAO, aborte a instalacao.";
       M_DOWNLOAD_FILE="Baixar a última versão?";
       M_DOWNLOAD_SIM="SIM, baixe a última versão a partir do github (acesso a internet necessario).";
-      M_DOWNLOAD_NAO="NAO, aborte a instalacao.";
+      M_DOWNLOAD_NAO="NAO, use o arquivo existente em /tmp/EveryZ.zip";
             ;;
 	*) 
       M_BASE="This installer will add an extra menu to the end of the menu bar of your environment. For installation are needed to inform some parameters.";
@@ -226,7 +228,7 @@ idioma() {
       M_DISTRO_NAO="NO, stop install.";
       M_DOWNLOAD_FILE="Download the latest version?";
       M_DOWNLOAD_SIM="YES, download the latest version from github (internet access required).";
-      M_DOWNLOAD_NAO="NO, stop intall.";
+      M_DOWNLOAD_NAO="NO, use /tmp/EveryZ.zip.";
         ;;
     esac
 }
@@ -245,24 +247,9 @@ caminhoFrontend() {
         else
             DBUSER=`cat "$CAMINHO_FRONTEND/conf/zabbix.conf.php" | `;
         fi
+        registra " Path do frontend: [$CAMINHO_FRONTEND] ";
     fi
     cd $CAMINHO_FRONTEND;
-
-#    URLZABBIX="http://localhost";
-#    if [ -f /tmp/upgZabbix/logInstall.log ]; then
-#        TMP=`cat /tmp/upgZabbix/logInstall.log | grep "URL do" | tail -n1 | awk -F[ '{print $2}' | awk -F] '{print $1}'`;
-#        if [ ! -z $TMP ]; then
-#            URLZABBIX=$TMP;
-#        fi
-#    fi
-#    dialog --inputbox "$M_BASE\n$M_URL" 0 0 $URLZABBIX 2> $TMP_DIR/resposta_dialog.txt;
-#    URL_FRONTEND=`cat $TMP_DIR/resposta_dialog.txt`;
-#
-#    VALID_URL=`curl -s $URL_FRONTEND | grep "Zabbix" | grep Author | awk -F\" '{print $4}'`;
-#    if [ "$VALID_URL" != "Zabbix SIA" ]; then
-#        registra " $M_ERRO_FRONT ($URL_FRONTEND). $M_ERRO_ABORT.";
-#        exit;
-#    fi    
 }
 
 tipoInstallZabbix(){
@@ -281,6 +268,7 @@ tipoInstallZabbix(){
 
 instalaMenus() {
     registra "Instalando menus customizados...";
+    cd $CAMINHO_FRONTEND;
     # Adiciona menu extra
     ARQUIVO="include/menu.inc.php";
     backupArquivo $ARQUIVO;
@@ -453,14 +441,12 @@ corTituloMapa() {
     ARQUIVO="include/classes/sysmaps/CCanvas.php";
     backupArquivo $ARQUIVO;
     sed -i "s/\$this->width - .*, \$this->height - 12, .*\$date/\$this->width - zbxeCompanyNameSize(), \$this->height - 12, zbxeCompanyName().\$date/" $ARQUIVO;
-exit;
     # Ajuste de cor no titulo dos elementos do mapa ============================
     #ToDo
     FIMINST=$(($FIMINST+1));
 }
 
 downloadPackage() {
-set -x
     ARQ_TMP="$1";
     REPOS="$2";
     if [ "$DOWNLOADFILES" = "S" ]; then
@@ -515,10 +501,6 @@ confirmaDownload() {
         N   "$M_DOWNLOAD_NAO"  off   \
         2> $TMP_DIR/resposta_dialog.txt
     DOWNLOADFILES=`cat $TMP_DIR/resposta_dialog.txt `;
-    if [ "$CONTINUA" !== "S" ]; then
-        clear;
-        exit 1;
-    fi
 }
 if [ $(alias  | grep rm | wc -l ) == "1" ]; then
     echo "Removendo alias do rm...";
@@ -544,3 +526,5 @@ instalaMenus;
 customLogo;
 instalaLiteral;
 corTituloMapa;
+
+echo "Installed";

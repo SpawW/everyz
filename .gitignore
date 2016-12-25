@@ -6,3 +6,4 @@ local/**/*full.png
 # Arquivos a ignorar o comando de ignore
 !everyz.php
 !zbxe-logo.php
+!everyz.initdb.php
