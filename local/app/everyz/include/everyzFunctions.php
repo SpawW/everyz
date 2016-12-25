@@ -1225,9 +1225,9 @@ try {
         $path = str_replace("/everyz/include", "/everyz", dirname(__FILE__));
         require_once $path . '/init/everyz.initdb.php';
     } else {
-        $VG_BANCO_OK = true;
+        $VG_BANCO_OK = true; 
     }
 } catch (Exception $e) {
     return FALSE;
 }
-?>
+
