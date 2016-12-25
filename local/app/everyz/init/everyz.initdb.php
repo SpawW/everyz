@@ -64,16 +64,17 @@ try {
  * ****************************************************************************/
 try { 
     if (zbxeFieldValue("select COUNT(*) as total from zbxe_preferences", "total") < 2) {
-        
         $debug = false;
         $resultOK = true;
         DBstart();
         // Configuration
         $json = json_decode(file_get_contents("$PATH/everyz_config.json"), true);
-        var_dump(zbxeUpdateConfig($json, $resultOK, $debug));
+        zbxeUpdateConfig($json, $resultOK, $debug);
+        debugInfo("oi",true);
         // Translation
         $json = json_decode(file_get_contents("$PATH/everyz_lang_ALL.json"), true);
         zbxeUpdateTranslation($json, $resultOK, $debug);
+        debugInfo("oi",true);
 
         DBend($resultOK);
     }

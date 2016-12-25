@@ -23,7 +23,13 @@
 define("ZE_VER", "3.0");
 define("EZ_TITLE", 'EveryZ - ');
 define("ZE_COPY", ", ZE " . ZE_VER);
-define("ZE_DBFQ", ($DB['TYPE'] == ZBX_DB_POSTGRESQL ? "" : "`"));
+if ($DB['TYPE'] == ZBX_DB_POSTGRESQL) {
+    define("ZE_DBFQ", "");
+    define("ZE_QUOTECHAR", "'");
+} else {
+    define("ZE_DBFQ", "`");
+    define("ZE_QUOTECHAR", '"');
+}
 
 global $VG_DEBUG;
 global $zeMessages, $zeLocale, $baseName, $requiredMissing;
@@ -75,11 +81,11 @@ function _zeT($msg, $moduleid = "", $autoinsert = true) {
     }
     $lang = quotestr(CWebUser::$data['lang']);
     $p_msg2 = quotestr($msg);
-    $return = zbxeFieldValue('select tx_new from zbxe_translation where tx_original = '
-            . $p_msg2 . ' and lang = ' . $lang, 'tx_new');
+    $return = zbxeFieldValue('SELECT tx_new FROM zbxe_translation WHERE tx_original = '
+            . $p_msg2 . ' AND lang = ' . $lang, 'tx_new');
     if ($return == "") {
         if ($autoinsert) {
-            $sql = "insert into zbxe_translation values (" . $lang . "," . $p_msg2 . "," . $p_msg2 . ", " . quotestr($moduleid) . ")";
+            $sql = "INSERT INTO zbxe_translation (lang, tx_original, tx_new, module_id) VALUES (" . $lang . "," . $p_msg2 . "," . $p_msg2 . ", " . quotestr($moduleid) . ")";
             prepareQuery($sql);
         }
         $return = $msg;
@@ -98,7 +104,7 @@ function _zeT($msg, $moduleid = "", $autoinsert = true) {
  * @param string  $default default value (used if dont exists configuration paramiter with $param name)
  */
 function zbxeConfigValue($param, $id = 0, $default = "") {
-    $query = 'select tx_value from zbxe_preferences where userid = '
+    $query = 'select tx_value from zbxe_preferences WHERE userid = '
             . $id . " and tx_option = " . quotestr($param);
     $retorno = zbxeFieldValue($query, 'tx_value');
     return (strlen($retorno) < 1 ? $default : $retorno);
@@ -117,11 +123,9 @@ function zbxeConfigValue($param, $id = 0, $default = "") {
 function zbxeUpdateConfigValue($param, $value, $id = 0) {
     $currentValue = zbxeConfigValue($param, $id);
     if ($currentValue == "") {
-        if (zbxeFieldValue("select count(*) as total from zbxe_preferences where tx_option = "
+        if (zbxeFieldValue("select count(*) as total from zbxe_preferences WHERE tx_option = "
                         . quotestr($param), "total") == 0) {
             $query = zbxeInsert("zbxe_preferences", ['userid', 'tx_option', 'tx_value', 'st_ativo'], [$id, $param, $value, '1']);
-            //echo $query;
-            //echo "insert [$currentValue] <br> [$query]";
         }
     }
     if ((!isset($query)) && ($currentValue != $value)) {
@@ -159,7 +163,7 @@ function zbxeInsert($table, $fields, $values) {
         $field_values .= ($field_values == "" ? "" : ", " ) . quotestr($values[$i]);
     }
     $filter = "";
-    $query = " insert into " . $table . " (" . $field_names . ") VALUES (" . $field_values . ") " . $filter;
+    $query = " INSERT INTO " . $table . " (" . $field_names . ") VALUES (" . $field_values . ") " . $filter;
     return zbxeStandardDML($query);
 }
 
@@ -190,7 +194,7 @@ function zbxeUpdate($table, $fields, $values, $filterNames, $filterValues) {
          */
         $filter .= ($filter == "" ? "" : " AND " ) . "" . $filterNames[$i] . " = " . quotestr($filterValues[$i]);
     }
-    $query = " update " . $table . " set " . $updateFields . ($filter != "" ? " where " . $filter : "");
+    $query = " UPDATE " . $table . " SET " . $updateFields . ($filter != "" ? " WHERE " . $filter : "");
     return zbxeStandardDML($query);
 }
 
@@ -333,10 +337,10 @@ function array_sort($array, $on, $order = SORT_ASC) {
 function quotestr($p_text, $quote = true) {
     global $DB;
     if ($quote) {
-        return "'" . ($DB['TYPE'] == ZBX_DB_POSTGRESQL ?
+        return ZE_QUOTECHAR . ($DB['TYPE'] == ZBX_DB_POSTGRESQL ?
                         pg_escape_string($p_text) :
                         addslashes($p_text)
-                ) . "'";
+                ) . ZE_QUOTECHAR;
     } else {
         return ($DB['TYPE'] == ZBX_DB_POSTGRESQL ?
                         pg_escape_string($p_text) :
@@ -827,15 +831,15 @@ function zeCancelButton($url) {
 }
 
 function zbxeMapTitleColor() {
-    return zbxeFieldValue("select tx_value from zbxe_preferences where tx_option='map_title_color'", "tx_value");
+    return zbxeFieldValue("select tx_value from zbxe_preferences WHERE tx_option='map_title_color'", "tx_value");
 }
 
 function zbxeMapShowTitle() {
-    return zbxeFieldValue("select tx_value from zbxe_preferences where tx_option='map_title_show'", "tx_value");
+    return zbxeFieldValue("select tx_value from zbxe_preferences WHERE tx_option='map_title_show'", "tx_value");
 }
 
 function zbxeCompanyName() {
-    return zbxeFieldValue("select tx_value from zbxe_preferences where tx_option='company_name'", "tx_value") . " ";
+    return zbxeFieldValue("select tx_value from zbxe_preferences WHERE tx_option='company_name'", "tx_value") . " ";
 }
 
 function zbxeCompanyNameSize() {
@@ -1064,20 +1068,20 @@ function zbxeUpdateTranslation($json, $resultOK, $debug = false) {
         foreach ($json["translation"] as $row) {
             // Populate translations array
             if (!isset($translations[$row['lang']])) {
-                $translations[$row['lang']] = zbxeSQLList('SELECT lang, tx_original, tx_new, module_id FROM `zbxe_translation` '
-                        . ' where lang = ' . quotestr($row['lang']) . ' order by tx_original');
+                $translations[$row['lang']] = zbxeSQLList(zbxeStandardDML('SELECT lang, tx_original, tx_new, module_id FROM `zbxe_translation` '
+                                . ' WHERE lang = ' . quotestr($row['lang']) . ' ORDER BY tx_original'));
             }
             $translate = zbxeArraySearch($translations[$row['lang']], 'tx_original', $row['tx_original']);
             if (!isset($translations[$row['lang']][$translate])) {
-                $sql = "insert into zbxe_translation (lang, tx_original, tx_new, module_id) values ("
+                $sql = "INSERT INTO zbxe_translation (lang, tx_original, tx_new, module_id) VALUES ("
                         . quotestr($row['lang']) . "," . quotestr($row['tx_original'])
                         . "," . quotestr($row['tx_new']) . ", " . quotestr($row['module_id']) . ")";
             } else {
                 $translate = $translations[$row['lang']][$translate];
                 //var_dump($translate);
                 $sql = ($translate['tx_new'] == $row['tx_new'] ? '' :
-                                'update zbxe_translation set tx_new = ' . quotestr($row['tx_new'])
-                                . ' where lang = ' . quotestr($row['lang']) . ' and tx_original = '
+                                'UPDATE zbxe_translation SET tx_new = ' . quotestr($row['tx_new'])
+                                . ' WHERE lang = ' . quotestr($row['lang']) . ' and tx_original = '
                                 . quotestr($row['tx_original']));
             }
             if (trim($sql) !== '') {
@@ -1106,12 +1110,16 @@ function zbxeUpdateTranslation($json, $resultOK, $debug = false) {
  */
 function zbxeUpdateConfig($json, $resultOK, $debug = false) {
     if (isset($json["config"])) {
-        $config = zbxeSQLList(zbxeStandardDML('SELECT * FROM `zbxe_preferences` order by userid, tx_option'));
+        $config = zbxeSQLList(zbxeStandardDML('SELECT * FROM `zbxe_preferences` ORDER BY userid, tx_option'));
         foreach ($json["config"] as $row) {
             $cIndex = zbxeArraySearch($config, 'tx_option', $row['tx_option']);
             if (!isset($config[$cIndex]['tx_option'])) {
                 $sql = zbxeInsert("zbxe_preferences", ['userid', 'tx_option', 'tx_value', 'st_ativo']
                         , [$row['userid'], $row['tx_option'], $row['tx_value'], $row['st_ativo']]);
+                //$sql = createInsertQuery("zbxe_preferences", ['userid', 'tx_option', 'tx_value', 'st_ativo']
+//                        , [$row['userid'], $row['tx_option'], $row['tx_value'], $row['st_ativo']]);
+                DB::insert('zbxe_preferences', ['userid' => $row['userid'], 'tx_option' => $row['tx_option']
+                    , 'tx_value' => $row['tx_value'], 'st_ativo' => $row['st_ativo']]);
             } else {
                 $sql = ($config[$cIndex]['tx_value'] == $row['tx_value'] ? '' :
                                 zbxeUpdate("zbxe_preferences", ['userid', 'tx_option', 'tx_value', 'st_ativo']
@@ -1124,6 +1132,8 @@ function zbxeUpdateConfig($json, $resultOK, $debug = false) {
                     debugInfo($sql, true);
                 else {
                     $resultOK = DBexecute($sql);
+                    var_dump($resultOK);
+                    debugInfo("aqui" . $sql, true);
                     if (!$resultOK)
                         return false;
                 }
@@ -1165,7 +1175,7 @@ function zbxeStandardDML($query) {
  * @param string $name     Name of image
  */
 function getImageId($name) {
-    return zbxeFieldValue("select imageid from images where name = " . quotestr($name), "imageid");
+    return zbxeFieldValue("select imageid from images WHERE name = " . quotestr($name), "imageid");
 }
 
 /**
@@ -1177,7 +1187,7 @@ function getImageId($name) {
  * @param string $name     Name of image
  */
 function getImageName($imageid) {
-    return zbxeFieldValue("select name from images where imageid = " . quotestr($imageid), "name");
+    return zbxeFieldValue("select name from images WHERE imageid = " . quotestr($imageid), "name");
 }
 
 function updateImage($image) {
@@ -1202,7 +1212,7 @@ function updateImage($image) {
 try {
     global $VG_BANCO_OK;
     $VG_BANCO_OK = false;
-    $regExp = DBfetch(DBselect('select tx_value from zbxe_preferences where tx_option = "everyz_version"'));
+    $regExp = DBfetch(DBselect('select tx_value from zbxe_preferences WHERE tx_option = ' . quotestr("everyz_version")));
     if (empty($regExp)) {
         $path = str_replace("/everyz/include", "/everyz", dirname(__FILE__));
         require_once $path . '/init/everyz.initdb.php';
