@@ -1202,7 +1202,8 @@ try {
     $VG_BANCO_OK = false;
     $regExp = DBfetch(DBselect('select tx_value from zbxe_preferences where tx_option = "everyz_version"'));
     if (empty($regExp)) {
-        require_once dirname(__FILE__) . '/../init/everyz.initdb.php';
+        $path = str_replace("/everyz/include", "/everyz", dirname(__FILE__)) ;
+        require_once $path . '/init/everyz.initdb.php';
     } else {
         $VG_BANCO_OK = true;
     }

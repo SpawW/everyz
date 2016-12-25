@@ -52,8 +52,8 @@ try {
       `tx_new` varchar(255) NOT NULL,
       `module_id` varchar(20)
     ) ";
-        DBexecute($dmlPreferences);
-        DBexecute($dmlTranslation);
+        DBexecute(zbxeStandardDML($dmlPreferences));
+        DBexecute(zbxeStandardDML($dmlTranslation));
     }
 } catch (Exception $e) {
     error($e->getMessage());
