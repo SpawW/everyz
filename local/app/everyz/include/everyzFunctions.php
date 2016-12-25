@@ -1064,7 +1064,7 @@ function zbxeUpdateTranslation($json, $resultOK, $debug = false) {
         foreach ($json["translation"] as $row) {
             // Populate translations array
             if (!isset($translations[$row['lang']])) {
-                $translations[$row['lang']] = zbxeSQLList('SELECT * FROM zbxe_translation '
+                $translations[$row['lang']] = zbxeSQLList('SELECT lang, tx_original, tx_new, module_id FROM `zbxe_translation` '
                         . ' where lang = ' . quotestr($row['lang']) . ' order by tx_original');
             }
             $translate = zbxeArraySearch($translations[$row['lang']], 'tx_original', $row['tx_original']);
