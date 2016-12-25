@@ -1138,8 +1138,8 @@ function zbxeUpdateConfig($json, $resultOK, $debug = false) {
                     debugInfo($sql, true);
                 else {
                     $resultOK = DBexecute($sql);
-                    var_dump($resultOK);
-                    debugInfo("aqui" . $sql, true);
+                    //var_dump($resultOK);
+                    //debugInfo("aqui" . $sql, true);
                     if (!$resultOK)
                         return false;
                 }
