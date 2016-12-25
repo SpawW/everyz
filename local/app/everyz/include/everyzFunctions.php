@@ -160,7 +160,7 @@ function zbxeInsert($table, $fields, $values) {
     }
     $filter = "";
     $query = " insert into " . $table . " (" . $field_names . ") VALUES (" . $field_values . ") " . $filter;
-    return $query;
+    return zbxeStandardDML($query);
 }
 
 /**
@@ -191,7 +191,7 @@ function zbxeUpdate($table, $fields, $values, $filterNames, $filterValues) {
         $filter .= ($filter == "" ? "" : " AND " ) . "" . $filterNames[$i] . " = " . quotestr($filterValues[$i]);
     }
     $query = " update " . $table . " set " . $updateFields . ($filter != "" ? " where " . $filter : "");
-    return $query;
+    return zbxeStandardDML($query);
 }
 
 /**
