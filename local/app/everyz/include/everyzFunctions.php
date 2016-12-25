@@ -1219,7 +1219,7 @@ function zbxeStartDefinitions() {
 try {
     global $VG_BANCO_OK;
     $VG_BANCO_OK = false;
-    zbxeStartDefinitions();
+    zbxeStartDefinitions(); 
     $regExp = DBfetch(DBselect('select tx_value from zbxe_preferences WHERE tx_option = ' . quotestr("everyz_version")));
     if (empty($regExp)) {
         $path = str_replace("/everyz/include", "/everyz", dirname(__FILE__));
