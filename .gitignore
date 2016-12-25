@@ -2,7 +2,8 @@
 *.php
 **.swp
 .gitignore
-nbproject/
+nbproject/project.properties
+nbproject/project.xml
 local/**/*full.png
 # Arquivos a ignorar o comando de ignore
 !everyz.php
