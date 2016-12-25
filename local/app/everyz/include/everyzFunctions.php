@@ -24,16 +24,6 @@ define("ZE_VER", "3.0");
 define("EZ_TITLE", 'EveryZ - ');
 define("ZE_COPY", ", ZE " . ZE_VER);
 
-if (isset($DB)) {
-    if ($DB['TYPE'] == ZBX_DB_POSTGRESQL) {
-        define("ZE_DBFQ", "");
-        define("ZE_QUOTECHAR", "'");
-    } else {
-        define("ZE_DBFQ", "`");
-        define("ZE_QUOTECHAR", '"');
-    }
-}
-
 global $VG_DEBUG;
 global $zeMessages, $zeLocale, $baseName, $requiredMissing;
 
