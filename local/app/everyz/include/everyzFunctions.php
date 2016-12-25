@@ -23,12 +23,17 @@
 define("ZE_VER", "3.0");
 define("EZ_TITLE", 'EveryZ - ');
 define("ZE_COPY", ", ZE " . ZE_VER);
-if ($DB['TYPE'] == ZBX_DB_POSTGRESQL) {
-    define("ZE_DBFQ", "");
-    define("ZE_QUOTECHAR", "'");
-} else {
-    define("ZE_DBFQ", "`");
-    define("ZE_QUOTECHAR", '"');
+
+require_once dirname(__FILE__) . '../../../../conf/zabbix.conf.php';
+
+if (isset($DB)) {
+    if ($DB['TYPE'] == ZBX_DB_POSTGRESQL) {
+        define("ZE_DBFQ", "");
+        define("ZE_QUOTECHAR", "'");
+    } else {
+        define("ZE_DBFQ", "`");
+        define("ZE_QUOTECHAR", '"');
+    }
 }
 
 global $VG_DEBUG;
@@ -336,6 +341,7 @@ function array_sort($array, $on, $order = SORT_ASC) {
  */
 function quotestr($p_text, $quote = true) {
     global $DB;
+    zbxeStartDefinitions();
     if ($quote) {
         return ZE_QUOTECHAR . ($DB['TYPE'] == ZBX_DB_POSTGRESQL ?
                         pg_escape_string($p_text) :
@@ -1207,11 +1213,25 @@ function updateImage($image) {
     }
 }
 
+function zbxeStartDefinitions() {
+    global $DB;
+    if (isset($DB)) {
+        if ($DB['TYPE'] == ZBX_DB_POSTGRESQL) {
+            define("ZE_DBFQ", "");
+            define("ZE_QUOTECHAR", "'");
+        } else {
+            define("ZE_DBFQ", "`");
+            define("ZE_QUOTECHAR", '"');
+        }
+    }
+}
+
 // End Functions
 // Enviroment configuration
 try {
     global $VG_BANCO_OK;
     $VG_BANCO_OK = false;
+    zbxeStartDefinitions();
     $regExp = DBfetch(DBselect('select tx_value from zbxe_preferences WHERE tx_option = ' . quotestr("everyz_version")));
     if (empty($regExp)) {
         $path = str_replace("/everyz/include", "/everyz", dirname(__FILE__));
