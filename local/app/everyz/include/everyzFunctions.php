@@ -23,6 +23,8 @@
 define("ZE_VER", "3.0");
 define("EZ_TITLE", 'EveryZ - ');
 define("ZE_COPY", ", ZE " . ZE_VER);
+define("ZE_DBFQ", ($DB['TYPE'] == ZBX_DB_POSTGRESQL ? "" : "`"));
+
 global $VG_DEBUG;
 global $zeMessages, $zeLocale, $baseName, $requiredMissing;
 
@@ -150,7 +152,7 @@ function zbxeInsert($table, $fields, $values) {
     global $conn;
     $field_names = $field_values = "";
     for ($i = 0; $i < count($fields); $i++) {
-        $field_names .= ($field_names == "" ? "" : ", " ) . "`" . $fields[$i] . "`";
+        $field_names .= ($field_names == "" ? "" : ", " ) . ZE_DBFQ . $fields[$i] . ZE_DBFQ;
         /* when I found the support for paramiters query on Zabbix..
           $field_values .= ($field_values == "" ? "" : ", " ) . "?";
          */
@@ -177,7 +179,7 @@ function zbxeUpdate($table, $fields, $values, $filterNames, $filterValues) {
     global $conn;
     $updateFields = "";
     for ($i = 0; $i < count($fields); $i++) {
-        $updateFields .= ($updateFields == "" ? "" : ", " ) . "`" . $fields[$i] . "` = " . quotestr($values[$i]);
+        $updateFields .= ($updateFields == "" ? "" : ", " ) . ZE_DBFQ . $fields[$i] . ZE_DBFQ . " = " . quotestr($values[$i]);
     }
     $filter = "";
 
@@ -1062,7 +1064,7 @@ function zbxeUpdateTranslation($json, $resultOK, $debug = false) {
         foreach ($json["translation"] as $row) {
             // Populate translations array
             if (!isset($translations[$row['lang']])) {
-                $translations[$row['lang']] = zbxeSQLList('SELECT * FROM `zbxe_translation` '
+                $translations[$row['lang']] = zbxeSQLList('SELECT * FROM zbxe_translation '
                         . ' where lang = ' . quotestr($row['lang']) . ' order by tx_original');
             }
             $translate = zbxeArraySearch($translations[$row['lang']], 'tx_original', $row['tx_original']);
@@ -1104,7 +1106,7 @@ function zbxeUpdateTranslation($json, $resultOK, $debug = false) {
  */
 function zbxeUpdateConfig($json, $resultOK, $debug = false) {
     if (isset($json["config"])) {
-        $config = zbxeSQLList('SELECT * FROM `zbxe_preferences` order by userid, tx_option');
+        $config = zbxeSQLList(zbxeStandardDML('SELECT * FROM `zbxe_preferences` order by userid, tx_option'));
         foreach ($json["config"] as $row) {
             $cIndex = zbxeArraySearch($config, 'tx_option', $row['tx_option']);
             if (!isset($config[$cIndex]['tx_option'])) {
@@ -1149,7 +1151,7 @@ function zbxeStandardDML($query) {
     if ($DB['TYPE'] == ZBX_DB_POSTGRESQL) {
         $query = str_replace('varchar', 'character varying', $query);
         $query = str_replace('int', 'integer', $query);
-        $query = str_replace('`', '', $query);
+        $query = str_replace(ZE_DBFQ, '', $query);
     }
     return $query;
 }
@@ -1202,7 +1204,7 @@ try {
     $VG_BANCO_OK = false;
     $regExp = DBfetch(DBselect('select tx_value from zbxe_preferences where tx_option = "everyz_version"'));
     if (empty($regExp)) {
-        $path = str_replace("/everyz/include", "/everyz", dirname(__FILE__)) ;
+        $path = str_replace("/everyz/include", "/everyz", dirname(__FILE__));
         require_once $path . '/init/everyz.initdb.php';
     } else {
         $VG_BANCO_OK = true;

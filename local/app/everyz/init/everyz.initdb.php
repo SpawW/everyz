@@ -27,8 +27,8 @@ if (isset($argv)) {
 }
 $VG_DEBUG = true;
 $PATH = realpath(dirname(__FILE__));
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+//error_reporting(E_ALL);
+//ini_set('display_errors', 1);
 
 
 /* * ***************************************************************************
@@ -64,6 +64,7 @@ try {
  * ****************************************************************************/
 try { 
     if (zbxeFieldValue("select COUNT(*) as total from zbxe_preferences", "total") < 2) {
+        
         $debug = false;
         $resultOK = true;
         DBstart();
