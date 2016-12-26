@@ -87,7 +87,8 @@ if (hasRequest('dml')) {
             $name = str_replace("|", "", $filter['name']);
             $title = $filter['row'] . "|" . $filter['order'] . "|" . $name . "|" . str_replace("|", "", $filter['title']);
             if ($filter["mode"] == "widget.add") {
-                $last = explode("_", zbxeFieldValue('select MAX(tx_option) as ultimo from zbxe_preferences zp where zp.tx_option like "widget_%"', "ultimo"));
+                $last = explode("_", zbxeFieldValue('select MAX(tx_option) as ultimo from zbxe_preferences zp where zp.tx_option like '
+                                . quotestr("widget_%"), "ultimo"));
                 $last = intval($last[1]) + 1;
                 $name = "widget_" . $last; //. "_" . $name;
 // Insert
@@ -160,7 +161,7 @@ if (strpos($filter['mode'], "edit") > 0 || strpos($filter['mode'], "add") > 0) {
     $createButton = (new CList())->addItem(new CSubmit('form', _zeT('Create ' . (strpos($filter['mode'], "item") > 0 ? 'item' : 'widget'))));
 }
 if (in_array($filter['mode'], ["widget.edit", "widget.items", "widget.item.edit", "widget.item.add"])) { // Recover widget data
-    $query = 'SELECT tx_value, tx_option, st_ativo from zbxe_preferences where tx_option = "' . $filter['widget'] . '" order by tx_value';
+    $query = 'SELECT tx_value, tx_option, st_ativo from zbxe_preferences where tx_option = ' . quotestr($filter['widget']) . ' order by tx_value';
     $result = DBselect($query);
     while ($row = DBfetch($result)) {
         $tmp = explode("|", $row['tx_value']);
@@ -330,9 +331,9 @@ if ($filter['mode'] !== "") {
             break;
     }
 } else { // Report
-    $query = 'SELECT tx_option, tx_value FROM `zbxe_preferences` '
-            . ' where tx_option like "widget%" '
-            . ' and tx_option not like "%link%" ' . $filterSQL
+    $query = 'SELECT tx_option, tx_value FROM zbxe_preferences '
+            . ' where tx_option like ' . quotestr("widget%")
+            . ' and tx_option not like ' . quotestr("%link%") . $filterSQL
             . ' order by userid, tx_option';
     $res = DBselect($query);
     $report = [];

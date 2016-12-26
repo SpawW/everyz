@@ -27,9 +27,6 @@ if (isset($argv)) {
 }
 $VG_DEBUG = true;
 $PATH = realpath(dirname(__FILE__));
-//error_reporting(E_ALL);
-//ini_set('display_errors', 1);
-
 
 /* * ***************************************************************************
  * DML commands
@@ -69,12 +66,10 @@ try {
         DBstart();
         // Configuration
         $json = json_decode(file_get_contents("$PATH/everyz_config.json"), true);
-        zbxeUpdateConfig($json, $resultOK, $debug);
-        debugInfo("oi",true);
+        zbxeUpdateConfig($json, $resultOK, $debug);        
         // Translation
         $json = json_decode(file_get_contents("$PATH/everyz_lang_ALL.json"), true);
         zbxeUpdateTranslation($json, $resultOK, $debug);
-        debugInfo("oi",true);
 
         DBend($resultOK);
     }

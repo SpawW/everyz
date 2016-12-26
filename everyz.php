@@ -1,5 +1,4 @@
 <?php
-
 /*
  * * Purpose: Add support for external modules to extend Zabbix native functions
  * * Adail Horst - http://spinola.net.br/blog
@@ -44,7 +43,7 @@ switch (getRequest('format')) {
     default:
         $page['type'] = detect_page_type(PAGE_TYPE_HTML);
         ?>
-<link href="local/app/everyz/css/everyz.css" rel="stylesheet" type="text/css" id="skinSheet">
+        <link href="local/app/everyz/css/everyz.css" rel="stylesheet" type="text/css" id="skinSheet">
         <?php
         break;
 }
@@ -65,7 +64,7 @@ $action = getRequest2("action");
 $module = "dashboard";
 $res = DBselect('SELECT userid, tx_option, tx_value from zbxe_preferences zpre '
         . ' WHERE userid in (0,' . CWebUser::$data['userid'] . ') and st_ativo = 1 '
-        . ' and tx_value like "' . $action . '|%" '
+        . ' and tx_value like ' . quotestr($action . '|%')
         . ' order by userid, tx_option');
 while ($row = DBfetch($res)) {
     $tmp = explode("|", $row['tx_value']);

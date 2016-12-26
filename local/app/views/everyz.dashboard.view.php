@@ -36,7 +36,7 @@ function linkList($p_filter) {
 
     $res = DBselect('SELECT userid, tx_option, tx_value from zbxe_preferences zpre '
             . ' WHERE userid in (0,' . CWebUser::$data['userid'] . ') and st_ativo = 1 '
-            . ' and tx_option like "' . $p_filter . '"'
+            . ' and tx_option like ' . quotestr($p_filter)
             . ' order by userid, tx_option');
     while ($row = DBfetch($res)) {
         $tmp = explode("|", $row['tx_value']);
@@ -51,8 +51,8 @@ function linkList($p_filter) {
 }
 
 // Recuperando a lista de widgets
-$res = DBselect('SELECT tx_option, tx_value FROM `zbxe_preferences` '
-        . ' where tx_option like "widget%" and tx_option not like "%link%" and st_ativo = 1 '
+$res = DBselect('SELECT tx_option, tx_value FROM zbxe_preferences '
+        . ' where tx_option like ' . quotestr("widget%") . ' and tx_option not like ' . quotestr("%link%") . ' and st_ativo = 1 '
         . ' order by userid, tx_value');
 
 //Todo: Descobrir o maior número de linha

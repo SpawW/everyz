@@ -961,7 +961,7 @@ function zbxeSQLList($query) {
         }
         $report[] = $tmp;
     }
-    return $report;
+    return (isset($report) ? $report : []);
 }
 
 /**
@@ -1104,30 +1104,24 @@ function zbxeUpdateTranslation($json, $resultOK, $debug = false) {
  */
 function zbxeUpdateConfig($json, $resultOK, $debug = false) {
     if (isset($json["config"])) {
-        $config = zbxeSQLList(zbxeStandardDML('SELECT * FROM `zbxe_preferences` ORDER BY userid, tx_option'));
+        $sql = zbxeStandardDML('SELECT * FROM `zbxe_preferences` ORDER BY userid, tx_option');
+        $config = zbxeSQLList($sql);
         foreach ($json["config"] as $row) {
             $cIndex = zbxeArraySearch($config, 'tx_option', $row['tx_option']);
             if (!isset($config[$cIndex]['tx_option'])) {
                 $sql = zbxeInsert("zbxe_preferences", ['userid', 'tx_option', 'tx_value', 'st_ativo']
                         , [$row['userid'], $row['tx_option'], $row['tx_value'], $row['st_ativo']]);
-                //$sql = createInsertQuery("zbxe_preferences", ['userid', 'tx_option', 'tx_value', 'st_ativo']
-//                        , [$row['userid'], $row['tx_option'], $row['tx_value'], $row['st_ativo']]);
-                DB::insert('zbxe_preferences', ['userid' => $row['userid'], 'tx_option' => $row['tx_option']
-                    , 'tx_value' => $row['tx_value'], 'st_ativo' => $row['st_ativo']]);
             } else {
                 $sql = ($config[$cIndex]['tx_value'] == $row['tx_value'] ? '' :
                                 zbxeUpdate("zbxe_preferences", ['userid', 'tx_option', 'tx_value', 'st_ativo']
                                         , [$row['userid'], $row['tx_option'], $row['tx_value'], $row['st_ativo']]
                                         , ['tx_option'], [$row['tx_option']]));
             }
-            //var_dump([$sql, $resultOK]);
             if (trim($sql) !== '') {
                 if ($debug)
                     debugInfo($sql, true);
                 else {
                     $resultOK = DBexecute($sql);
-                    //var_dump($resultOK);
-                    //debugInfo("aqui" . $sql, true);
                     if (!$resultOK)
                         return false;
                 }
@@ -1137,7 +1131,21 @@ function zbxeUpdateConfig($json, $resultOK, $debug = false) {
     // Import images
     if (isset($json["images"])) {
         foreach ($json["images"] as $row) {
-            updateImage($row);
+            $imageIDs = updateImage($row);
+            $imageID = $imageIDs['imageids'][0];
+            if ($imageID !== $row['imageid']) {
+                $newImageIDs[$row['imageid']] = $imageID;
+                //zbxeConfigImageIDs();
+            }
+        }
+        // Updating config image references
+        if (isset($json["imageReferences"])) {
+            foreach ($json["imageReferences"] as $row) {
+                if ($newImageIDs[$row['imageid']] !== $row[$row['imageid']]) {
+                    zbxeUpdateConfigValue($row['tx_option'], $newImageIDs[$row['imageid']]);
+                    //var_dump(['Configuracao a atualizar', $newImageIDs[$row['imageid']], $row]);
+                }
+            }
         }
     }
 }
@@ -1155,7 +1163,7 @@ function zbxeStandardDML($query) {
     if ($DB['TYPE'] == ZBX_DB_POSTGRESQL) {
         $query = str_replace('varchar', 'character varying', $query);
         $query = str_replace('int', 'integer', $query);
-        $query = str_replace(ZE_DBFQ, '', $query);
+        $query = str_replace("`", '', $query);
     }
     return $query;
 }
@@ -1188,17 +1196,20 @@ function updateImage($image) {
     $imageid = getImageId($image['name']);
     if (intval($imageid) > 0) {
         $result = API::Image()->update([
+            'imageid' => $imageid,
             'name' => $image['name'],
-            'imageid' => $image['imageid'],
             'image' => $image['image']
         ]);
+//        var_dump([$result, "update - " . $image['name']]);
     } else {
         $result = API::Image()->create([
             'name' => $image['name'],
             'imagetype' => $image['imagetype'],
             'image' => $image['image']
         ]);
+//        var_dump([$result, "insert - " . $image['name']]);
     }
+    return $result;
 }
 
 function zbxeStartDefinitions() {
@@ -1214,18 +1225,25 @@ function zbxeStartDefinitions() {
     }
 }
 
+function zbxeConfigImageIDs() {
+    return 'tx_option in (' . quotestr("company_logo_login") . ',' . quotestr("company_logo_site") . ',' . quotestr("geo_default_poi") . ')'
+            . " OR tx_option like " . quotestr('zbxe_default_image_%') . " OR tx_option like " . quotestr('%_poi')
+            . " OR tx_option like " . quotestr('%_logo_%') . " AND tx_option not like " . quotestr('%_width%')
+    ;
+}
+
 // End Functions
 // Enviroment configuration
 try {
     global $VG_BANCO_OK;
     $VG_BANCO_OK = false;
-    zbxeStartDefinitions(); 
+    zbxeStartDefinitions();
     $regExp = DBfetch(DBselect('select tx_value from zbxe_preferences WHERE tx_option = ' . quotestr("everyz_version")));
     if (empty($regExp)) {
         $path = str_replace("/everyz/include", "/everyz", dirname(__FILE__));
         require_once $path . '/init/everyz.initdb.php';
     } else {
-        $VG_BANCO_OK = true; 
+        $VG_BANCO_OK = true;
     }
 } catch (Exception $e) {
     return FALSE;

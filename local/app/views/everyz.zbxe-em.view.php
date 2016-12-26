@@ -51,7 +51,6 @@ addFilterParameter("filter_timetill", T_ZBX_STR);
 
 check_fields($fields);
 
-//var_dump(getRealPOST());
 $range = $filter["p_check_range"] * 60;
 
 $reportMode = $filter["mode"] == "report";
@@ -401,6 +400,7 @@ if ($reportMode) {
         //Todo: Filtro por trigger (com suporte a expressão regular)
 
         $triggers = API::Trigger()->get($triggerOptions);
+
         // End filters
         $events = API::Event()->get([
             'time_from' => $filter["filter_timesince"],
@@ -431,7 +431,6 @@ if ($reportMode) {
                 $instants[$momento]["hosts"] = 0;
                 $uniqueHosts = [];
                 $uniqueItems = [];
-//                }
                 $cont = 0;
             }
             $instants[$momento]["events"] ++;
@@ -443,14 +442,11 @@ if ($reportMode) {
             $triggers[$event['objectid']]["hosts_names"] = hostName($hostids);
             $instants[$momento]["hosts"] = count($uniqueHosts);
 // Sumarizar quantidade de itens
-            //var_dump($triggers[$event['objectid']]['items']);
             $itemids = $triggers[$event['objectid']]['items'];
             $uniqueItems = array_unique(array_merge(zbx_objectValues($itemids, 'itemid'), $uniqueItems));
 
             $triggers[$event['objectid']]["items_names"] = CMacrosResolverHelper::resolveItemNames($itemids);
             $instants[$momento]["items"] = count($uniqueItems);
-// Sumarizar quantidade de eventos anteriores
-// Sumarizar quantidade de triggers
         }
 
         foreach ($events as $enum => $event) {
@@ -464,7 +460,7 @@ if ($reportMode) {
                             ITEM_VALUE_TYPE_FLOAT,
                             ITEM_VALUE_TYPE_UINT64
                         )) ? 'showgraph' : 'showvalues';
-                $i['name'] = $item['name']; //itemName($item);
+                $i['name'] = $item['name']; 
                 $items[] = $i;
             }
 
@@ -507,7 +503,6 @@ if ($reportMode) {
 // add colors and blinking to span depending on configuration and trigger parameters
                     addTriggerValueStyle($statusSpan, $event['value'], $event['clock'], $event['acknowledged']);
                     $hostSpan = new CSpan($triggers[$event['objectid']]["hosts_names"], 'link_menu menu-host');
-                    $scripts = API::Script()->getScriptsByHosts($triggers[$event['objectid']]["hosts"][0]);
                     if ($momento !== $ultimoMomento) {
                         $descMomento = zbx_date2str(DATE_TIME_FORMAT_SECONDS, $momento);
                         $descMomento = substr($descMomento, 0, strlen($descMomento) - ($filter["groupmode"] == 3600 ? 5 :

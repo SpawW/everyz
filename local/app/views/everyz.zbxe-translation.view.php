@@ -47,8 +47,8 @@ $lang = CWebUser::$data['lang'];
 
 function addTab($key, $value, $dataTab) {
     global $lang;
-    $tmp = explode("|", zbxeFieldValue("SELECT tx_value FROM zbxe_preferences where tx_option like 'widget_%_link_%' and tx_value like '" .
-                    $key . "|%' ", "tx_value"));
+    $tmp = explode("|", zbxeFieldValue("SELECT tx_value FROM zbxe_preferences where tx_option like 'widget_%_link_%' and tx_value like "
+                    . quotestr($key . "|%"), "tx_value"));
     $desc = (count($tmp) == 2 ? $tmp[1] : $key);
     $tabContent = new CFormList();
     $tabContent->addRow(bold(_zeT("Source")), bold(_zeT("Translation")));
@@ -101,7 +101,9 @@ if ($dml) {
  * Get Data
  * ************************************************************************** */
 
-$query = 'SELECT tx_original, module_id FROM `zbxe_translation` zet where lang="en_GB" and tx_original <> "Everyz" order by module_id';
+$query = 'SELECT tx_original, module_id FROM zbxe_translation zet where lang='
+        . quotestr("en_GB") . ' and tx_original <> '
+        . quotestr("Everyz") . ' order by module_id';
 $result = prepareQuery($query);
 $strings = [];
 

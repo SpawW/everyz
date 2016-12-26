@@ -77,9 +77,7 @@ checkAccessGroup('groupids');
 function initiateGlobalMacro($macroName, $value) {
     $currentValue = globalMacroValue($macroName, "--EVERYZ--");
     if ($currentValue == "--EVERYZ--") {
-        var_dump(
-                API::UserMacro()->createGlobal([ "macro" => $macroName, "value" => $value])
-        );
+        API::UserMacro()->createGlobal(["macro" => $macroName, "value" => $value]);
         return $value;
     } else {
         return globalMacroValue($macroName, "--EVERYZ--");

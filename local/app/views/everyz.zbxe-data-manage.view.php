@@ -85,17 +85,20 @@ switch ($filter['actionType']) {
     case 1;
         switch ($filter['typeExport']) {
             case 1:
-                $zbxeConfig = zbxeSQLList('SELECT * FROM `zbxe_preferences` where not like "zbxe_default_icon_%" order by userid, tx_option');
+                $zbxeConfig = zbxeSQLList('SELECT * FROM zbxe_preferences order by userid, tx_option');
                 $report['export'] = ['config' => $zbxeConfig];
                 // Parameters with imageids
-                $zbxeImageIDs = zbxeSQLList('SELECT DISTINCT tx_value FROM `zbxe_preferences` where tx_option in ('
-                        . '"company_logo_login","company_logo_site","geo_default_poi"'
-                        . ') order by userid, tx_option');
+                $zbxeImageIDs = zbxeSQLList('SELECT DISTINCT(tx_value) as tx_value, userid, tx_option FROM zbxe_preferences where '
+                        . zbxeConfigImageIDs()
+                        //. 'tx_option in (' . quotestr("company_logo_login") . ',' . quotestr("company_logo_site") . ',' . quotestr("geo_default_poi") . ')'
+                        . ' order by userid, tx_option, tx_value');
                 foreach ($zbxeImageIDs as $value) {
                     $imagesIds[] = $value['tx_value'];
+                    $imageReferences[] = ['tx_option' => $value['tx_option'], 'imageid' => $value['tx_value']];
                 }
                 // Parameters with image names
-                $zbxeImageIDs = zbxeSQLList('SELECT DISTINCT tx_value FROM `zbxe_preferences` where tx_option like "zbxe_default_icon_%" order by userid, tx_option');
+                $zbxeImageIDs = zbxeSQLList('SELECT DISTINCT(tx_value) as tx_value, userid, tx_option FROM zbxe_preferences where tx_option like '
+                        . quotestr("zbxe_default_icon_%") . ' order by userid, tx_option, tx_value');
                 foreach ($zbxeImageIDs as $value) {
                     $imagesIds[] = getImageId($value['tx_value']);
                 }
@@ -105,9 +108,10 @@ switch ($filter['actionType']) {
                     $images[] = ['imageid' => $row['imageid'], 'imagetype' => $row['imagetype'], 'name' => $row['name'], 'image' => base64_encode($row['image'])];
                 }
                 $report['export']['images'] = $images;
+                $report['export']['imageReferences'] = $imageReferences;
                 break;
             case 0:
-                $report['export'] = ['translation' => zbxeSQLList('SELECT * FROM `zbxe_translation` '
+                $report['export'] = ['translation' => zbxeSQLList('SELECT * FROM zbxe_translation '
                             . ($filter['langExport'] != '' ? ' where lang = ' . quotestr($filter['langExport']) : '' ) . ' order by lang, tx_original')
                 ];
                 break;
@@ -126,10 +130,11 @@ switch ($filter['actionType']) {
         </script>
         <?php
 
-        $report['widgets'] = zbxeFieldValue("SELECT count(*) as total FROM `zbxe_preferences` where tx_option like 'widget%' and tx_option not like '%link%' ", 'total');
-        $report['links'] = zbxeFieldValue("SELECT count(*) as total FROM `zbxe_preferences` where tx_option like '%_%link%'  ", 'total');
-        $report['strings'] = zbxeFieldValue("SELECT count(*) as total FROM `zbxe_translation` where lang = 'en_GB' ", 'total');
-        $report['languages'] = zbxeFieldValue("SELECT COUNT(DISTINCT(lang)) as total FROM `zbxe_translation` ", 'total');
+        $report['widgets'] = zbxeFieldValue("SELECT count(*) as total FROM zbxe_preferences where tx_option like " . quotestr('widget%')
+                . " and tx_option not like " . quotestr('%link%'), 'total');
+        $report['links'] = zbxeFieldValue("SELECT count(*) as total FROM zbxe_preferences where tx_option like " . quotestr('%_%link%'), 'total');
+        $report['strings'] = zbxeFieldValue("SELECT count(*) as total FROM zbxe_translation where lang = " . quotestr('en_GB'), 'total');
+        $report['languages'] = zbxeFieldValue("SELECT COUNT(DISTINCT(lang)) as total FROM zbxe_translation ", 'total');
 
         break;
 }
@@ -150,7 +155,7 @@ switch ($filter["format"]) {
         $actionTypeButtons = buttonOptions("actionType", $filter['actionType'], ['Import', 'Export'], [0, 1]);
         $actionTypeButtons->onChange('changeAction();');
 
-        $languages = zbxeSQLList('SELECT DISTINCT(lang) as lang FROM `zbxe_translation` order by lang');
+        $languages = zbxeSQLList('SELECT DISTINCT(lang) as lang FROM zbxe_translation order by lang');
         $languageButtons = buttonOptions("langExport", $filter['langExport'], $languages, $languages);
 
         $inputImport = (new CFile('import_file'))->setWidth(ZBX_TEXTAREA_STANDARD_WIDTH);
@@ -182,8 +187,6 @@ switch ($filter["format"]) {
         $tmpColumn1->addItem(new CInput('hidden', 'format', PAGE_TYPE_HTML));
 
         $table->addRow([$tmpColumn1]);
-        //$imageForm = (new CForm('post', null, 'multipart/form-data'))
-        //->addVar('form', $this->data['form']);
         $form->setAttribute('enctype', 'multipart/form-data');
         $form->addItem([ $table]);
         $dashboard->addItem($form)->show();
