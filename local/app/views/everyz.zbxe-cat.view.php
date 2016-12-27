@@ -83,23 +83,23 @@ function buildQueryReport($itemid, $logTable) {
     global $DB, $filter;
     global $intervalMask, $sourceAgregator;
 
-    $query = "
-select " . ($DB['TYPE'] == ZBX_DB_POSTGRESQL ? " DISTINCT ON(ano,mes,momento) " : "" ) . "it.units, it.description, ano, mes, dia, momento, AVG(valor) as valor
-  from items it 
- inner join 
-(select 
-hu.itemid,
-DATE_FORMAT(FROM_UNIXTIME(hu.clock), '%Y') as ano, DATE_FORMAT(FROM_UNIXTIME(hu.clock), '%m') as mes, DATE_FORMAT(FROM_UNIXTIME(hu.clock), '%d') as dia, 
-DATE_FORMAT(FROM_UNIXTIME(hu.clock), '" . $intervalMask[$filter["timeshiftsource"]] . "') as momento, "
-            . $sourceAgregator[$filter["agregation"]] . " as valor
-from " . $logTable . " hu 
-where hu.clock between " . $filter["filter_timesince"] . " and  "
+    $query = "\n"
+            . "SELECT " . ($DB['TYPE'] == ZBX_DB_POSTGRESQL ? " DISTINCT ON(a.ano,a.mes,a.momento) " : "" )
+            . "it.units, it.description, a.ano, a.mes, a.dia, a.momento, AVG(a.valor) AS valor
+  FROM items it 
+ INNER JOIN 
+(SELECT hu.itemid,
+DATE_FORMAT(FROM_UNIXTIME(hu.clock), '%Y') AS ano, DATE_FORMAT(FROM_UNIXTIME(hu.clock), '%m') AS mes, DATE_FORMAT(FROM_UNIXTIME(hu.clock), '%d') AS dia, 
+DATE_FORMAT(FROM_UNIXTIME(hu.clock), '" . $intervalMask[$filter["timeshiftsource"]] . "') AS momento, "
+            . $sourceAgregator[$filter["agregation"]] . " AS valor
+FROM " . $logTable . " hu 
+WHERE hu.clock between " . $filter["filter_timesince"] . " AND  "
             . $filter["filter_timetill"] . " AND hu.itemid = " . $itemid . "
 ) a 
-on a.itemid = it.itemid 
-where it.itemid = " . $itemid . "
-group by " . ($DB['TYPE'] == ZBX_DB_POSTGRESQL ? "units, ano, mes, dia, description, " : "" ) . " momento
-order by ano, mes, momento
+ON a.itemid = it.itemid 
+WHERE it.itemid = " . $itemid . "
+GROUP BY it.units, a.ano, a.mes, a.dia, it.description, a.momento
+ORDER BY a.ano, a.mes, a.momento
 ";
     if ($DB['TYPE'] == ZBX_DB_POSTGRESQL) {
         $query = str_replace('DATE_FORMAT', 'to_char', $query);
