@@ -4,6 +4,7 @@
 .gitignore
 nbproject/project.properties
 nbproject/project.xml
+nbproject/configs/ubuntu.properties
 local/**/*full.png
 # Arquivos a ignorar o comando de ignore
 !everyz.php
