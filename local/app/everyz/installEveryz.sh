@@ -1,7 +1,7 @@
 #!/bin/bash
 # Autor: Adail Horst
 # Email: the.spaww@gmail.com
-# Objective: Install everyz / zabbix extras
+# Objective: Install everyz / zabbix extras 
 
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com";
