@@ -510,14 +510,34 @@ confirmaDownload() {
         2> $TMP_DIR/resposta_dialog.txt
     DOWNLOADFILES=`cat $TMP_DIR/resposta_dialog.txt `;
 }
+
+apacheDirectoryConf() {
+    echo "<Directory \"$CAMINHO_FRONTEND/local/app/everyz/$1\"> 
+ Options FollowSymLinks 
+ AllowOverride All 
+ Require all granted 
+ Order allow,deny
+ Allow from all
+</Directory>" >> $APACHEROOT/everyz.conf;
+}
+configuraApache() {
+    # Localizar onde estão os arquivos de configuração do apache
+    APACHEROOT=$(apachectl -V 2> /dev/null | grep HTTPD | awk -F= '{print $2}' | sed 's/"//g' );
+    [[ -d "$APACHEROOT/conf.d" ]] && APACHEROOT=$APACHEROOT"/conf.d" || APACHEROOT=$APACHEROOT"/conf-enabled";
+    # Adicionar o arquivo de configuração do everyz
+    BASECONF="# Allow to read images, scripts, css files on EveryZ installation ";
+    echo "$BASEZCONF" > "$APACHEROOT/everyz.conf";
+    apacheDirectoryConf "js";
+    apacheDirectoryConf "images";
+    apacheDirectoryConf "css";
+}
+
+####### Parametros de instalacao -----------------------------------------------
+
 if [ $(alias  | grep rm | wc -l ) == "1" ]; then
     echo "Removendo alias do rm...";
     unalias rm;
 fi
-
-
-
-####### Parametros de instalacao -----------------------------------------------
 
 # Idenfificando distribuicao
 identificaDistro;
@@ -529,6 +549,7 @@ confirmaDownload;
 ####### Download de arquivos ---------------------------------------------------
 
 ####### Instalacao -------------------------------------------------------------
+configuraApache;
 instalaGit;
 instalaMenus;
 customLogo;
