@@ -80,16 +80,6 @@ if (hasRequest('filter_set')) {
     if ($hostGroupFilter !== "") {
         $hostGroupFilter = "\n inner join hosts_groups hg \n on (hg.hostid = ite.hostid) AND " . $hostGroupFilter;
     }
-    /* Todo: Add a application filter
-      if (getRequest('application') !== "") {
-      $applicationFilter = "\n inner join items_applications ita \n on (ita.itemid = ite.itemid) "
-      . "\n inner join applications app \n on (app.name like \"" . quotestr(getRequest('application'). "%") . "\") "
-      . "\n AND (app.applicationid = ita.applicationid) "
-      ;
-      } else {
-      $applicationFilter = "";
-      }
-     */
     $query = 'select hos.host, hos.name as visible_name, ite.name, ite.itemid, hos.hostid, ite.error, ite.key_ ' .
             '  from items ite ' .
             '  inner join hosts hos ' .
@@ -97,7 +87,7 @@ if (hasRequest('filter_set')) {
             . ($hostFilter == "" ? "" : " AND ") . $hostFilter
             . $hostGroupFilter
             . ' where ite.state = 1 AND ite.status = 0 '
-            . ($filter["item"] == "" ? "" : ' AND ite.name like ' . quotestr($filter["item"] . "%"))
+            . ($filter["item"] == "" ? "" : ' AND ite.key_ like ' . quotestr($filter["item"] . "%"))
             . ' order by hos.host, ite.name'
     ;
     // Build a list of items with required key ---------------------------------
