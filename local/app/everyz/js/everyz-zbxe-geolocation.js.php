@@ -74,7 +74,7 @@ echo $mapBackgroud[$filter["map"]]; //"streets"
     // Cria dinamicamente a referencia para o icone do host
     function zbxImage(p_iconid) {
         return L.icon({
-            iconUrl: '/imgstore.php?iconid=' + p_iconid,
+            iconUrl: 'imgstore.php?iconid=' + p_iconid,
             iconSize: [32, 32],
             iconAnchor: [16, 32],
             popupAnchor: [2, -38],
