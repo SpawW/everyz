@@ -523,7 +523,7 @@ apacheDirectoryConf() {
 configuraApache() {
     # Localizar onde estão os arquivos de configuração do apache
     APACHEROOT=$(apachectl -V 2> /dev/null | grep HTTPD | awk -F= '{print $2}' | sed 's/"//g' );
-    [[ -d "$APACHEROOT/conf.d" ]] && APACHEROOT=$APACHEROOT"/conf.d" || APACHEROOT=$APACHEROOT"/conf-enabled";
+    [[ -d "$APACHEROOT/conf.d" ]] && APACHEROOT=$APACHEROOT"/conf.d"; || APACHEROOT=$APACHEROOT"/conf-enabled";
     # Adicionar o arquivo de configuração do everyz
     BASECONF="# Allow to read images, scripts, css files on EveryZ installation ";
     echo "$BASEZCONF" > "$APACHEROOT/everyz.conf";
@@ -557,3 +557,4 @@ instalaLiteral;
 corTituloMapa;
 
 echo "Installed";
+echo "You need to restart your apache server!";
