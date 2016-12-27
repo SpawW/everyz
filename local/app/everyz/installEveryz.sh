@@ -6,7 +6,7 @@
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com"; 
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="Beta_20161227_30";
+VERSAO_INST="Beta_20161227_3_4";
 UPDATEBD="S";
 BRANCH="master";
 NOME_PLUGIN="EVERYZ";
@@ -549,9 +549,14 @@ configuraApache() {
         apacheDirectoryConf "js";
         apacheDirectoryConf "images";
         apacheDirectoryConf "css";
-        registra " Optou por reconfiguração automatica do apache ($APACHEROOT/everyz.conf)! ";
-    else
-        registra " Optou por nao reconfiturar o apache! ";
+        if [ -f "/etc/init.d/apache2" ]; then
+            /etc/init.d/apache2 restart ;
+        else
+            /etc/init.d/httpd restart ;
+        fi
+        registra "Reconfigurou o apache! ";
+    else 
+        registra "Nao reconfigurou o apache!";
     fi
 }
 
@@ -572,15 +577,12 @@ confirmaDownload;
 ####### Download de arquivos ---------------------------------------------------
 
 ####### Instalacao -------------------------------------------------------------
-configuraApache;
-instalaGit;
 instalaMenus;
 customLogo;
 instalaLiteral;
 corTituloMapa;
+instalaGit;
+configuraApache;
 
-echo "Installed - [$VERSAO_INST]";
-echo "You need to restart your apache server!";
-if [ "$RECONFAPACHE" = "S" ]; then
-    registra " Optou por reconfiguração automatica do apache ($APACHEROOT/everyz.conf)! ";
-fi
+echo "Installed - [ $VERSAO_INST ]";
+echo "You need to check your apache server and restart!";
