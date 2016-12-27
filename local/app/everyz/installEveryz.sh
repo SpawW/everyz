@@ -196,6 +196,9 @@ idioma() {
       M_DOWNLOAD_FILE="Baixar a última versão?";
       M_DOWNLOAD_SIM="SIM, baixe a última versão a partir do github (acesso a internet necessario).";
       M_DOWNLOAD_NAO="NAO, use o arquivo existente em /tmp/EveryZ.zip";
+      M_CONFAPACHE="Tentar configuraçao automatica do apache?";
+      M_CONFAPACHE_SIM="SIM, configura e reinicia o apache.";
+      M_CONFAPACHE_NAO="NAO, você terá que verificar manualmente suas configurações do apache.";
             ;;
 	*) 
       M_BASE="This installer will add an extra menu to the end of the menu bar of your environment. For installation are needed to inform some parameters.";
@@ -230,6 +233,9 @@ idioma() {
       M_DOWNLOAD_FILE="Download the latest version?";
       M_DOWNLOAD_SIM="YES, download the latest version from github (internet access required).";
       M_DOWNLOAD_NAO="NO, use /tmp/EveryZ.zip.";
+      M_CONFAPACHE="Try automatic configuration of apache?";
+      M_CONFAPACHE_SIM="YES, add everyz.conf and restart apache.";
+      M_CONFAPACHE_NAO="NO, you need to check and configure apache by your self.";
         ;;
     esac
 }
@@ -521,19 +527,32 @@ apacheDirectoryConf() {
 </Directory>" >> $APACHEROOT/everyz.conf;
 }
 configuraApache() {
-    # Localizar onde estão os arquivos de configuração do apache
-    APACHEROOT=$(apachectl -V 2> /dev/null | grep HTTPD | awk -F= '{print $2}' | sed 's/"//g' );
-    if [ -d "$APACHEROOT/conf.d" ]; then
-        APACHEROOT=$APACHEROOT"/conf.d";
+    dialog \
+        --title 'Apache'        \
+        --radiolist "$M_CONFAPACHE"  \
+        0 0 0                                    \
+        S   "$M_CONFAPACHE_SIM"  on    \
+        N   "$M_CONFAPACHE_NAO"  off   \
+        2> $TMP_DIR/resposta_dialog.txt
+    RECONFAPACHE=`cat $TMP_DIR/resposta_dialog.txt `;
+    if [ "$RECONFAPACHE" = "S" ]; then
+        # Localizar onde estão os arquivos de configuração do apache
+        APACHEROOT=$(apachectl -V 2> /dev/null | grep HTTPD | awk -F= '{print $2}' | sed 's/"//g' );
+        if [ -d "$APACHEROOT/conf.d" ]; then
+            APACHEROOT=$APACHEROOT"/conf.d";
+        else
+            APACHEROOT=$APACHEROOT"/conf-enabled";
+        fi
+        # Adicionar o arquivo de configuração do everyz
+        BASECONF="# Allow to read images, scripts, css files on EveryZ installation ";
+        echo "$BASEZCONF" > "$APACHEROOT/everyz.conf";
+        apacheDirectoryConf "js";
+        apacheDirectoryConf "images";
+        apacheDirectoryConf "css";
+        registra " Optou por reconfiguração automatica do apache ($APACHEROOT/everyz.conf)! ";
     else
-        APACHEROOT=$APACHEROOT"/conf-enabled";
+        registra " Optou por nao reconfiturar o apache! ";
     fi
-    # Adicionar o arquivo de configuração do everyz
-    BASECONF="# Allow to read images, scripts, css files on EveryZ installation ";
-    echo "$BASEZCONF" > "$APACHEROOT/everyz.conf";
-    apacheDirectoryConf "js";
-    apacheDirectoryConf "images";
-    apacheDirectoryConf "css";
 }
 
 ####### Parametros de instalacao -----------------------------------------------
@@ -562,3 +581,6 @@ corTituloMapa;
 
 echo "Installed - [$VERSAO_INST]";
 echo "You need to restart your apache server!";
+if [ "$RECONFAPACHE" = "S" ]; then
+    registra " Optou por reconfiguração automatica do apache ($APACHEROOT/everyz.conf)! ";
+fi
