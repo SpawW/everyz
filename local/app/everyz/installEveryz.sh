@@ -6,7 +6,7 @@
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com";
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="3.0.0";
+VERSAO_INST="Beta 20161227 - 3.0.0";
 UPDATEBD="S";
 BRANCH="master";
 NOME_PLUGIN="EVERYZ";
@@ -523,7 +523,11 @@ apacheDirectoryConf() {
 configuraApache() {
     # Localizar onde estão os arquivos de configuração do apache
     APACHEROOT=$(apachectl -V 2> /dev/null | grep HTTPD | awk -F= '{print $2}' | sed 's/"//g' );
-    [[ -d "$APACHEROOT/conf.d" ]] && APACHEROOT=$APACHEROOT"/conf.d"; || APACHEROOT=$APACHEROOT"/conf-enabled";
+    if [ -d "$APACHEROOT/conf.d" ]; then
+        APACHEROOT=$APACHEROOT"/conf.d";
+    else
+        APACHEROOT=$APACHEROOT"/conf-enabled";
+    fi
     # Adicionar o arquivo de configuração do everyz
     BASECONF="# Allow to read images, scripts, css files on EveryZ installation ";
     echo "$BASEZCONF" > "$APACHEROOT/everyz.conf";
@@ -556,5 +560,5 @@ customLogo;
 instalaLiteral;
 corTituloMapa;
 
-echo "Installed";
+echo "Installed - [$VERSAO_INST]";
 echo "You need to restart your apache server!";
