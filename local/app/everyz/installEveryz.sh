@@ -4,7 +4,7 @@
 # Objective: Install everyz / zabbix extras 
 
 INSTALAR="N";
-AUTOR="the.spaww@gmail.com";
+AUTOR="the.spaww@gmail.com"; 
 TMP_DIR="/tmp/upgZabbix";
 VERSAO_INST="Beta_20161227_30";
 UPDATEBD="S";
