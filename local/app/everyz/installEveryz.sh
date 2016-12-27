@@ -1,6 +1,6 @@
 #!/bin/bash
 # Autor: Adail Horst
-# Email: the.spaww@gmail.com
+# Email: the.spaww@gmail.com 
 # Objective: Install everyz / zabbix extras 
 
 INSTALAR="N";
