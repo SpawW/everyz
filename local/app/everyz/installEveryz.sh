@@ -536,18 +536,20 @@ configuraApache() {
         else
             APACHEROOT=$APACHEROOT"/conf-enabled";
         fi
-        # Adicionar o arquivo de configuração do everyz
-        BASECONF="# Allow to read images, scripts, css files on EveryZ installation ";
-        echo "$BASEZCONF" > "$APACHEROOT/everyz.conf";
-        apacheDirectoryConf "js";
-        apacheDirectoryConf "images";
-        apacheDirectoryConf "css";
-        if [ -f "/etc/init.d/apache2" ]; then
-            /etc/init.d/apache2 restart ;
-        else
-            /etc/init.d/httpd restart ;
+        if [ -d "$APACHEROOT" ]; then
+            # Adicionar o arquivo de configuração do everyz
+            BASECONF="# Allow to read images, scripts, css files on EveryZ installation ";
+            echo "$BASEZCONF" > "$APACHEROOT/everyz.conf";
+            apacheDirectoryConf "js";
+            apacheDirectoryConf "images";
+            apacheDirectoryConf "css";
+            if [ -f "/etc/init.d/apache2" ]; then
+                /etc/init.d/apache2 restart ;
+            else
+                /etc/init.d/httpd restart ;
+            fi
+            registra "Reconfigurou o apache! $APACHEROOT/everyz.conf  ";
         fi
-        registra "Reconfigurou o apache! $APACHEROOT/everyz.conf  ";
     else 
         registra "Nao reconfigurou o apache!";
     fi
