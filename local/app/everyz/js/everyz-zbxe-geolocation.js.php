@@ -71,7 +71,7 @@ $mapBackgroud = [ "light", "streets", "dark", "outdoors", "satellite", "emerald"
 echo $mapBackgroud[$filter["map"]]; //"streets"             
 ?>'
     }).addTo(ZabGeomap);
-    // Cria dinamicamente a referencia para o icone do host
+    // Cria dinamicamente a referencia para o icone do host 
     function zbxImage(p_iconid) {
         return L.icon({
             iconUrl: 'imgstore.php?iconid=' + p_iconid,
