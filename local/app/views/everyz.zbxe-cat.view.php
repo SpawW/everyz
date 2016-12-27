@@ -87,7 +87,7 @@ function buildQueryReport($itemid, $logTable) {
             . "SELECT " . ($DB['TYPE'] == ZBX_DB_POSTGRESQL ? " DISTINCT ON(a.ano,a.mes,a.momento) " : "" )
             . "it.units, it.description, a.ano, a.mes, a.dia, a.momento, AVG(a.valor) AS valor
   FROM items it 
- INNER JOIN 
+ INNER JOIN  
 (SELECT hu.itemid,
 DATE_FORMAT(FROM_UNIXTIME(hu.clock), '%Y') AS ano, DATE_FORMAT(FROM_UNIXTIME(hu.clock), '%m') AS mes, DATE_FORMAT(FROM_UNIXTIME(hu.clock), '%d') AS dia, 
 DATE_FORMAT(FROM_UNIXTIME(hu.clock), '" . $intervalMask[$filter["timeshiftsource"]] . "') AS momento, "
