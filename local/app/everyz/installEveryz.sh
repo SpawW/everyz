@@ -518,23 +518,16 @@ confirmaDownload() {
 }
 
 apacheDirectoryConf() {
-    echo "<Directory \"$CAMINHO_FRONTEND/local/app/everyz/$1\"> 
- Options FollowSymLinks 
- AllowOverride All 
- Require all granted 
- Order allow,deny
- Allow from all
-</Directory>" >> $APACHEROOT/everyz.conf;
+    echo "<Directory \"$CAMINHO_FRONTEND/local/app/everyz/$1\"> " >> $APACHEROOT/everyz.conf
+    echo " Options FollowSymLinks " >> $APACHEROOT/everyz.conf
+    echo " AllowOverride All " >> $APACHEROOT/everyz.conf
+    echo " Require all granted " >> $APACHEROOT/everyz.conf
+    echo " Order allow,deny" >> $APACHEROOT/everyz.conf
+    echo " Allow from all" >> $APACHEROOT/everyz.conf
+    echo "</Directory>" >> $APACHEROOT/everyz.conf;
 }
+
 configuraApache() {
-    dialog \
-        --title 'Apache'        \
-        --radiolist "$M_CONFAPACHE"  \
-        0 0 0                                    \
-        S   "$M_CONFAPACHE_SIM"  on    \
-        N   "$M_CONFAPACHE_NAO"  off   \
-        2> $TMP_DIR/resposta_dialog.txt
-    RECONFAPACHE=`cat $TMP_DIR/resposta_dialog.txt `;
     if [ "$RECONFAPACHE" = "S" ]; then
         # Localizar onde estão os arquivos de configuração do apache
         APACHEROOT=$(apachectl -V 2> /dev/null | grep HTTPD | awk -F= '{print $2}' | sed 's/"//g' );
@@ -554,10 +547,21 @@ configuraApache() {
         else
             /etc/init.d/httpd restart ;
         fi
-        registra "Reconfigurou o apache! ";
+        registra "Reconfigurou o apache! $APACHEROOT/everyz.conf  ";
     else 
         registra "Nao reconfigurou o apache!";
     fi
+}
+
+confirmaApache() {
+    dialog \
+        --title 'Apache'        \
+        --radiolist "$M_CONFAPACHE"  \
+        0 0 0                                    \
+        S   "$M_CONFAPACHE_SIM"  on    \
+        N   "$M_CONFAPACHE_NAO"  off   \
+        2> $TMP_DIR/resposta_dialog.txt
+    RECONFAPACHE=`cat $TMP_DIR/resposta_dialog.txt `;
 }
 
 ####### Parametros de instalacao -----------------------------------------------
@@ -574,6 +578,7 @@ idioma;
 tipoInstallZabbix;
 caminhoFrontend;
 confirmaDownload;
+confirmaApache;
 ####### Download de arquivos ---------------------------------------------------
 
 ####### Instalacao -------------------------------------------------------------
@@ -581,8 +586,8 @@ instalaMenus;
 customLogo;
 instalaLiteral;
 corTituloMapa;
-instalaGit;
 configuraApache;
-
+instalaGit;  
+ 
 echo "Installed - [ $VERSAO_INST ]";
 echo "You need to check your apache server and restart!";
