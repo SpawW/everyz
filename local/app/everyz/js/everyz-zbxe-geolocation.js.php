@@ -108,7 +108,7 @@ function showEvents($host) {
         $eventList = "";
         foreach ($host["events"] as $key => $value) {
             $eventList .= "<li style=\'background: #" . getSeverityColor($value["priority"], [$config])
-                    . "; list-style:square;\'><a href=\'/tr_events.php?triggerid="
+                    . "; list-style:square;\'><a href=\'tr_events.php?triggerid="
                     . $value["triggerid"] . "&eventid=" . $value["eventid"] . "\'> " . $value["description"] . "</a></li>";
             $bigPriority = ($bigPriority > $value["priority"] ? $bigPriority : $value["priority"]);
         }

@@ -341,7 +341,7 @@ customLogo() {
         sed -i "$INIINST,$FIMINST d" $ARQUIVO;
     fi
 # Logo do site
-    TXT_CUSTOM_LOGO="\t\$logoCompany = new CDiv(SPACE, '')\;\n\t\$logoCompany->setAttribute('style', 'float: left; margin: 10px 0px 0 0; background: url(\"zbxe-logo.php\") no-repeat; height: 25px; width: 140px; cursor: pointer;');";
+    TXT_CUSTOM_LOGO="\t\$logoCompany = new CDiv(SPACE, '')\;\n\t\$logoCompany->setAttribute('style', 'float: left; margin: 10px 0px 0 0; background: url(\"zbxe-logo.php\") no-repeat; height: 25px; width: 120px; cursor: pointer;');";
     TXT_CUSTOM_LOGO="$TXT_CUSTOM_LOGO\n\t\$logoZE = new CDiv(SPACE, '');\n\t\$logoZE->setAttribute('style', 'float: left; margin: 10px 0px 0 0; background: url(\"local\/app\/everyz\/images\/zbxe-logo.png\") no-repeat; height: 25px; width: 30px; cursor: pointer;');";
     TAG1="\/\/ 1st level menu";
     NOVO="$TAG1\n$TAG_INICIO\n$TXT_CUSTOM_LOGO\n$TAG_FINAL";
