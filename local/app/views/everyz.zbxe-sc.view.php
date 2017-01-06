@@ -208,7 +208,7 @@ if (hasRequest('filter_set')) {
                 $totalSize = ($historyRows * HISTORYSIZE) + ($trendRows * TRENDSIZE);
                 $storageTotal += $totalSize;
                 $report[$cont][6] = convert_units(array('value' => $totalSize, 'units' => 'B'));
-                $report[$cont][$indexVPS] = round(1 / floatval($row['delay']), 4);
+                $report[$cont][$indexVPS] = round(1 / (floatval($row['delay']) == 0 ? 1 : floatval($row['delay'])), 4);
                 $vpsTotal += (float) $report[$cont][$indexVPS];
                 $report[$cont][$indexUBM] = totalUBM($report[$cont][$indexVPS], $totalSize);
                 $report[$cont][$indexTotal] = valorUBM($report[$cont][$indexUBM], hostMacroValue($row["hostid"], '{$EVERYZ_UBM_VALUE}'));
