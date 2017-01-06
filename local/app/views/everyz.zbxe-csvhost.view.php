@@ -26,7 +26,7 @@
 $moduleName = "zbxe-csvhost";
 $baseProfile .= $moduleName;
 $moduleTitle = 'Host import';
-$requiredFields = ['host.host', 'interface.type', 'group.1', 'template.1'];
+$requiredFields = ['host.host', 'interface.type', 'interface.ip', 'group.1', 'template.1'];
 $requiredIndex = [];
 $groupCount = $templateCount = 1;
 $useip = false;

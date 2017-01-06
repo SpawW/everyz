@@ -78,6 +78,25 @@ function getWidgetItemData() {
 /* * ***************************************************************************
  * Get Data
  * ************************************************************************** */
+// Filtros =====================================================================
+if (hasRequest('filter_rst')) { // Clean the filter parameters
+    $filter['filter_rst'] = NULL;
+    $filter['action'] = $moduleName;
+    $filter['mode'] = "";
+    $filter['nameFilter'] = "";
+}
+
+$filterSQL = "";
+// Get data for report ---------------------------------------------------------
+if (hasRequest('filter_set')) {
+    // Sample Check if all required fields have values
+    checkRequiredField("hostids", _zeT("You need to provide a least one host in filter!"));
+    // $count variable for check if the report has results
+    // $report for store the report data
+    if ($filter['nameFilter'] !== "") {
+        $filterSQL = " and tx_value like " . quotestr("%|%" . $filter['nameFilter'] . "%");
+    }
+}
 
 // DML actions
 if (hasRequest('dml')) {
@@ -195,38 +214,16 @@ $toggle_all = (new CColHeader(
 $form = (new CForm('POST', 'everyz.php'))->setName($moduleName);
 $table = (new CTableInfo())->addClass(ZBX_STYLE_OVERFLOW_ELLIPSIS);
 
-// Filtros =====================================================================
-if (hasRequest('filter_rst')) { // Clean the filter parameters
-    $filter['filter_rst'] = NULL;
-    $filter['action'] = $moduleName;
-    $filter['mode'] = "";
-    $filter['nameFilter'] = "";
-}
-
-
-$widget = (new CFilter('web.' . $moduleName . '.filter.state'));
-
-// Source data filter
-$tmpColumn = new CFormList();
-$tmpColumn->addRow(_zeT('Name/title'), [ (new CTextBox('nameFilter', $filter['nameFilter']))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH)]);
-$tmpColumn->addItem(new CInput('hidden', 'action', $filter["action"]));
-$widget->addColumn($tmpColumn);
-
 if ($filter['mode'] == "") {
+    $widget = (new CFilter('web.' . $moduleName . '.filter.state'));
+// Source data filter
+    $tmpColumn = new CFormList();
+    $tmpColumn->addRow(_zeT('Name/title'), [ (new CTextBox('nameFilter', $filter['nameFilter']))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH)]);
+    $tmpColumn->addItem(new CInput('hidden', 'action', $filter["action"]));
+    $widget->addColumn($tmpColumn);
     $dashboard->addItem($widget);
 }
 
-$filterSQL = "";
-// Get data for report ---------------------------------------------------------
-if (hasRequest('filter_set')) {
-    // Sample Check if all required fields have values
-//    checkRequiredField("hostids", "You need to provide a least one host in filter!");
-    // $count variable for check if the report has results
-    // $report for store the report data
-    if ($filter['nameFilter'] !== "") {
-        $filterSQL = " and tx_value like " . quotestr("%|%" . $filter['nameFilter'] . "%");
-    }
-}
 
 if ($filter['mode'] !== "") {
     switch ($filter['mode']) {
