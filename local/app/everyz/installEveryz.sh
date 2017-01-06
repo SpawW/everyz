@@ -318,7 +318,7 @@ instalaMenus() {
     # Ajuste do Copyright
         registra "Instalando Copyright...";
         IDENT="->setAttribute('target', '_blank')";
-        NOVO="$IDENT\n$TAG_INICIO\n, ' | ', (new CLink('EveryZ \/ '.EVERYZ_VERSION, 'http:\/\/www.everyz.org\/'))\n\t->addClass(ZBX_STYLE_GREY)\n\t->addClass(ZBX_STYLE_LINK_ALT)\n\t->setAttribute('target', '_blank')\n$TAG_FINAL";
+        NOVO="$IDENT\n$TAG_INICIO\n, ' | ', (new CLink('EveryZ '.EVERYZ_VERSION, 'http:\/\/www.everyz.org\/'))\n\t->addClass(ZBX_STYLE_GREY)\n\t->addClass(ZBX_STYLE_LINK_ALT)\n\t->setAttribute('target', '_blank')\n$TAG_FINAL";
         sed -i "s/$IDENT/$NOVO/" include/html.inc.php
     fi
     if [ "`cat include/defines.inc.php | grep \"EVERYZ_VERSION\" | wc -l`" -eq 0 ]; then
