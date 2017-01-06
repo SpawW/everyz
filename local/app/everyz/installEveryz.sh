@@ -7,6 +7,7 @@ INSTALAR="N";
 AUTOR="the.spaww@gmail.com"; 
 TMP_DIR="/tmp/upgZabbix";
 VERSAO_INST="Beta_20161227_3_4";
+VERSAO_EZ="1.0";
 UPDATEBD="S";
 BRANCH="master";
 NOME_PLUGIN="EVERYZ";
@@ -321,7 +322,7 @@ instalaMenus() {
         sed -i "s/$IDENT/$NOVO/" include/html.inc.php
     fi
     if [ "`cat include/defines.inc.php | grep \"EVERYZ_VERSION\" | wc -l`" -eq 0 ]; then
-        echo "define ('EVERYZ_VERSION','$BRANCH');" >> include/defines.inc.php;
+        echo "define ('EVERYZ_VERSION','$VERSAO_EZ');" >> include/defines.inc.php;
     fi
     FIMINST=$(($FIMINST+1));
 }
