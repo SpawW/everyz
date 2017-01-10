@@ -6,7 +6,7 @@
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com"; 
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="Beta_20160106_3";
+VERSAO_INST="Beta_20160110_1";
 VERSAO_EZ="1.0";
 UPDATEBD="S";
 BRANCH="master";
@@ -23,8 +23,12 @@ if [ $# -gt 0 ]; then
     do
         case $i in
             -a=*|--apache=*)
-                TMP=$(paramValue $i);
-                echo "apache [ $TMP ]";
+                RECONFAPACHE=$(paramValue $i);
+                if [ "$RECONFAPACHE" != 'S' ] && [ "$RECONFAPACHE" != 'N' ]; then
+                    echo "Invalid apache option: $RECONFAPACHE";
+                else
+                    echo "Apache option selected: $RECONFAPACHE";
+                fi
                 shift # past argument=value
             ;;
             -f=*|--frontend-path=*)
@@ -66,7 +70,7 @@ if [ $# -gt 0 ]; then
     done
     echo "Have parameters";
 fi
-exit;
+
 # Parametros de configuração ===================================================
 
 instalaPacote() {
@@ -314,8 +318,8 @@ caminhoFrontend() {
         if [ ! -f "$CAMINHO_FRONTEND/zabbix.php" ]; then
             registra " $M_ERRO_CAMINHO2 ($CAMINHO_FRONTEND). $M_ERRO_ABORT.";
             exit;
-        else
-            DBUSER=`cat "$CAMINHO_FRONTEND/conf/zabbix.conf.php" | `;
+        #else
+        #    DBUSER=`cat "$CAMINHO_FRONTEND/conf/zabbix.conf.php" | `;
         fi
         registra " Path do frontend: [$CAMINHO_FRONTEND] ";
     fi
@@ -622,14 +626,16 @@ configuraApache() {
 }
 
 confirmaApache() {
-    dialog \
-        --title 'Apache'        \
-        --radiolist "$M_CONFAPACHE"  \
-        0 0 0                                    \
-        S   "$M_CONFAPACHE_SIM"  on    \
-        N   "$M_CONFAPACHE_NAO"  off   \
-        2> $TMP_DIR/resposta_dialog.txt
-    RECONFAPACHE=`cat $TMP_DIR/resposta_dialog.txt `;
+    if [ "$RECONFAPACHE" = "" ]; then
+        dialog \
+            --title 'Apache'        \
+            --radiolist "$M_CONFAPACHE"  \
+            0 0 0                                    \
+            S   "$M_CONFAPACHE_SIM"  on    \
+            N   "$M_CONFAPACHE_NAO"  off   \
+            2> $TMP_DIR/resposta_dialog.txt
+        RECONFAPACHE=`cat $TMP_DIR/resposta_dialog.txt `;
+    fi
 }
 
 ####### Parametros de instalacao -----------------------------------------------
