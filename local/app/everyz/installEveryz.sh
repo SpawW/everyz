@@ -6,13 +6,72 @@
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com"; 
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="Beta_20161227_3_4";
+VERSAO_INST="Beta_20160110_1";
+VERSAO_EZ="1.0";
 UPDATEBD="S";
 BRANCH="master";
 NOME_PLUGIN="EVERYZ";
 HORARIO_BKP=$(date +"%Y_%d_%m_%H-%M");
 BKP_FILE="/tmp/zeBackup$HORARIO_BKP.tgz";
-# Change Log
+
+paramValue() {
+  echo $(echo $1 | awk -F'=' '{print $2}' );
+}
+# Parametros de configuração para automatização ================================
+if [ $# -gt 0 ]; then
+    for i in "$@"
+    do
+        case $i in
+            -a=*|--apache=*)
+                RECONFAPACHE=$(paramValue $i);
+                if [ "$RECONFAPACHE" != 'S' ] && [ "$RECONFAPACHE" != 'N' ]; then
+                    echo "Invalid apache option: $RECONFAPACHE";
+                else
+                    echo "Apache option selected: $RECONFAPACHE";
+                fi
+                shift # past argument=value
+            ;;
+            -f=*|--frontend-path=*)
+                CAMINHO_FRONTEND=$(paramValue $i);
+                if [ ! -d "$CAMINHO_FRONTEND"  ]; then
+                    echo "Invalid frontend path: $CAMINHO_FRONTEND";
+                else
+                    echo "Frontend selected path: $CAMINHO_FRONTEND";
+                fi
+                shift # past argument=value
+            ;;
+            -d=*|--download=*)
+                DOWNLOADFILES=$(paramValue $i);
+                if [ "$DOWNLOADFILES" != 'S' ] && [ "$DOWNLOADFILES" != 'N' ]; then
+                    echo "Invalid download option: $DOWNLOADFILES";
+                else
+                    echo "Download option selected: $DOWNLOADFILES";
+                fi
+                shift # past argument=value
+            ;;
+            -l=*|--language=*)
+                PAR_IDIOMA=$(paramValue $i);
+                if [ "$PAR_IDIOMA" != 'pt' ] && [ "$PAR_IDIOMA" != 'en' ]; then
+                    echo "Invalid language: $PAR_IDIOMA";
+                else
+                    echo "Language selected: $PAR_IDIOMA";
+                fi
+                shift # past argument=value
+            ;;
+            *)
+                DEFAULT=YES
+                echo "default";
+                shift # past argument with no value
+            ;;
+            *)
+                    # unknown option
+            ;;
+        esac
+    done
+    echo "Have parameters";
+fi
+
+# Parametros de configuração ===================================================
 
 instalaPacote() {
     registra "============== Instalando pacote(s) ($1 $2 $3 $4 $5 $6 $7 $8 $9) =================";
@@ -45,8 +104,10 @@ installMgs() {
 }
 
 identificaDistro() {
-    registra "Finding zabbix frontend location...";
-    PATHDEF=$(find / -name zabbix.php | head -n1 | sed 's/\/zabbix.php//g');
+    if [ "$CAMINHO_FRONTEND" = "" ]; then
+        registra "Finding zabbix frontend location...";    
+        PATHDEF=$(find / -name zabbix.php | head -n1 | sed 's/\/zabbix.php//g');
+    fi
     if [ -f /etc/redhat-release -o -f /etc/system-release ]; then
 #        PATHDEF="/var/www/html";
         GERENCIADOR_PACOTES='yum ';
@@ -147,14 +208,18 @@ idioma() {
     else
         mkdir $TMP_DIR;
     fi
-    dialog \
-        --title "Zabbix Extras Installer [$VERSAO_INST]"        \
-        --radiolist 'Informe o idioma (Enter the language for the installer) '  \
-        0 0 0                                    \
-        pt   'Portugues / Brasil'  on    \
-        en   'English'   off   \
-        2> $TMP_DIR/resposta_dialog.txt
-    OPCOES=`cat $TMP_DIR/resposta_dialog.txt `;
+    if [ "$PAR_IDIOMA" != "" ]; then
+        OPCOES=$PAR_IDIOMA;
+    else
+        dialog \
+            --title "Zabbix Extras Installer [$VERSAO_INST]"        \
+            --radiolist 'Informe o idioma (Enter the language for the installer) '  \
+            0 0 0                                    \
+            pt   'Portugues / Brasil'  on    \
+            en   'English'   off   \
+            2> $TMP_DIR/resposta_dialog.txt
+        OPCOES=`cat $TMP_DIR/resposta_dialog.txt `;
+    fi
     if [ "`echo $OPCOES| wc -m`" -eq 3 ]; then
         INSTALAR="S";
     else
@@ -241,8 +306,10 @@ idioma() {
 }
 
 caminhoFrontend() {
-    dialog --inputbox "$M_BASE\n$M_CAMINHO" 0 0 "$PATHDEF" 2> $TMP_DIR/resposta_dialog.txt;
-    CAMINHO_FRONTEND=`cat $TMP_DIR/resposta_dialog.txt`;
+    if [ "$CAMINHO_FRONTEND" = "" ]; then
+        dialog --inputbox "$M_BASE\n$M_CAMINHO" 0 0 "$PATHDEF" 2> $TMP_DIR/resposta_dialog.txt;
+        CAMINHO_FRONTEND=`cat $TMP_DIR/resposta_dialog.txt`;
+    fi
     if [ ! -d "$CAMINHO_FRONTEND" ]; then        
         registra " $M_ERRO_CAMINHO ($CAMINHO_FRONTEND). $M_ERRO_ABORT";
         exit;
@@ -251,12 +318,13 @@ caminhoFrontend() {
         if [ ! -f "$CAMINHO_FRONTEND/zabbix.php" ]; then
             registra " $M_ERRO_CAMINHO2 ($CAMINHO_FRONTEND). $M_ERRO_ABORT.";
             exit;
-        else
-            DBUSER=`cat "$CAMINHO_FRONTEND/conf/zabbix.conf.php" | `;
+        #else
+        #    DBUSER=`cat "$CAMINHO_FRONTEND/conf/zabbix.conf.php" | `;
         fi
         registra " Path do frontend: [$CAMINHO_FRONTEND] ";
     fi
     cd $CAMINHO_FRONTEND;
+
 }
 
 tipoInstallZabbix(){
@@ -317,11 +385,11 @@ instalaMenus() {
     # Ajuste do Copyright
         registra "Instalando Copyright...";
         IDENT="->setAttribute('target', '_blank')";
-        NOVO="$IDENT\n$TAG_INICIO\n, ' | ', (new CLink('EveryZ \/ '.EVERYZ_VERSION, 'http:\/\/www.everyz.org\/'))\n\t->addClass(ZBX_STYLE_GREY)\n\t->addClass(ZBX_STYLE_LINK_ALT)\n\t->setAttribute('target', '_blank')\n$TAG_FINAL";
+        NOVO="$IDENT\n$TAG_INICIO\n, ' | ', (new CLink('EveryZ '.EVERYZ_VERSION, 'http:\/\/www.everyz.org\/'))\n\t->addClass(ZBX_STYLE_GREY)\n\t->addClass(ZBX_STYLE_LINK_ALT)\n\t->setAttribute('target', '_blank')\n$TAG_FINAL";
         sed -i "s/$IDENT/$NOVO/" include/html.inc.php
     fi
     if [ "`cat include/defines.inc.php | grep \"EVERYZ_VERSION\" | wc -l`" -eq 0 ]; then
-        echo "define ('EVERYZ_VERSION','$BRANCH');" >> include/defines.inc.php;
+        echo "define ('EVERYZ_VERSION','$VERSAO_EZ');" >> include/defines.inc.php;
     fi
     FIMINST=$(($FIMINST+1));
 }
@@ -507,14 +575,16 @@ instalaGit() {
 }
 
 confirmaDownload() {
-    dialog \
-        --title 'Download /tmp/EveryZ.zip'        \
-        --radiolist "$M_DOWNLOAD_FILE"  \
-        0 0 0                                    \
-        S   "$M_DOWNLOAD_SIM"  on    \
-        N   "$M_DOWNLOAD_NAO"  off   \
-        2> $TMP_DIR/resposta_dialog.txt
-    DOWNLOADFILES=`cat $TMP_DIR/resposta_dialog.txt `;
+    if [ "$DOWNLOADFILES" = "" ]; then
+        dialog \
+            --title 'Download /tmp/EveryZ.zip'        \
+            --radiolist "$M_DOWNLOAD_FILE"  \
+            0 0 0                                    \
+            S   "$M_DOWNLOAD_SIM"  on    \
+            N   "$M_DOWNLOAD_NAO"  off   \
+            2> $TMP_DIR/resposta_dialog.txt
+        DOWNLOADFILES=`cat $TMP_DIR/resposta_dialog.txt `;
+    fi
 }
 
 apacheDirectoryConf() {
@@ -556,14 +626,16 @@ configuraApache() {
 }
 
 confirmaApache() {
-    dialog \
-        --title 'Apache'        \
-        --radiolist "$M_CONFAPACHE"  \
-        0 0 0                                    \
-        S   "$M_CONFAPACHE_SIM"  on    \
-        N   "$M_CONFAPACHE_NAO"  off   \
-        2> $TMP_DIR/resposta_dialog.txt
-    RECONFAPACHE=`cat $TMP_DIR/resposta_dialog.txt `;
+    if [ "$RECONFAPACHE" = "" ]; then
+        dialog \
+            --title 'Apache'        \
+            --radiolist "$M_CONFAPACHE"  \
+            0 0 0                                    \
+            S   "$M_CONFAPACHE_SIM"  on    \
+            N   "$M_CONFAPACHE_NAO"  off   \
+            2> $TMP_DIR/resposta_dialog.txt
+        RECONFAPACHE=`cat $TMP_DIR/resposta_dialog.txt `;
+    fi
 }
 
 ####### Parametros de instalacao -----------------------------------------------

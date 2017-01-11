@@ -31,19 +31,18 @@ addFilterActions();
 
 // Specific fields
 addFilterParameter("nameFilter", T_ZBX_STR);
-addFilterParameter("name", T_ZBX_STR);
-addFilterParameter("title", T_ZBX_STR);
-addFilterParameter("row", T_ZBX_INT);
-addFilterParameter("order", T_ZBX_INT);
-addFilterParameter("status", T_ZBX_INT);
-addFilterParameter("widgettype", T_ZBX_STR);
-addFilterParameter("dml", T_ZBX_STR);
+addFilterParameter("name", T_ZBX_STR, '', false, false, false);
+addFilterParameter("title", T_ZBX_STR, '', false, false, false);
+addFilterParameter("row", T_ZBX_INT, 1, false, false, false);
+addFilterParameter("order", T_ZBX_INT, 1, false, false, false);
+addFilterParameter("status", T_ZBX_INT, 0, false, false, false);
+addFilterParameter("widgettype", T_ZBX_STR, 0, false, false, false);
+addFilterParameter("dml", T_ZBX_STR, '', false, true, false);
 addFilterParameter("widget", T_ZBX_STR, "", false, true, false);
 addFilterParameter("item", T_ZBX_STR, "", false, true, false);
 
 // Mode of report
 addFilterParameter("mode", T_ZBX_STR, "", false, false, false);
-
 check_fields($fields);
 
 /* * ***************************************************************************
@@ -89,8 +88,6 @@ if (hasRequest('filter_rst')) { // Clean the filter parameters
 $filterSQL = "";
 // Get data for report ---------------------------------------------------------
 if (hasRequest('filter_set')) {
-    // Sample Check if all required fields have values
-    checkRequiredField("hostids", _zeT("You need to provide a least one host in filter!"));
     // $count variable for check if the report has results
     // $report for store the report data
     if ($filter['nameFilter'] !== "") {
@@ -100,72 +97,91 @@ if (hasRequest('filter_set')) {
 
 // DML actions
 if (hasRequest('dml')) {
-    switch ($filter['mode']) {
-        case "widget.edit":
-        case "widget.add":
-            $name = str_replace("|", "", $filter['name']);
-            $title = $filter['row'] . "|" . $filter['order'] . "|" . $name . "|" . str_replace("|", "", $filter['title']);
-            if ($filter["mode"] == "widget.add") {
-                $last = explode("_", zbxeFieldValue('select MAX(tx_option) as ultimo from zbxe_preferences zp where zp.tx_option like '
-                                . quotestr("widget_%"), "ultimo"));
-                $last = intval($last[1]) + 1;
-                $name = "widget_" . $last; //. "_" . $name;
+    // Sample Check if all required fields have values
+    if ($filter['mode'] !== 'widget.delete' && $filter['mode'] !== 'widget.item.delete') {
+        checkRequiredField("name", _zeT("You need to provide a name!"));
+        checkRequiredField("title", _zeT("You need to provide a title!"));
+        switch ($filter['mode']) {
+            case "widget.edit":
+            case "widget.add":
+//                checkRequiredField("row", _zeT("You need to provide a row number!"));
+//                checkRequiredField("order", _zeT("You need to provide a order for widget!"));
+//            checkRequiredField("widgettype", _zeT("You need to define the type of widget!"));
+                break;
+            default :
+                break;
+        }
+    }
+    if ($requiredMissing) {
+        show_messages(false, 'Configuration not updated!');
+    } else {
+        switch ($filter['mode']) {
+            case "widget.edit":
+            case "widget.add":
+                $name = str_replace("|", "", $filter['name']);
+                $title = $filter['row'] . "|" . $filter['order'] . "|" . $name . "|" . str_replace("|", "", $filter['title']);
+                if ($filter["mode"] == "widget.add") {
+                    $last = explode("_", zbxeFieldValue('select MAX(tx_option) as ultimo from zbxe_preferences zp where zp.tx_option like '
+                                    . quotestr("widget_%"), "ultimo"));
+                    $last = intval($last[1]) + 1;
+                    $name = "widget_" . $last; //. "_" . $name;
 // Insert
-                $sql = "insert into zbxe_preferences (userid, tx_option, tx_value, st_ativo) values (0," . quotestr($name) . "," . quotestr($title) . "," . $filter['status'] . ")";
-            } else {
-// Update
-                $sql = "update zbxe_preferences set tx_value = " . quotestr($title) . ", st_ativo = " . $filter['status'] . " where tx_option = " . quotestr($filter["widget"]);
-            }
-            show_messages(prepareQuery($sql), _zeT('Widget ' . ($filter["mode"] == "widget.add" ? "added" : "updated")));
-            $filter['mode'] = '';
-            $filter["widget"] = '';
-            break;
-        case "widget.item.edit":
-        case "widget.item.add":
-            $name = str_replace("|", "", $filter['name']);
-            $title = $name . "|" . str_replace("|", "", $filter['title']);
-            if ($filter["mode"] == "widget.item.add") {
-                $last = explode("_", zbxeFieldValue('select MAX(tx_option) as ultimo from zbxe_preferences zp where zp.tx_option like ' .
-                                quotestr($filter["widget"] . '_link_%'), "ultimo"));
-                if (count($last) > 2) {
-                    $last = intval($last[3]) + 1;
+                    $sql = "insert into zbxe_preferences (userid, tx_option, tx_value, st_ativo) values (0," . quotestr($name) . "," . quotestr($title) . "," . $filter['status'] . ")";
                 } else {
-                    $last = 1;
-                }
-                $name = $filter["widget"] . '_link_' . $last; //. "_" . $name;
-// Insert
-                $sql = "insert into zbxe_preferences values (0," . quotestr($name) . "," . quotestr($title) . "," . $filter['status'] . ")";
-            } else {
 // Update
-                $sql = "update zbxe_preferences set tx_value = " . quotestr($title) . ", st_ativo = " . $filter['status'] . " where tx_option = " . quotestr($filter["item"]);
-            }
+                    $sql = "update zbxe_preferences set tx_value = " . quotestr($title) . ", st_ativo = " . $filter['status'] . " where tx_option = " . quotestr($filter["widget"]);
+                }
+                show_messages(prepareQuery($sql), _zeT('Widget ' . ($filter["mode"] == "widget.add" ? "added" : "updated")));
+                $filter['mode'] = '';
+                $filter["widget"] = '';
+                break;
+            case "widget.item.edit":
+            case "widget.item.add":
+                $name = str_replace("|", "", $filter['name']);
+                $title = $name . "|" . str_replace("|", "", $filter['title']);
+                if ($filter["mode"] == "widget.item.add") {
+                    $last = explode("_", zbxeFieldValue('select MAX(tx_option) as ultimo from zbxe_preferences zp where zp.tx_option like ' .
+                                    quotestr($filter["widget"] . '_link_%'), "ultimo"));
+                    if (count($last) > 2) {
+                        $last = intval($last[3]) + 1;
+                    } else {
+                        $last = 1;
+                    }
+                    $name = $filter["widget"] . '_link_' . $last; //. "_" . $name;
+// Insert
+                    $sql = "insert into zbxe_preferences values (0," . quotestr($name) . "," . quotestr($title) . "," . $filter['status'] . ")";
+                } else {
+// Update
+                    $sql = "update zbxe_preferences set tx_value = " . quotestr($title) . ", st_ativo = " . $filter['status'] . " where tx_option = " . quotestr($filter["item"]);
+                }
 
-            show_messages(prepareQuery($sql), _zeT('Widget item ' . ($filter["mode"] == "widget.add" ? "added" : "updated")));
-            $filter['mode'] = 'widget.items';
-            $filter["item"] = '';
-            break;
+                show_messages(prepareQuery($sql), _zeT('Widget item ' . ($filter["mode"] == "widget.add" ? "added" : "updated")));
+                $filter['mode'] = 'widget.items';
+                $filter["item"] = '';
+                break;
 // Delete
-        case "widget.delete":
-            if (trim($filter["widget"]) == "") {
-                error(_zeT("Invalid parameters!"));
+            case "widget.delete":
+                if (trim($filter["widget"]) == "") {
+                    error(_zeT("Invalid parameters!"));
+                    break;
+                }
+                $sql = 'delete from zbxe_preferences where tx_option like ' . quotestr(trim($filter["widget"] . "%"));
+                show_messages(prepareQuery($sql), _zeT('Widget item ' . ($filter["mode"] == "widget.add" ? "added" : "deleted")));
+                $filter['mode'] = '';
+                $filter['item'] = '';
+                $filter['widget'] = '';
                 break;
-            }
-            $sql = 'delete from zbxe_preferences where tx_option like ' . quotestr(trim($filter["widget"] . "%"));
-            show_messages(prepareQuery($sql), _zeT('Widget item ' . ($filter["mode"] == "widget.add" ? "added" : "deleted")));
-            $filter['mode'] = '';
-            $filter['item'] = '';
-            $filter['widget'] = '';
-            break;
-        case "widget.item.delete":
-            if (trim($filter["item"]) == "") {
-                error(_zeT("Invalid parameters!"));
+            case "widget.item.delete":
+                if (trim($filter["item"]) == "") {
+                    error(_zeT("Invalid parameters!"));
+                    break;
+                }
+                $sql = 'delete from zbxe_preferences where tx_option = ' . quotestr(trim($filter["item"]));
+                show_messages(prepareQuery($sql), _zeT('Widget item ' . ($filter["mode"] == "widget.add" ? "added" : "deleted")));
+                $filter['mode'] = 'widget.items';
+                $filter['item'] = '';
                 break;
-            }
-            $sql = 'delete from zbxe_preferences where tx_option = ' . quotestr(trim($filter["item"]));
-            show_messages(prepareQuery($sql), _zeT('Widget item ' . ($filter["mode"] == "widget.add" ? "added" : "deleted")));
-            $filter['mode'] = 'widget.items';
-            $filter['item'] = '';
-            break;
+        }
     }
 }
 // End DML
@@ -230,7 +246,7 @@ if ($filter['mode'] !== "") {
         case "widget.add":
         case "widget.edit":
             if ($filter['mode'] == "widget.add") { // Recover widget data aqui2
-                $data = ["name" => "", "title" => "", "row" => "", "order" => "", "status" => "1"];
+                $data = ["name" => "", "title" => "", "row" => "1", "order" => "1", "status" => "1"];
             }
             $formWidget = (new CFormList())
                     ->addRow(_('Name')
@@ -265,7 +281,7 @@ if ($filter['mode'] !== "") {
         case "widget.item.add":
         case "widget.item.edit":
             if ($filter['mode'] == "widget.item.add") { // Recover widget data aqui2
-                $data = [["name" => "", "title" => "", "row" => "", "order" => "", "status" => "1"]];
+                $data = [["name" => "", "title" => "", "row" => "1", "order" => "1", "status" => "1"]];
             } else {
                 $data = getWidgetItemData();
             }

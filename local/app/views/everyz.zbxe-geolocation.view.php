@@ -105,9 +105,9 @@ foreach ($hostData as $host) {
         }
         if ($related) {
             $hostData[$cont]["events"][count($hostData[$cont]["events"])] = [
-            "triggerid" => $event["triggerid"], "description" => $event["description"]
-            , "priority" => $event["priority"], "moment" => zbx_date2age($event["lastEvent"]["clock"])
-            , "eventid" => $event["lastEvent"]["eventid"]
+                "triggerid" => $event["triggerid"], "description" => $event["description"]
+                , "priority" => $event["priority"], "moment" => zbx_date2age($event["lastEvent"]["clock"])
+                , "eventid" => $event["lastEvent"]["eventid"]
             ];
             if ($hostData[$cont]["maxPriority"] < $event["priority"]) {
                 $hostData[$cont]["maxPriority"] = $event["priority"];
@@ -136,6 +136,13 @@ foreach ($hostData as $host) {
         $tmp2 = explode("\n", $host["notes"]);
         foreach ($tmp2 as $hostMetadata) {
             $tmp = explode(";", $hostMetadata);
+            // Converter os links para lines através de consulta reversa aos hosts
+            // aqui adail
+            if ($tmp[0] == 'link') {
+                //line;-3.70068;-38.65891;#303;2;Link3;
+                $targetHost = hostIndex($tmp[1], $hostData);
+                $tmp = ['line', $hostData[$targetHost]['location_lat'], $hostData[$targetHost]['location_lon'], $tmp[2], $tmp[3], $tmp[4]];
+            }
             if (!isset($hostData[$cont][$tmp[0]])) {
                 $hostData[$cont][$tmp[0]] = [];
             }
@@ -146,6 +153,14 @@ foreach ($hostData as $host) {
         }
     }
     $cont++;
+}
+
+function hostIndex($hostid, $hostArray) {
+    foreach ($hostArray as $k => $v) {
+        if ($v['id'] == $hostid) {
+            return $k;
+        }
+    }
 }
 
 /* * ***************************************************************************
@@ -229,18 +244,14 @@ require_once 'local/app/everyz/js/everyz-zbxe-geolocation.js.php';
             var newItem = document.createElement("LI");
             var textnode = document.createTextNode(" ")
             //newItem.appendChild(textnode);
-//            titleUL.appendChild(newItem);
+            //            titleUL.appendChild(newItem);
             titleUL.appendChild(filterButton);
             btnMin = document.getElementsByClassName("btn-min");
             if (btnMin.length > 0) {
                 filterDIV.style = 'display: none;'
             }
-            //titleUL.insertBefore(filterButton,titleUL.childNodes[0]);
-//            alert($titleBar[0].children[i].innerHTML);
         }
     }
-    //$titleBar[0].appendChild($filterButton);
-    //alert($titleBar[0].children);
 </script>
 
 <?php
