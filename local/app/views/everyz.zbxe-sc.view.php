@@ -41,6 +41,9 @@ $currency = (strlen($locale['currency_symbol']) > 1 ? $locale['currency_symbol']
 $groupOptions = array(_('Item'), _('Host'), _('Host Groups'), _('Template'));
 $groupMoment = array(_('Day'), _('Week'), _('Year'));
 
+resetProfile('format');
+
+
 // Common fields
 addFilterParameter("format", T_ZBX_INT, 0, false, false, false);
 addFilterActions();
@@ -60,8 +63,6 @@ addFilterParameter("filter_timesince", T_ZBX_STR);
 addFilterParameter("filter_timetill", T_ZBX_STR);
 addFilterParameter("timeshiftsource", T_ZBX_INT, 2);
 addFilterParameter("timeshiftprojection", T_ZBX_INT, 2);
-
-addFilterParameter("format", T_ZBX_INT);
 
 check_fields($fields);
 

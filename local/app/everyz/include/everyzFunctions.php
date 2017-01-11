@@ -524,13 +524,15 @@ function addFilterParameter($p_name, $p_type, $p_default = "", $p_array = false
  * @param string    $p_name   Last part of profile name on Zabbix Database ($baseProfile$p_name)
  * @param boolean   $p_array  True - Filter variable will receive "blank value" | False - Filter variable will receive "null" value.
  */
-function resetProfile($p_name, $p_array = false) {
+function resetProfile($p_name, $p_array = false, $resetVariable = true) {
     global $baseProfile, $filter;
     CProfile::delete($baseProfile . "." . $p_name);
-    if ($p_array) {
-        $filter[$p_name] = null;
-    } else {
-        $filter[$p_name] = "";
+    if ($resetVariable) {
+        if ($p_array) {
+            $filter[$p_name] = null;
+        } else {
+            $filter[$p_name] = "";
+        }
     }
 }
 
