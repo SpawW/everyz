@@ -49,14 +49,14 @@
     //Create layerGroup Alert
     var ZabGeoalert = new L.LayerGroup();
 
-
+    
     //User will need change this token for the theirs token, acquire in https://www.mapbox.com/studio/account/
     //(setup this data in database ZabbixExtras)
     //pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw
     var mbToken = '<?php echo zbxeConfigValue('geo_token') ?>';
 
     var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-            '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+            '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' + 
             'Imagery &copy <a href="http://mapbox.com">Mapbox</a>',
             mbUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' + mbToken;
 
@@ -132,8 +132,12 @@ foreach ($hostData as $host) {
             }
         }
         if ($bigPriority > 0) {
+            //$myZoomLevel = getRequest2("zoomLevel");
+            $circleAlert = pow(2, (13.5-(getRequest2("zoomLevel"))))*1000;
+            //echo "\n console.log('$myZoomLevel')";
+            //echo "\n console.log('$circleAlert')";
             $color = getSeverityColor($bigPriority, [$config]);
-            echo "\n addAlert (" . $host["location_lat"] . "," . $host["location_lon"] . ",2000,'#"
+            echo "\n addAlert (" . $host["location_lat"] . "," . $host["location_lon"] . ",$circleAlert,'#"
             . $color . "','#" . $color . "',0.7);\n";
         }
         // Add lines
