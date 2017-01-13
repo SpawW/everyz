@@ -152,26 +152,13 @@ foreach ($hostData as $host) {
                         . "\n"
                         . '{"type": "Feature", "geometry": { "type": "LineString", "coordinates": [['
                         . $host["location_lon"] . ", " . $host["location_lat"]
-                        . '],[' . $lines[2] . ', ' . $lines[1] . ']]}, "properties": {  "popupContent": "' . $lines[5] . '"}, "style": {  "fill": "' . $lines[3] . '"},"id": '
-                        . $lineCount . '}';
-                $lineCount++;
-                echo "\n console.log('$lines[4]')";
-            }
-        }
-        if (isset($host["line"])) {
-            $lineCount = 1;
-            foreach ($host["line"] as $lines) {
-                $linesPackage .= ($linesPackage == "" ? "" : ", ")
-                        . "\n"
-                        . '{"type": "Feature", "geometry": { "type": "LineString", "coordinates": [['
-                        . $host["location_lon"] . ", " . $host["location_lat"]
                         . '],[' . $lines[2] . ', ' . $lines[1] . ']]}, "properties": {  "popupContent": "' . $lines[5] . '"},"id": '
                         . $lineCount . '}';
                 $lineCount++;
                 echo "\n console.log('$lines[4]')";
             }
         }
-        
+          
     }
 }
 ?>
@@ -238,23 +225,30 @@ foreach ($hostData as $host) {
     var lineHosts = {
         "type": "FeatureCollection",
         "features": [
-<?php echo $linesPackage; ?>
+        <?php echo $linesPackage; ?>
         ]
     };
 
+
+    var myStyle = {
+        "color": "#ff7800",
+        "weight": 2,
+        "opacity": 0.5
+    };
+    
     function onEachFeature(feature, layer) {
         var popupContent = "";
-
+      
         if (feature.properties && feature.properties.popupContent) {
             popupContent += feature.properties.popupContent;
         }
-
+  
         layer.bindPopup(popupContent);
     }
 
 
     L.geoJSON(lineHosts, {
-        //style: style,
+        //style: myStyle,
         onEachFeature: onEachFeature
     }).addTo(ZabGeolines);
 
