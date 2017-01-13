@@ -54,10 +54,14 @@
     //(setup this data in database ZabbixExtras)
     //pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw
     var mbToken = '<?php echo zbxeConfigValue('geo_token') ?>';
-
+    console.log("Tamanho do Token MapBox: "+mbToken.length);
+    if (mbToken.length <= 1) {
+       window.alert("Alert! \n Please check EveryZ - Customization. Token is required for ZabGeo!");
+       <?php //error("Alert! Please check EveryZ - Customization. Token is required for ZabGeo!"); ?>
+    }
     var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
             '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' + 
-            'Imagery &copy <a href="http://mapbox.com">Mapbox</a>',
+            'Imagery &copy <a href="http://mapbox.com">Mapbox</a>', 
             mbUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' + mbToken;
 
 
@@ -148,11 +152,26 @@ foreach ($hostData as $host) {
                         . "\n"
                         . '{"type": "Feature", "geometry": { "type": "LineString", "coordinates": [['
                         . $host["location_lon"] . ", " . $host["location_lat"]
+                        . '],[' . $lines[2] . ', ' . $lines[1] . ']]}, "properties": {  "popupContent": "' . $lines[5] . '"}, "style": {  "fill": "' . $lines[3] . '"},"id": '
+                        . $lineCount . '}';
+                $lineCount++;
+                echo "\n console.log('$lines[4]')";
+            }
+        }
+        if (isset($host["line"])) {
+            $lineCount = 1;
+            foreach ($host["line"] as $lines) {
+                $linesPackage .= ($linesPackage == "" ? "" : ", ")
+                        . "\n"
+                        . '{"type": "Feature", "geometry": { "type": "LineString", "coordinates": [['
+                        . $host["location_lon"] . ", " . $host["location_lat"]
                         . '],[' . $lines[2] . ', ' . $lines[1] . ']]}, "properties": {  "popupContent": "' . $lines[5] . '"},"id": '
                         . $lineCount . '}';
                 $lineCount++;
+                echo "\n console.log('$lines[4]')";
             }
         }
+        
     }
 }
 ?>
@@ -235,6 +254,7 @@ foreach ($hostData as $host) {
 
 
     L.geoJSON(lineHosts, {
+        //style: style,
         onEachFeature: onEachFeature
     }).addTo(ZabGeolines);
 
