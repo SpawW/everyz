@@ -56,6 +56,15 @@ checkAccessGroup('groupids');
  * Module Functions
  * ************************************************************************** */
 
+function hostIndex($hostid, $hostArray) {
+    foreach ($hostArray as $k => $v) {
+        if ($v['id'] == $hostid) {
+            return $k;
+        }
+    }
+    return -1;
+}
+
 /* * ***************************************************************************
  * Get Data
  * ************************************************************************** */
@@ -89,6 +98,7 @@ $eventData = selectEventsByGroup($filter["groupids"], 1);
 $hostData = selectHostsByGroup($filter["groupids"], $inventoryFields);
 $cont = 0;
 $imagesArray = [];
+
 foreach ($hostData as $host) {
     // Popular dados de triggers no host
     // Descobrir a imagem do host
@@ -133,37 +143,55 @@ foreach ($hostData as $host) {
     }
     // Varrer o notes e transferir o metadado para os arrays
     if (isset($host["notes"])) {
-        $tmp2 = explode("\n", $host["notes"]);
-        foreach ($tmp2 as $hostMetadata) {
-            $tmp = explode(";", $hostMetadata);
-            // Converter os links para lines através de consulta reversa aos hosts
-            // aqui adail
-            if ($tmp[0] == 'link') {
-                //line;-3.70068;-38.65891;#303;2;Link3;
-                //echo "\n console.log('$tmp[4]')";
-                $targetHost = hostIndex($tmp[1], $hostData);
-                $tmp = ['line', $hostData[$targetHost]['location_lat'], $hostData[$targetHost]['location_lon'], $tmp[2], $tmp[3], $tmp[4]];
-                //echo "\n console.log('$tmp[5]')";
+        $jsonArray = isJson($host["notes"]);
+        if (!$jsonArray == false) {
+            // Tratamento dos Circles
+            foreach ($jsonArray['circle'] as $value) {
+                $hostData[$cont]['circle'][] = ['size' => $value['size'], 'color' => $value['color']];
             }
-            if (!isset($hostData[$cont][$tmp[0]])) {
-                $hostData[$cont][$tmp[0]] = [];
+            // Tratamento dos Lines
+            foreach ($jsonArray['line'] as $value) {
+                $hostData[$cont]['line'][] = ['lat' => $value['lat'], 'lon' => $value['lon'], 'popup' => optArrayValue($value, 'popup')];
             }
-            $contType = count($hostData[$cont][$tmp[0]]);
-            for ($noteInfo = 1; $noteInfo < count($tmp) - 1; $noteInfo++) {
-                $hostData[$cont][$tmp[0]][$contType][$noteInfo] = $tmp[$noteInfo];
+            // Tratamento dos Links
+            foreach ($jsonArray['link'] as $value) {
+                $targetHost = hostIndex($value['hostid'], $hostData);
+                if ($targetHost > -1) {
+                    $hostData[$cont]['line'][] = ['lat' => $hostData[$targetHost]['location_lat'], 'lon' => $hostData[$targetHost]['location_lon'], 'popup' => optArrayValue($value, 'popup')];
+                }
             }
+        } else {
+            //print_r("Invalid JSON");
         }
+        /* Configuração para CSV
+          $tmp2 = explode("\n", $host["notes"]);
+
+          // Tratar o JSON
+          foreach ($tmp2 as $hostMetadata) {
+          $tmp = explode(";", $hostMetadata);
+          // Converter os links para lines através de consulta reversa aos hosts
+          // aqui adail
+          if ($tmp[0] == 'link') {
+          //line;-3.70068;-38.65891;#303;2;Link3;
+          //echo "\n console.log('$tmp[4]')";
+          $targetHost = hostIndex($tmp[1], $hostData);
+          $tmp = ['line', $hostData[$targetHost]['location_lat'], $hostData[$targetHost]['location_lon'], $tmp[2], $tmp[3], $tmp[4]];
+          //echo "\n console.log('$tmp[5]')";
+          }
+          if (!isset($hostData[$cont][$tmp[0]])) {
+          $hostData[$cont][$tmp[0]] = [];
+          }
+          $contType = count($hostData[$cont][$tmp[0]]);
+          for ($noteInfo = 1; $noteInfo < count($tmp) - 1; $noteInfo++) {
+          $hostData[$cont][$tmp[0]][$contType][$noteInfo] = $tmp[$noteInfo];
+          }
+          }
+
+         */
     }
     $cont++;
 }
 
-function hostIndex($hostid, $hostArray) {
-    foreach ($hostArray as $k => $v) {
-        if ($v['id'] == $hostid) {
-            return $k;
-        }
-    }
-}
 
 /* * ***************************************************************************
  * Display

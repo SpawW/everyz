@@ -1250,4 +1250,15 @@ try {
 } catch (Exception $e) {
     return FALSE;
 }
-            
+
+// Original: http://stackoverflow.com/questions/6041741/fastest-way-to-check-if-a-string-is-json-in-php
+// With changes by Adail Horst
+function isJson($string) {
+    $return = json_decode($string, true);
+    return (json_last_error() == JSON_ERROR_NONE ? $return : false);
+}
+
+
+function optArrayValue($array, $value) {
+    return (isset($array[$value]) ? $array[$value] : "");
+}
