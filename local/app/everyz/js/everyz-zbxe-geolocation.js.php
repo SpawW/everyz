@@ -49,14 +49,14 @@
     //Create layerGroup Alert
     var ZabGeoalert = new L.LayerGroup();
 
-    
+
     //User will need change this token for the theirs token, acquire in https://www.mapbox.com/studio/account/
     //(setup this data in database ZabbixExtras)
     //pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw
     var mbToken = '<?php echo zbxeConfigValue('geo_token') ?>';
 
     var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-            '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' + 
+            '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
             'Imagery &copy <a href="http://mapbox.com">Mapbox</a>',
             mbUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' + mbToken;
 
@@ -79,15 +79,15 @@ echo $mapBackgroud[$filter["map"]]; //"streets"
             iconAnchor: [16, 32],
             popupAnchor: [2, -38],
         });
-    }
-    function addCircle (lat, lon, radiusSize, fillColor = '#303', borderColor = '', opacity = 0.2){
+        }
+        function addCircle (lat, lon, radiusSize, fillColor = '#303', borderColor = '', opacity = 0.2){
         L.circle([lat, lon], {color: borderColor, fillColor: fillColor, fillOpacity: opacity, radius: radiusSize}).addTo(ZabGeocircle);
-    }
-    function addHost(lat, lon, hostid, name, description) {
-        L.marker([lat, lon], {icon: zbxImage(hostid)}).addTo(ZabGeomap).bindPopup(name + description);
-    }
+        }
+        function addHost(lat, lon, hostid, name, description) {
+            L.marker([lat, lon], {icon: zbxImage(hostid)}).addTo(ZabGeomap).bindPopup(name + description);
+        }
 
-    function addAlert (lat, lon, radiusSize, fillColor = '#303', borderColor = '', opacity = 0.2){
+        function addAlert (lat, lon, radiusSize, fillColor = '#303', borderColor = '', opacity = 0.2){
         L.circle([lat, lon], {color: borderColor, fillColor: fillColor, fillOpacity: opacity, radius: radiusSize}).addTo(ZabGeoalert);
     }
 
@@ -133,7 +133,7 @@ foreach ($hostData as $host) {
         }
         if ($bigPriority > 0) {
             //$myZoomLevel = getRequest2("zoomLevel");
-            $circleAlert = pow(2, (13.5-(getRequest2("zoomLevel"))))*500;
+            $circleAlert = pow(2, (13.5 - (getRequest2("zoomLevel")))) * 500;
             //echo "\n console.log('$myZoomLevel')";
             //echo "\n console.log('$circleAlert')";
             $color = getSeverityColor($bigPriority, [$config]);
@@ -148,7 +148,8 @@ foreach ($hostData as $host) {
                         . "\n"
                         . '{"type": "Feature", "geometry": { "type": "LineString", "coordinates": [['
                         . $host["location_lon"] . ", " . $host["location_lat"]
-                        . '],[' . $lines[2] . ', ' . $lines[1] . ']]}, "properties": {  "popupContent": "' . $lines[5] . '"},"id": '
+                        . '],[' . $lines[2] . ', ' . $lines[1] . ']]}, ' .
+                        (count($lines) > 4 ? '"properties": {  "popupContent": "' . $lines[5] . '"},' : "") . '"id": '
                         . $lineCount . '}';
                 $lineCount++;
             }
@@ -204,7 +205,7 @@ foreach ($hostData as $host) {
     if (showCircles == 1) {
         ZabGeomap.addLayer(ZabGeocircle);
     }
-    
+
     //If filter Lines Actived show Lines 
     if (showLines == 1) {
         ZabGeomap.addLayer(ZabGeolines);
