@@ -246,7 +246,7 @@ require_once 'local/app/everyz/js/everyz-zbxe-geolocation.js.php';
             var newItem = document.createElement("LI");
             var textnode = document.createTextNode(" ")
             //newItem.appendChild(textnode);
-            //            titleUL.appendChild(newItem);
+            //             .titleUL.appendChild(newItem);
             titleUL.appendChild(filterButton);
             btnMin = document.getElementsByClassName("btn-min");
             if (btnMin.length > 0) {
