@@ -1,6 +1,7 @@
 # Arquivos a ignorar
-*.php
+#*.php
 **.swp
+*.properties
 .gitignore
 nbproject/project.properties
 nbproject/project.xml

@@ -146,20 +146,23 @@ foreach ($hostData as $host) {
         $jsonArray = isJson($host["notes"]);
         if (!$jsonArray == false) {
             // Tratamento dos Circles
-            foreach ($jsonArray['circle'] as $value) {
-                $hostData[$cont]['circle'][] = ['size' => $value['size'], 'color' => $value['color']];
-            }
-            // Tratamento dos Lines
-            foreach ($jsonArray['line'] as $value) {
-                $hostData[$cont]['line'][] = ['lat' => $value['lat'], 'lon' => $value['lon'], 'popup' => optArrayValue($value, 'popup')];
-            }
-            // Tratamento dos Links
-            foreach ($jsonArray['link'] as $value) {
-                $targetHost = hostIndex($value['hostid'], $hostData);
-                if ($targetHost > -1) {
-                    $hostData[$cont]['line'][] = ['lat' => $hostData[$targetHost]['location_lat'], 'lon' => $hostData[$targetHost]['location_lon'], 'popup' => optArrayValue($value, 'popup')];
+            if (isset($jsonArray['circle']))
+                foreach ($jsonArray['circle'] as $value) {
+                    $hostData[$cont]['circle'][] = ['size' => $value['size'], 'color' => $value['color']];
                 }
-            }
+            // Tratamento dos Lines
+            if (isset($jsonArray['line']))
+                foreach ($jsonArray['line'] as $value) {
+                    $hostData[$cont]['line'][] = ['lat' => $value['lat'], 'lon' => $value['lon'], 'popup' => optArrayValue($value, 'popup')];
+                }
+            // Tratamento dos Links
+            if (isset($jsonArray['link']))
+                foreach ($jsonArray['link'] as $value) {
+                    $targetHost = hostIndex($value['hostid'], $hostData);
+                    if ($targetHost > -1) {
+                        $hostData[$cont]['line'][] = ['lat' => $hostData[$targetHost]['location_lat'], 'lon' => $hostData[$targetHost]['location_lon'], 'popup' => optArrayValue($value, 'popup')];
+                    }
+                }
         } else {
             //print_r("Invalid JSON");
         }

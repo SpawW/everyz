@@ -78,6 +78,7 @@ if ($updated) {
 //$dashboard = (new CWidget())->setTitle(_zeT('Customization'));
 
 commonModuleHeader($moduleName, $moduleTitle, true);
+insert_show_color_picker_javascript();
 $buttonSave = (new CList())->addItem((new CSubmit('btnUpdate', _('Update'))));
 
 // Mapas =======================================================================

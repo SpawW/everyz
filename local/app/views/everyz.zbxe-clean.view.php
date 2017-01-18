@@ -1,7 +1,7 @@
 <?php
 
 /*
- * * Purpose: Sample custom page on Zabbix
+ * * Purpose: Build ZabGeo JSON metadata
  * * Adail Horst - http://spinola.net.br/blog
  * *
  * * This program is free software; you can redistribute it and/or modify
@@ -25,8 +25,9 @@
 // Definitions -----------------------------------------------------------------
 // Module Functions 
 // Configuration variables =====================================================
-$moduleName = "zbxe-sample";
+$moduleName = "zbxe-clean";
 $baseProfile .= $moduleName;
+$moduleTitle = 'Sample';
 
 // Common fields
 addFilterParameter("format", T_ZBX_INT);

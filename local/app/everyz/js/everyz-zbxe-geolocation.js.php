@@ -57,7 +57,7 @@
     console.log("Tamanho do Token MapBox: " + mbToken.length);
     if (mbToken.length <= 1) {
         window.alert("Alert! \n Please check EveryZ - Customization. Token is required for ZabGeo!");
-<?php //error("Alert! Please check EveryZ - Customization. Token is required for ZabGeo!");      ?>
+<?php //error("Alert! Please check EveryZ - Customization. Token is required for ZabGeo!");       ?>
     }
     var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
             '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
@@ -153,8 +153,8 @@ foreach ($hostData as $host) {
                         . "\n"
                         . '{"type": "Feature", "geometry": { "type": "LineString", "coordinates": [['
                         . $host["location_lon"] . ", " . $host["location_lat"]
-                        . '],[' . $lines['lon'] . ', ' . $lines['lat'] . ']]}, "properties": { ' . (
-                        $lines['popup'] == "" ? '' : ' "popupContent": "' . $lines['popup'] . '"' ) . '},"id": '
+                        . '],[' . $lines['lon'] . ', ' . $lines['lat'] . ']]} ' . (
+                        $lines['popup'] == "" ? '' : ', "properties": { "popupContent": "' . $lines['popup'] . '"}' ) . ',"id": '
                         . $lineCount . '}';
                 $lineCount++;
                 //echo "\n console.log('$lines[4]')";
