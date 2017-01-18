@@ -140,8 +140,10 @@ foreach ($hostData as $host) {
             // aqui adail
             if ($tmp[0] == 'link') {
                 //line;-3.70068;-38.65891;#303;2;Link3;
+                //echo "\n console.log('$tmp[4]')";
                 $targetHost = hostIndex($tmp[1], $hostData);
                 $tmp = ['line', $hostData[$targetHost]['location_lat'], $hostData[$targetHost]['location_lon'], $tmp[2], $tmp[3], $tmp[4]];
+                //echo "\n console.log('$tmp[5]')";
             }
             if (!isset($hostData[$cont][$tmp[0]])) {
                 $hostData[$cont][$tmp[0]] = [];
