@@ -47,13 +47,11 @@ try {
             }
             // Update Configuration
             if (file_exists("$PATH/everyz_config.$i.json")) {
-                echo "oi config";
                 $json = json_decode(file_get_contents("$PATH/everyz_config.$i.json"), true);
                 zbxeUpdateConfig($json, $resultOK, $debug);
             }
             // Update Translation
             if (file_exists("$PATH/everyz_lang.$i.json")) {
-                echo "oi translation";
                 $json = json_decode(file_get_contents("$PATH/everyz_lang.$i.json"), true);
                 zbxeUpdateTranslation($json, $resultOK, $debug);
             }
