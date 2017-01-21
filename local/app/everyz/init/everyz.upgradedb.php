@@ -41,10 +41,8 @@ try {
             $debug = false;
             $resultOK = true;
             DBstart();
-            echo "oi";
             // If is needed, I can create upgrade commands using this standard. Delete operations need to be here.
             if (file_exists("$PATH/everyz_upgrade.$i.php")) {
-                echo "oi php";
                 require_once "$PATH/everyz_upgrade.$i.php";
             }
             // Update Configuration
