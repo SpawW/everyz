@@ -54,10 +54,6 @@ addFilterParameter("num_projection", T_ZBX_INT, 0);
 
 check_fields($fields);
 
-// Scripts e CSS adicionais
-?>
-<?php
-
 /* * ***************************************************************************
  * Access Control
  * ************************************************************************** */

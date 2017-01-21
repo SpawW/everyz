@@ -57,7 +57,7 @@
     console.log("Tamanho do Token MapBox: " + mbToken.length);
     if (mbToken.length <= 1) {
         window.alert("Alert! \n Please check EveryZ - Customization. Token is required for ZabGeo!");
-<?php //error("Alert! Please check EveryZ - Customization. Token is required for ZabGeo!");       ?>
+<?php //error("Alert! Please check EveryZ - Customization. Token is required for ZabGeo!");         ?>
     }
     var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
             '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
@@ -85,7 +85,7 @@ echo $mapBackgroud[$filter["map"]]; //"streets"
         });
         }
         function addCircle (lat, lon, radiusSize, fillColor = '#303', borderColor = '', opacity = 0.2){
-        L.circle([lat, lon], {color: borderColor, fillColor: fillColor, fillOpacity: opacity, radius: radiusSize}).addTo(ZabGeocircle);
+            L.circle([lat, lon], {color: borderColor, fillColor: fillColor, fillOpacity: opacity, radius: radiusSize}).addTo(ZabGeocircle).bindPopup(radiusSize + 'm');
         }
         function addHost(lat, lon, hostid, name, description) {
             L.marker([lat, lon], {icon: zbxImage(hostid)}).addTo(ZabGeomap).bindPopup(name + description);
@@ -158,6 +158,35 @@ foreach ($hostData as $host) {
                         . $lineCount . '}';
                 $lineCount++;
                 //echo "\n console.log('$lines[4]')";
+            }
+        }
+        // Add Multiline
+        if (isset($host["multiline"])) {
+            $multilineCount = 1;
+            foreach ($host["multiline"] as $multilines) {
+                $linesPackage .= ($linesPackage == "" ? "" : ", ")
+                        . "\n"
+                        . '{"type": "Feature", "geometry": { "type": "MultiLineString", "coordinates": [['
+                        . '[' . $host["location_lon"] . "," . $host["location_lat"] . '],' . $multilines[1]
+                        . ']]}, "style": { "color":"red" } , "properties": {  "color":"red",  "popupContent": "' . $multilines[6] . '"},"id": '
+                        . $multilineCount . '}';
+                $multilineCount++;
+                echo "\n console.log('Multiline: [" . $host['location_lon'] . "],[" . $host['location_lat'] . "]," . $multilines[1] . " - " . $multilines[6] . "')";
+            }
+        }
+
+        // Add Polygon
+        if (isset($host["polygon"])) {
+            $polygonCount = 1;
+            foreach ($host["polygon"] as $polygons) {
+                $linesPackage .= ($linesPackage == "" ? "" : ", ")
+                        . "\n"
+                        . '{"type": "Feature", "properties": { "popupContent": "' . $polygons[6] . '"}, "geometry": { "type": "Polygon", "coordinates": [['
+                        . $polygons[1]
+                        . ']]}, "className":{ "baseVal":"line2" },"id": '
+                        . $polygonCount . '}';
+                $polygonCount++;
+                echo "\n console.log('Polygon: $polygons[1] - " . $polygons[6] . "')";
             }
         }
     }
@@ -239,11 +268,9 @@ foreach ($hostData as $host) {
 
     function onEachFeature(feature, layer) {
         var popupContent = "";
-
         if (feature.properties && feature.properties.popupContent) {
             popupContent += feature.properties.popupContent;
         }
-
         layer.bindPopup(popupContent);
     }
 

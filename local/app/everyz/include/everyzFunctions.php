@@ -23,6 +23,7 @@
 define("ZE_VER", "3.0");
 define("EZ_TITLE", 'EveryZ - ');
 define("ZE_COPY", ", ZE " . ZE_VER);
+define("EVERYZBUILD", 2);
 
 global $VG_DEBUG;
 global $zeMessages, $zeLocale, $baseName, $requiredMissing;
@@ -1234,23 +1235,6 @@ function zbxeConfigImageIDs() {
     ;
 }
 
-// End Functions
-// Enviroment configuration
-try {
-    global $VG_BANCO_OK;
-    $VG_BANCO_OK = false;
-    zbxeStartDefinitions();
-    $regExp = DBfetch(DBselect('select tx_value from zbxe_preferences WHERE tx_option = ' . quotestr("everyz_version")));
-    if (empty($regExp)) {
-        $path = str_replace("/everyz/include", "/everyz", dirname(__FILE__));
-        require_once $path . '/init/everyz.initdb.php';
-    } else {
-        $VG_BANCO_OK = true;
-    }
-} catch (Exception $e) {
-    return FALSE;
-}
-
 // Original: http://stackoverflow.com/questions/6041741/fastest-way-to-check-if-a-string-is-json-in-php
 // With changes by Adail Horst
 function isJson($string) {
@@ -1258,7 +1242,30 @@ function isJson($string) {
     return (json_last_error() == JSON_ERROR_NONE ? $return : false);
 }
 
-
 function optArrayValue($array, $value) {
     return (isset($array[$value]) ? $array[$value] : "");
 }
+
+// End Functions ===============================================================
+// Enviroment configuration
+try {
+    global $VG_BANCO_OK;
+    $VG_BANCO_OK = false;
+    zbxeStartDefinitions();
+    $ezCurrent = DBfetch(DBselect('select tx_value from zbxe_preferences WHERE tx_option = ' . quotestr("everyz_version")));
+
+    if (empty($ezCurrent)) {
+        $path = str_replace("/everyz/include", "/everyz", dirname(__FILE__));
+        require_once $path . '/init/everyz.initdb.php';
+    } else {
+        $VG_BANCO_OK = true;
+        $ezCurrent = $ezCurrent['tx_value'];
+    }
+    if ($VG_BANCO_OK && $ezCurrent !== EVERYZBUILD) {
+        $path = str_replace("/everyz/include", "/everyz", dirname(__FILE__));
+        require_once $path . '/init/everyz.upgradedb.php';
+    }
+} catch (Exception $e) {
+    return FALSE;
+}
+
