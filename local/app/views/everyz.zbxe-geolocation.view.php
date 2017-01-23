@@ -99,98 +99,102 @@ $hostData = selectHostsByGroup($filter["groupids"], $inventoryFields);
 $cont = 0;
 $imagesArray = [];
 
-foreach ($hostData as $host) {
-    // Popular dados de triggers no host
-    // Descobrir a imagem do host
-    $hostData[$cont]["maxPriority"] = -1;
-    foreach ($eventData as $event) {
-        $related = false;
-        foreach ($event["hosts"] as $eventHost) {
-            if ($eventHost["hostid"] == $host["id"]) {
-                if (!isset($hostData[$cont]["events"])) {
-                    $hostData[$cont]["events"] = [];
-                }
-                $related = true;
-            }
-        }
-        if ($related) {
-            $hostData[$cont]["events"][count($hostData[$cont]["events"])] = [
-                "triggerid" => $event["triggerid"], "description" => $event["description"]
-                , "priority" => $event["priority"], "moment" => zbx_date2age($event["lastEvent"]["clock"])
-                , "eventid" => $event["lastEvent"]["eventid"]
-            ];
-            if ($hostData[$cont]["maxPriority"] < $event["priority"]) {
-                $hostData[$cont]["maxPriority"] = $event["priority"];
-            }
-        }
-    }
-    // Descobrir a imagem do host
-    if ($withIconMapping) {
-        foreach ($iconMapping[0]["mappings"] as $iMap) {
-            if (array_key_exists($iMap["inventory_field"], $host)) {
-                if ($host[$iMap["inventory_field"]] == $iMap["expression"]) {
-                    $hostData[$cont]["iconid"] = $iMap["iconid"];
-                    break;
-                }
-            }
-        }
-
-        if (!isset($hostData[$cont]["iconid"])) {
-            $hostData[$cont]["iconid"] = $iconMapping[0]["default_iconid"];
-        }
+foreach ($hostData as $key => $host) {
+    // Check if host have a minimum usable data
+    if ($host['location_lat'] == "" || $host['location_lon'] == "") {
+//        echo "host faltando dados".$host['id'];
+        unset($hostData[$key]);
     } else {
-        $hostData[$cont]["iconid"] = zbxeConfigValue('geo_default_poi', 0, "zbxe_default_icon");
-    }
-    // Varrer o notes e transferir o metadado para os arrays
-    if (isset($host["notes"])) {
-        $jsonArray = isJson($host["notes"]);
-        if (!$jsonArray == false) {
-            // Tratamento dos Circles
-            if (isset($jsonArray['circle']))
-                foreach ($jsonArray['circle'] as $value) {
-                    $hostData[$cont]['circle'][] = ['size' => $value['size'], 'color' => $value['color']];
+        // Popular dados de triggers no host
+        // Descobrir a imagem do host
+        $hostData[$cont]["maxPriority"] = -1;
+        foreach ($eventData as $event) {
+            $related = false;
+            foreach ($event["hosts"] as $eventHost) {
+                if ($eventHost["hostid"] == $host["id"]) {
+                    if (!isset($hostData[$cont]["events"])) {
+                        $hostData[$cont]["events"] = [];
+                    }
+                    $related = true;
                 }
-            // Tratamento dos Lines
-            if (isset($jsonArray['line']))
-                foreach ($jsonArray['line'] as $value) {
-                    $hostData[$cont]['line'][] = ['lat' => $value['lat'], 'lon' => $value['lon'], 'popup' => optArrayValue($value, 'popup')];
+            }
+            if ($related) {
+                $hostData[$cont]["events"][count($hostData[$cont]["events"])] = [
+                    "triggerid" => $event["triggerid"], "description" => $event["description"]
+                    , "priority" => $event["priority"], "moment" => zbx_date2age($event["lastEvent"]["clock"])
+                    , "eventid" => $event["lastEvent"]["eventid"]
+                ];
+                if ($hostData[$cont]["maxPriority"] < $event["priority"]) {
+                    $hostData[$cont]["maxPriority"] = $event["priority"];
                 }
-            // Tratamento dos Links
-            if (isset($jsonArray['link']))
-                foreach ($jsonArray['link'] as $value) {
-                    $targetHost = hostIndex($value['hostid'], $hostData);
-                    if ($targetHost > -1) {
-                        $hostData[$cont]['line'][] = ['lat' => $hostData[$targetHost]['location_lat'], 'lon' => $hostData[$targetHost]['location_lon'], 'popup' => optArrayValue($value, 'popup')];
+            }
+        }
+        // Descobrir a imagem do host
+        if ($withIconMapping) {
+            foreach ($iconMapping[0]["mappings"] as $iMap) {
+                if (array_key_exists($iMap["inventory_field"], $host)) {
+                    if ($host[$iMap["inventory_field"]] == $iMap["expression"]) {
+                        $hostData[$cont]["iconid"] = $iMap["iconid"];
+                        break;
                     }
                 }
+            }
+
+            if (!isset($hostData[$cont]["iconid"])) {
+                $hostData[$cont]["iconid"] = $iconMapping[0]["default_iconid"];
+            }
         } else {
-            //print_r("Invalid JSON");
+            $hostData[$cont]["iconid"] = zbxeConfigValue('geo_default_poi', 0, "zbxe_default_icon");
         }
-        /* Configuração para CSV
-          $tmp2 = explode("\n", $host["notes"]);
+        // Varrer o notes e transferir o metadado para os arrays
+        if (isset($host["notes"])) {
+            $jsonArray = isJson($host["notes"]);
+            if (!$jsonArray == false) {
+                // Tratamento dos Circles
+                if (isset($jsonArray['circle']))
+                    foreach ($jsonArray['circle'] as $value) {
+                        $hostData[$cont]['circle'][] = ['size' => $value['size'], 'color' => $value['color']];
+                    }
+                // Tratamento dos Lines
+                if (isset($jsonArray['line']))
+                    foreach ($jsonArray['line'] as $value) {
+                        $hostData[$cont]['line'][] = ['lat' => $value['lat'], 'lon' => $value['lon'], 'popup' => optArrayValue($value, 'popup')];
+                    }
+                // Tratamento dos Links
+                if (isset($jsonArray['link']))
+                    foreach ($jsonArray['link'] as $value) {
+                        $targetHost = hostIndex($value['hostid'], $hostData);
+                        if ($targetHost > -1) {
+                            $hostData[$cont]['line'][] = ['lat' => $hostData[$targetHost]['location_lat'], 'lon' => $hostData[$targetHost]['location_lon'], 'popup' => optArrayValue($value, 'popup')];
+                        }
+                    }
+            }
+            /* Configuração para CSV
+              $tmp2 = explode("\n", $host["notes"]);
 
-          // Tratar o JSON
-          foreach ($tmp2 as $hostMetadata) {
-          $tmp = explode(";", $hostMetadata);
-          // Converter os links para lines através de consulta reversa aos hosts
-          // aqui adail
-          if ($tmp[0] == 'link') {
-          //line;-3.70068;-38.65891;#303;2;Link3;
-          //echo "\n console.log('$tmp[4]')";
-          $targetHost = hostIndex($tmp[1], $hostData);
-          $tmp = ['line', $hostData[$targetHost]['location_lat'], $hostData[$targetHost]['location_lon'], $tmp[2], $tmp[3], $tmp[4]];
-          //echo "\n console.log('$tmp[5]')";
-          }
-          if (!isset($hostData[$cont][$tmp[0]])) {
-          $hostData[$cont][$tmp[0]] = [];
-          }
-          $contType = count($hostData[$cont][$tmp[0]]);
-          for ($noteInfo = 1; $noteInfo < count($tmp) - 1; $noteInfo++) {
-          $hostData[$cont][$tmp[0]][$contType][$noteInfo] = $tmp[$noteInfo];
-          }
-          }
+              // Tratar o JSON
+              foreach ($tmp2 as $hostMetadata) {
+              $tmp = explode(";", $hostMetadata);
+              // Converter os links para lines através de consulta reversa aos hosts
+              // aqui adail
+              if ($tmp[0] == 'link') {
+              //line;-3.70068;-38.65891;#303;2;Link3;
+              //echo "\n console.log('$tmp[4]')";
+              $targetHost = hostIndex($tmp[1], $hostData);
+              $tmp = ['line', $hostData[$targetHost]['location_lat'], $hostData[$targetHost]['location_lon'], $tmp[2], $tmp[3], $tmp[4]];
+              //echo "\n console.log('$tmp[5]')";
+              }
+              if (!isset($hostData[$cont][$tmp[0]])) {
+              $hostData[$cont][$tmp[0]] = [];
+              }
+              $contType = count($hostData[$cont][$tmp[0]]);
+              for ($noteInfo = 1; $noteInfo < count($tmp) - 1; $noteInfo++) {
+              $hostData[$cont][$tmp[0]][$contType][$noteInfo] = $tmp[$noteInfo];
+              }
+              }
 
-         */
+             */
+        }
     }
     $cont++;
 }
