@@ -34,7 +34,10 @@ $PATH = realpath(dirname(__FILE__));
 
 try {
     if (!$VG_BANCO_OK) {
-        $criar_tabelas = "S";
+        // se tabelas na versão anterior do zabbix extras existirem, remover....
+        if (!empty(DBfetch(DBselect('select tx_value from zbxe_preferences WHERE tx_option = ' . quotestr("logo_company"))))) {
+            debugInfo("Versão antiga do BD!");
+        }
         $resultOK = true;
         debugInfo("EveryZ tables does not exists. Creating the configuration table:", true);
         $dmlPreferences = "CREATE TABLE zbxe_preferences (
@@ -58,15 +61,15 @@ try {
 
 /* * ***************************************************************************
  * Update data
- * ****************************************************************************/
-try { 
+ * *************************************************************************** */
+try {
     if (zbxeFieldValue("select COUNT(*) as total from zbxe_preferences", "total") < 2) {
         $debug = false;
         $resultOK = true;
         DBstart();
         // Configuration
         $json = json_decode(file_get_contents("$PATH/everyz_config.json"), true);
-        zbxeUpdateConfig($json, $resultOK, $debug);        
+        zbxeUpdateConfig($json, $resultOK, $debug);
         // Translation
         $json = json_decode(file_get_contents("$PATH/everyz_lang_ALL.json"), true);
         zbxeUpdateTranslation($json, $resultOK, $debug);

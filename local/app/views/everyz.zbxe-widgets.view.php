@@ -119,7 +119,7 @@ if (hasRequest('dml')) {
             case "widget.edit":
             case "widget.add":
                 $name = str_replace("|", "", $filter['name']);
-                $title = $filter['row'] . "|" . $filter['order'] . "|" . $name . "|" . str_replace("|", "", $filter['title']);
+                $title = $filter['row'] . "|" . $filter['order'] . "|" . $name . "|" . str_replace("|", "", $filter['title']) . "|" . str_replace("|", "", $filter['widgettype']);
                 if ($filter["mode"] == "widget.add") {
                     $last = explode("_", zbxeFieldValue('select MAX(tx_option) as ultimo from zbxe_preferences zp where zp.tx_option like '
                                     . quotestr("widget_%"), "ultimo"));
@@ -128,7 +128,7 @@ if (hasRequest('dml')) {
 // Insert
                     $sql = "insert into zbxe_preferences (userid, tx_option, tx_value, st_ativo) values (0," . quotestr($name) . "," . quotestr($title) . "," . $filter['status'] . ")";
                 } else {
-// Update
+// Update 
                     $sql = "update zbxe_preferences set tx_value = " . quotestr($title) . ", st_ativo = " . $filter['status'] . " where tx_option = " . quotestr($filter["widget"]);
                 }
                 show_messages(prepareQuery($sql), _zeT('Widget ' . ($filter["mode"] == "widget.add" ? "added" : "updated")));
@@ -204,6 +204,7 @@ if (in_array($filter['mode'], ["widget.edit", "widget.items", "widget.item.edit"
         $data['title'] = $tmp[3];
         $data['row'] = $tmp[0];
         $data['order'] = $tmp[1];
+        $data['widgettype'] = $tmp[4];
         $data['status'] = $row['st_ativo'];
     }
     $extraTitle = " - [" . $data['title'] . "]";
@@ -246,7 +247,7 @@ if ($filter['mode'] !== "") {
         case "widget.add":
         case "widget.edit":
             if ($filter['mode'] == "widget.add") { // Recover widget data aqui2
-                $data = ["name" => "", "title" => "", "row" => "1", "order" => "1", "status" => "1"];
+                $data = ["name" => "", "title" => "", "row" => "1", "order" => "1", "status" => "1", 'widgettype' => 0];
             }
             $formWidget = (new CFormList())
                     ->addRow(_('Name')
@@ -258,7 +259,7 @@ if ($filter['mode'] !== "") {
                     ->addRow(_zeT('Position'), [
                         _('Row'), '&nbsp;', (new CNumericBox('row', $data['row'], 2))->setWidth(ZBX_TEXTAREA_NUMERIC_STANDARD_WIDTH)
                         , '&nbsp;', _('Order'), '&nbsp;', (new CNumericBox('order', $data['order'], 2))->setWidth(ZBX_TEXTAREA_NUMERIC_STANDARD_WIDTH)])
-                    ->addRow(bold('Type of widget'), [(new CRadioButtonList('widgettype', (int) $filter['widgettype']))->setModern(true)
+                    ->addRow(bold('Type of widget'), [(new CRadioButtonList('widgettype', (int) $data['widgettype']))->setModern(true)
                         ->addValue(_zeT('Links'), 0)->addValue(_zeT('jQuery'), 1)->addValue(_zeT('Custom DIV'), 2)])
                     ->addRow(bold(_zeT('Visibility')), buttonOptions("status", $data["status"], [_('Hide'), _('Show')]))
                     ->addItem(new CInput('hidden', 'action', $filter["action"]))

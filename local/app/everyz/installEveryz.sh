@@ -6,8 +6,8 @@
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com"; 
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="Beta_20160121_2";
-VERSAO_EZ="1.0-beta6";
+VERSAO_INST="Beta_20170125_1";
+VERSAO_EZ="1.0-beta7";
 UPDATEBD="S";
 BRANCH="master";
 NOME_PLUGIN="EVERYZ";
@@ -138,7 +138,7 @@ identificaDistro() {
     fi
 
     case $LINUX_DISTRO in
-	"ubuntu" | "debian" | "red hat" | "red" | "centos" | "opensuse" | "opensuse" | "amazon" | "oracle" )
+	"ubuntu" | "debian" | "red hat" | "red" | "centos" | "opensuse" | "opensuse" | "amazon" | "oracle" | "zabbix - server" )
             CAMINHO_RCLOCAL="/etc/rc.local";
             registra "Versao do Linux - OK ($LINUX_DISTRO - $LINUX_VER)"
             ;;
@@ -638,6 +638,28 @@ confirmaApache() {
     fi
 }
 
+instalaPortletNS() {
+    registra "Configurando portlet com link para itens nao suportados...";
+    ARQUIVO="include/blocks.inc.php";
+    TAG_INICIO='##Zabbix-Extras-NS-custom';
+    TAG_FINAL="$TAG_INICIO-FIM";
+    INIINST=`cat $ARQUIVO | sed -ne "/$TAG_INICIO/{=;q;}"`;
+    FIMINST=`cat $ARQUIVO | sed -ne "/$TAG_FINAL/{=;q;}"`;
+    if [ ! -z $INIINST ]; then
+        installMgs "U" "NS"; 
+    else
+        installMgs "N" "NS"; 
+        TMP="items_count_not_supported";
+        INIINST=`cat $ARQUIVO | sed -ne "/$TMP/{=;q;}"`;
+        FIMINST=$INIINST;
+    fi
+    sed -i "$INIINST,$FIMINST d" $ARQUIVO;
+    #TXT_CUSTOM="new CSpan(\$status['items_count_not_supported'], 'unknown')";
+    TXT_CUSTOM="new CLink(\$status['items_count_not_supported']\, 'zbxe-ns.php?groupid=0&hostid=0')";
+    sed -i "$INIINST i$TAG_INICIO\n$TXT_CUSTOM\n$TAG_FINAL" $ARQUIVO
+}
+
+
 ####### Parametros de instalacao -----------------------------------------------
 
 if [ $(alias  | grep rm | wc -l ) == "1" ]; then
@@ -662,6 +684,7 @@ instalaLiteral;
 corTituloMapa;
 configuraApache;
 instalaGit;  
+instalaPortletNS;
  
 echo "Installed - [ $VERSAO_INST ]";
 echo "You need to check your apache server and restart!";
