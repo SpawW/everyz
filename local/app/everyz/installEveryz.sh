@@ -615,8 +615,10 @@ configuraApache() {
             apacheDirectoryConf "css";
             if [ -f "/etc/init.d/apache2" ]; then
                 /etc/init.d/apache2 restart ;
-            else
+            elif [ -f "/etc/init.d/httpd" ]; then
                 /etc/init.d/httpd restart ;
+            else
+                service httpd restart
             fi
             registra "Reconfigurou o apache! $APACHEROOT/everyz.conf  ";
         fi
@@ -639,6 +641,7 @@ confirmaApache() {
 }
 
 instalaPortletNS() {
+    cd $CAMINHO_FRONTEND;
     registra "Configurando portlet com link para itens nao suportados...";
     ARQUIVO="include/blocks.inc.php";
     TAG_INICIO='##Zabbix-Extras-NS-custom';
