@@ -204,7 +204,7 @@ if (in_array($filter['mode'], ["widget.edit", "widget.items", "widget.item.edit"
         $data['title'] = $tmp[3];
         $data['row'] = $tmp[0];
         $data['order'] = $tmp[1];
-        $data['widgettype'] = $tmp[4];
+        $data['widgettype'] = (count($tmp) > 4 ? $tmp[4] : 0);
         $data['status'] = $row['st_ativo'];
     }
     $extraTitle = " - [" . $data['title'] . "]";
@@ -356,7 +356,8 @@ if ($filter['mode'] !== "") {
         $tmp = explode("|", $row['tx_value']);
         $name = $row['tx_option'];
         $title = $tmp[3];
-        $report[count($report)] = [$name, $title];
+        $widgettype = (isset($tmp[4]) ? $tmp[4] : 0);
+        $report[count($report)] = [$name, $title, $widgettype];
         $cont++;
     }
 
@@ -385,7 +386,8 @@ if ($filter['mode'] !== "") {
                         (new CRedirectButton(_('Edit'), $baseAction . "&mode=widget.edit"
                         , null))->setId('edit')
                         , "&nbsp;"
-                        , (new CRedirectButton(_('Items'), $baseAction . "&mode=widget.items", null))->setId('items')
+                        // Aqui disable button
+                        , (new CRedirectButton(_('Items'), $baseAction . "&mode=widget.items", null))->setId('items')->setEnabled(intval($report[$i][2]) <= 1)
                         , "&nbsp;"
                         , (new CRedirectButton(_('Delete'), $baseAction . "&dml=Y&mode=widget.delete", _('Delete record?')))->setId('delete')
                     );

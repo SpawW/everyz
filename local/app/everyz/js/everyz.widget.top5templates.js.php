@@ -1,6 +1,6 @@
 <?php
 /*
- * * Purpose: Chart with group information
+ * * Purpose: Chart with Top 5 templates
  * * Adail Horst - http://spinola.net.br/blog
  * *
  * * This program is free software; you can redistribute it and/or modify
@@ -23,9 +23,10 @@
  * Module Variables
  * ************************************************************************** */
 // Configuration variables =====================================================
-$moduleName = "groupsum";
+$moduleName = "top5templates";
 $baseProfile .= $moduleName;
-$moduleTitle = 'Group Sum';
+$moduleTitle = 'Top 5 Templates';
+$divName = "body-$moduleName";
 // Common fields
 addFilterActions();
 // Specific fields
@@ -43,53 +44,40 @@ $hosts = checkAccessHost('hostids');
  * Module Functions
  * ************************************************************************** */
 
-function data() {
-    return '[
-		{        
-			type: "pie",       
-			indexLabelFontFamily: "Garamond",       
-			indexLabelFontSize: 20,
-			indexLabel: "{label} {y}%",
-			startAngle:-20,      
-			showInLegend: true,
-			toolTipContent:"{legendText} {y}%",
-			dataPoints: [
-				{  y: 83.24, legendText:"Google", label: "Google" },
-				{  y: 8.16, legendText:"Yahoo!", label: "Yahoo!" },
-				{  y: 4.67, legendText:"Bing", label: "Bing" },
-				{  y: 1.67, legendText:"Baidu" , label: "Baidu"},       
-				{  y: 0.98, legendText:"Others" , label: "Others"}
-			]
-		}
-		]';
+function top5TemplatesData() {
+    $query = "SELECT COUNT(hte.templateid) as total, hte.templateid
+  FROM hosts_templates hte
+ INNER JOIN hosts hos 
+    ON hos.hostid = hte.hostid 
+   AND hos.status = 0
+  GROUP BY hte.templateid
+ ORDER BY total DESC
+LIMIT 0, 5
+";
+    $res = DBselect($query);
+    $jsonResult = [];
+    while ($row = DBfetch($res)) {
+        $templateName = templateName($row['templateid']);
+        $jsonResult[] = [
+            "label" => substr($templateName, 0, 20) . (strlen($templateName) > 20 ? '...' : ''),
+            "value" => (int) $row['total']
+        ];
+    }
+    // Array padrao JSON / Javascript??
+    return json_encode($jsonResult, JSON_UNESCAPED_UNICODE); //'[]';
 }
 
 /* * ***************************************************************************
  * Get Data
  * ************************************************************************** */
+zbxeJSLoad(['d3/d3.min.js', 'd3/d3pie.js','everyzD3Functions.js.php']);
 ?>
-<script type="text/javascript">
-    window.onload = function () {
-        var chart = new CanvasJS.Chart("body-groupsum",
-                {
-                    title: {
-                        text: "Group Statistics"
-                    },
-                    animationEnabled: true,
-                    legend: {
-                        verticalAlign: "center",
-                        horizontalAlign: "left",
-                        fontSize: 20,
-                        fontFamily: "Helvetica"
-                    },
-                    theme: "theme2",
-                    data: <?php echo data(); ?>
-                });
-        chart.render();
-    }
+<script>
+    container="<?php echo $divName; ?>";
+    data=<?php echo top5TemplatesData(); ?>;
+    newD3Pie(container,data,"{label}: {value} <?php echo strtolower(_("Hosts")); ?>",false,250);
 </script>
-<script type="text/javascript" src="local/app/everyz/js/canvasjs.min.js"></script> 
-
+    
 <?php
 
 

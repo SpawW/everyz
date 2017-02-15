@@ -23,7 +23,7 @@
 define("ZE_VER", "3.0");
 define("EZ_TITLE", 'EveryZ - ');
 define("ZE_COPY", ", ZE " . ZE_VER);
-define("EVERYZBUILD", 3);
+define("EVERYZBUILD", 2);
 
 global $VG_DEBUG;
 global $zeMessages, $zeLocale, $baseName, $requiredMissing, $zbxeLoadedJS;
@@ -731,15 +731,12 @@ function hostMacroValue($hostid, $macroName, $default = 0) {
         'hostids' => $hostid,
         'selectMacros' => ['hostmacroid', 'macro', 'value']
     ]);
-    if (count($array_host) > 0) {
-        foreach ($array_host[0]["macros"] as $row) {
-            if ($row["macro"] == $macroName) {
-                $macroValue = $row["value"];
-                break;
-            }
+    foreach ($array_host[0]["macros"] as $row) {
+        if ($row["macro"] == $macroName) {
+            $macroValue = $row["value"];
+            break;
         }
     }
-
     if (!isset($macroValue) || $macroValue == NULL) {
         $macroValue = globalMacroValue($macroName);
     }

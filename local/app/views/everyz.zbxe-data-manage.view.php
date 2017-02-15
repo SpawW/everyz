@@ -60,7 +60,7 @@ function newText($text, $class = ZBX_STYLE_GREEN, $margin = "10px") {
  * Change Data
  * ************************************************************************** */
 if (isset($_FILES['import_file']) && $filter['actionType'] == 0) {
-    $result = false;
+    $resultOK = false;
 
     try {
         $file = new CUploadFile($_FILES['import_file']);

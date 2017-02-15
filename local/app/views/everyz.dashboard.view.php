@@ -28,10 +28,9 @@ function newWidget($p_id, $p_title, $p_content, $p_expanded = true, $p_icon = []
     $tmp = explode("|", $p_title);
     if (isset($tmp[4]) && $tmp[4] == 2) {
         $loadScripts[] = $tmp[2];
-        return (new CDiv($p_content))->setName('body-' . $tmp[2])->setId('body-' . $tmp[2]);
+        return (new CUiWidget($p_id, (new CDiv(''))->setName('body-' . $tmp[2])->setId('body-' . $tmp[2])))->setHeader(_zeT($tmp[3]), [$p_icon], true);
     } else {
         return (new CCollapsibleUiWidget($p_id, (new CDiv($p_content))->setName('body-' . $tmp[2])->setId('body-' . $tmp[2])))
-#    return (new CUiWidget($p_id, (new CDiv($p_content))->setName('body-' . $p_id)))
                         ->setExpanded($p_expanded)
                         ->setHeader(_zeT($tmp[3]), [$p_icon], true);
     }

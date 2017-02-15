@@ -1,6 +1,6 @@
 <?php
 /*
- * * Purpose: Chart with group information
+ * * Purpose: Chart with Events / Last 5 weeks
  * * Adail Horst - http://spinola.net.br/blog
  * *
  * * This program is free software; you can redistribute it and/or modify
@@ -23,9 +23,10 @@
  * Module Variables
  * ************************************************************************** */
 // Configuration variables =====================================================
-$moduleName = "groupsum";
+$moduleName = "events-5week";
 $baseProfile .= $moduleName;
-$moduleTitle = 'Group Sum';
+$moduleTitle = 'Events / Last 5 weeks';
+$divName = "body-$moduleName";
 // Common fields
 addFilterActions();
 // Specific fields
@@ -43,65 +44,59 @@ $hosts = checkAccessHost('hostids');
  * Module Functions
  * ************************************************************************** */
 
-function data() {
-    return '[
-		{        
-			type: "pie",       
-			indexLabelFontFamily: "Garamond",       
-			indexLabelFontSize: 20,
-			indexLabel: "{label} {y}%",
-			startAngle:-20,      
-			showInLegend: true,
-			toolTipContent:"{legendText} {y}%",
-			dataPoints: [
-				{  y: 83.24, legendText:"Google", label: "Google" },
-				{  y: 8.16, legendText:"Yahoo!", label: "Yahoo!" },
-				{  y: 4.67, legendText:"Bing", label: "Bing" },
-				{  y: 1.67, legendText:"Baidu" , label: "Baidu"},       
-				{  y: 0.98, legendText:"Others" , label: "Others"}
-			]
-		}
-		]';
+function getStartAndEndDate($week, $year) {
+    $time = strtotime("1 January $year", time());
+    $day = date('w', $time);
+    $time += ((7 * $week) + 1 - $day) * 24 * 3600;
+    $mask = 'j M'; //'Y-n-j'
+    $tmp = date($mask, $time);
+    $start = explode(' ', $tmp);
+    $time += 6 * 24 * 3600;
+    $tmp = date($mask, $time);
+    $end = explode(' ', $tmp);
+    if ($start[1] == $end[1]) {
+        return $start[0] . " a " . $end[0] . "/" . _($end[1]);
+    } else {
+        return $start[0] . "/" . _($start[1]) . " a " . $end[0] . "/" . _($end[1]);
+    }
+}
+
+function events5WeekData() {
+    $query = "select COUNT(subt.week) as total, subt.week FROM
+  (select CONCAT(DATE_FORMAT(sub1.clock,'%Y'),DATE_FORMAT(sub1.clock,'%U')) as week from 
+    (select FROM_UNIXTIME(eve.clock) as clock from events eve WHERE 
+    source = 0) sub1
+  ) subt
+group by week
+ORDER BY week DESC
+LIMIT 0, 5
+";
+    $res = DBselect($query);
+    $jsonResult = [];
+    while ($row = DBfetch($res)) {
+        $year = substr($row['week'], 0, 4);
+        $weekNum = substr($row['week'], 4, 2);
+        $weekInfo = getStartAndEndDate((int) $weekNum, (int) $year);
+        $jsonResult[] = [
+            "label" => $weekInfo,
+            //$row['week'] . ' [' .$year.' - '.$weekNum. ']',
+            "value" => (int) $row['total']
+                //"color": "#2484c1"
+        ];
+    }
+    // Array padrao JSON / Javascript??
+    return json_encode($jsonResult, JSON_UNESCAPED_UNICODE); //'[]';
 }
 
 /* * ***************************************************************************
  * Get Data
  * ************************************************************************** */
+zbxeJSLoad(['d3/d3.min.js', 'd3/d3pie.js','everyzD3Functions.js.php']);
 ?>
-<!-- ChartJS 1.0.1 -->
-<script src="local/app/everyz/js/Chart.min.js" type="text/javascript"></script>
-<!-- jQuery 2.1.3 -->
-<!--<script src="local/app/everyz/js/jQuery-2.1.3.min.js"></script>-->
-<!-- Scripts Especificos -->
-<script type="text/javascript" src="http://canvasjs.com/assets/script/jquery-1.11.1.min.js"></script>  
-<script type="text/javascript" src="http://canvasjs.com/assets/script/jquery.canvasjs.min.js"></script>  
-<script type="text/javascript">
-    $j = jQuery.noConflict();
-    //alert('oi');
-    jQuery(function ($) {
-        // The dollar sign will equal jQuery in this scope
-    });
-    alert($j("body-groupsum").innerHTML);
-    $j("body-groupsum").CanvasJSChart({//Pass chart options
-        data: [
-            {
-                type: "splineArea", //change it to column, spline, line, pie, etc
-                dataPoints: [
-                    {x: 10, y: 10},
-                    {x: 20, y: 14},
-                    {x: 30, y: 18},
-                    {x: 40, y: 22},
-                    {x: 50, y: 18},
-                    {x: 60, y: 28}
-                ]
-            }
-        ]
-
-    }); 
-</script>
-
-<script type="text/javascript">
-
+<script>
+    container="<?php echo $divName; ?>";
+    data=<?php echo events5WeekData(); ?>;
+    newD3Pie(container,data,"{label}: {value} <?php echo strtolower(_("Events")); ?>",true,350);
 </script>
 <?php
 
