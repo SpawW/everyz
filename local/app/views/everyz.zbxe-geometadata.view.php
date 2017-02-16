@@ -58,7 +58,7 @@ checkAccessHost('hostids');
     jq2(function ($) {
         // Code using $ as usual goes here; the actual jQuery object is jq2
         //
-        json = JSON.parse('{"circle":[{"size":5000,"color":"#e6e600"},{"size":3000,"color":"#e6e600"}],"line":[{"lat":-3.73082,"lon":-38.53935},{"lat":-3.77091,"lon":-38.56922,"popup":"Link 1"}],"link":[{"hostid":10781},{"hostid":11781}]}');
+        //json = JSON.parse('{"circle":[{"size":5000,"color":"#e6e600"},{"size":3000,"color":"#e6e600"}],"line":[{"lat":-3.73082,"lon":-38.53935},{"lat":-3.77091,"lon":-38.56922,"popup":"Link 1"}],"link":[{"hostid":10781},{"hostid":11781}]}');
         json = JSON.parse('{}');
         txJson = document.getElementById('jsonResult');
         txJson.value = formatJSON();
@@ -153,6 +153,19 @@ checkAccessHost('hostids');
             return false;
         }
     }
+    function resetJSON() {
+        try {
+            var txJson = document.getElementById('jsonResult');
+            txJson.value = '{}';
+            json = JSON.parse(txJson.value);
+            return true;
+        }
+        catch (e) {
+            alert('Invalid json');
+            return false;
+        }
+    }
+
 </script>
 
 <?php
@@ -201,34 +214,14 @@ $subTable->addRow([
 ]);
 $leftCol->addRow(_('Line'), $subTable);
 // Multiline
-/*
-  $subTable = (new CTableInfo())->setHeader(['Coordenates', '']);
-  $addButton->onClick('javascript:addMultiLine();');
-  $subTable->addRow([
-  (new CTextArea('multiline_coord', ''))->setWidth(ZBX_TEXTAREA_STANDARD_WIDTH)
-  ]);
-  $subTable->addRow([
-  (new CTextBox('multiline_popup', 'Link Description'))
-  , $addButton
-  ]);
-  $rightCol->addRow(_('MultiLine'), $subTable);
- */
 
 $subTable2 = (new CTableInfo())->setHeader(['New configuration', '']);
 $subTable2->addRow([ (new CTextArea('jsonResult', ''))->setWidth(ZBX_TEXTAREA_BIG_WIDTH)]);
-$subTable2->addRow([ (new CButton('btnvalidate', _('Validate')))->onClick('javascript:validateJSON();')]);
-/*
-  $subTable3 = (new CTableInfo());//->setHeader(['Current Metadata', '']);
-  $subTable3->addRow([ (new CTextArea('currentJSON', ''))->setWidth(ZBX_TEXTAREA_BIG_WIDTH)]);
-  $subTable3->addRow([ (new CButton('btnvalidate', _('Restore')))->onClick('javascript:restoreJSON();')]);
-  //$rightCol->addRow(_('Current'), $subTable3);
- * */
+$subTable2->addRow([ (new CButton('btnvalidate', _('Validate')))->onClick('javascript:validateJSON();'), (new CButton('btnReset', _('Reset')))->onClick('javascript:resetJSON();')]);
 
 $rightCol->addRow($subTable2);
 
 $table->addRow([$leftCol, $rightCol]);
-//$table->setAttribute('style', 'vertical-align: top');
-//$table->addRow([$subTable2, $subTable3]);
 
 /* * ***************************************************************************
  * Display Footer 
