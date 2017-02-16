@@ -105,6 +105,8 @@ $cont = 0;
 $imagesArray = [];
 
 foreach ($hostData as $key => $host) {
+    $hostData[$key]['location_lat'] = cleanPosition($host['location_lat']);
+    $hostData[$key]['location_lon'] = cleanPosition($host['location_lon']);
     // Check if host have a minimum usable data
     if ($host['location_lat'] == "" || $host['location_lon'] == "") {
 //        echo "host faltando dados".$host['id'];
@@ -163,44 +165,18 @@ foreach ($hostData as $key => $host) {
                 // Tratamento dos Lines
                 if (isset($jsonArray['line']))
                     foreach ($jsonArray['line'] as $value) {
-                        $hostData[$cont]['line'][] = ['lat' => $value['lat'], 'lon' => $value['lon'], 'popup' => optArrayValue($value, 'popup')];
+                        $hostData[$cont]['line'][] = ['lat' => cleanPosition($value['lat']), 'lon' => cleanPosition($value['lon']), 'popup' => optArrayValue($value, 'popup')];
                     }
                 // Tratamento dos Links
                 if (isset($jsonArray['link']))
                     foreach ($jsonArray['link'] as $value) {
                         $targetHost = hostIndex($value['hostid'], $hostData);
                         if ($targetHost > -1) {
-                            //aqui °
                             $hostData[$cont]['line'][] = ['lat' => cleanPosition($hostData[$targetHost]['location_lat'])
                                 , 'lon' => cleanPosition($hostData[$targetHost]['location_lon']), 'popup' => optArrayValue($value, 'popup')];
                         }
                     }
             }
-            /* Configuração para CSV
-              $tmp2 = explode("\n", $host["notes"]);
-
-              // Tratar o JSON
-              foreach ($tmp2 as $hostMetadata) {
-              $tmp = explode(";", $hostMetadata);
-              // Converter os links para lines através de consulta reversa aos hosts
-              // aqui adail
-              if ($tmp[0] == 'link') {
-              //line;-3.70068;-38.65891;#303;2;Link3;
-              //echo "\n console.log('$tmp[4]')";
-              $targetHost = hostIndex($tmp[1], $hostData);
-              $tmp = ['line', $hostData[$targetHost]['location_lat'], $hostData[$targetHost]['location_lon'], $tmp[2], $tmp[3], $tmp[4]];
-              //echo "\n console.log('$tmp[5]')";
-              }
-              if (!isset($hostData[$cont][$tmp[0]])) {
-              $hostData[$cont][$tmp[0]] = [];
-              }
-              $contType = count($hostData[$cont][$tmp[0]]);
-              for ($noteInfo = 1; $noteInfo < count($tmp) - 1; $noteInfo++) {
-              $hostData[$cont][$tmp[0]][$contType][$noteInfo] = $tmp[$noteInfo];
-              }
-              }
-
-             */
         }
     }
     $cont++;
