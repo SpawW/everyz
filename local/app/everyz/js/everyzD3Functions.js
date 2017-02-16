@@ -2,9 +2,9 @@
  * 
  */
 function newD3Pie(container, data, tooltipStandard, showLabels, canvasWidth, canvasHeight) {
-    showLabels = showLabels || true;
-    canvasWidth = canvasWidth || 350;
-    canvasHeight = canvasHeight || 200;
+    showLabels = (showLabels === undefined ? true : showLabels);
+    canvasWidth = (canvasWidth === undefined ? 350 : canvasWidth);
+    canvasHeight = (canvasHeight === undefined ? 200 : canvasHeight);
     if (showLabels) {
         outerLabel = {"pieDistance": 12};
     } else {
