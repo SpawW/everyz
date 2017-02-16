@@ -56,6 +56,11 @@ checkAccessGroup('groupids');
  * Module Functions
  * ************************************************************************** */
 
+function cleanPosition($position) {
+    $position = str_replace('°', '', $position);
+    return $position;
+}
+
 function hostIndex($hostid, $hostArray) {
     foreach ($hostArray as $k => $v) {
         if ($v['id'] == $hostid) {
@@ -165,7 +170,9 @@ foreach ($hostData as $key => $host) {
                     foreach ($jsonArray['link'] as $value) {
                         $targetHost = hostIndex($value['hostid'], $hostData);
                         if ($targetHost > -1) {
-                            $hostData[$cont]['line'][] = ['lat' => $hostData[$targetHost]['location_lat'], 'lon' => $hostData[$targetHost]['location_lon'], 'popup' => optArrayValue($value, 'popup')];
+                            //aqui °
+                            $hostData[$cont]['line'][] = ['lat' => cleanPosition($hostData[$targetHost]['location_lat'])
+                                , 'lon' => cleanPosition($hostData[$targetHost]['location_lon']), 'popup' => optArrayValue($value, 'popup')];
                         }
                     }
             }

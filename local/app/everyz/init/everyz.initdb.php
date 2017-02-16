@@ -36,7 +36,7 @@ try {
     if (!$VG_BANCO_OK) {
         // se tabelas na versão anterior do zabbix extras existirem, remover....
         $oldZE = DBfetch(DBselect('select tx_value from zbxe_preferences WHERE tx_option = ' . quotestr("logo_company")));
-        
+
         if (!empty($result)) {
             debugInfo("Versão antiga do BD!");
         }
