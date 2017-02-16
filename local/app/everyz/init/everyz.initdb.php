@@ -35,7 +35,8 @@ $PATH = realpath(dirname(__FILE__));
 try {
     if (!$VG_BANCO_OK) {
         // se tabelas na versão anterior do zabbix extras existirem, remover....
-        if (!empty(DBfetch(DBselect('select tx_value from zbxe_preferences WHERE tx_option = ' . quotestr("logo_company"))))) {
+        $result = DBselect('select tx_value from zbxe_preferences WHERE tx_option = ' . quotestr("logo_company"));
+        if (!empty(DBfetch($result))) {
             debugInfo("Versão antiga do BD!");
         }
         $resultOK = true;
