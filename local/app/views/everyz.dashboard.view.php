@@ -65,7 +65,7 @@ for ($rowNum = 0; $rowNum <= $totRows; $rowNum++) {
     //   var_dump($rowNum);
     $query = 'SELECT tx_option, tx_value FROM zbxe_preferences '
             . ' where tx_option like ' . quotestr("widget_%") . ' and tx_option not like ' . quotestr("%link%") . ' and st_ativo = 1 '
-            . ' and tx_value like "' . $rowNum . '|%"'
+            . ' and tx_value like ' . quotestr($rowNum . '|%')
             . ' order by userid, tx_value';
     $res = DBselect($query);
     //var_dump($query);

@@ -6,8 +6,8 @@
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com"; 
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="Beta_20170215_1";
-VERSAO_EZ="1.0-beta8";
+VERSAO_INST="Beta_20170216_1";
+VERSAO_EZ="1.0-beta9";
 UPDATEBD="S";
 BRANCH="master";
 NOME_PLUGIN="EVERYZ";
@@ -109,7 +109,6 @@ identificaDistro() {
         PATHDEF=$(find / -name zabbix.php | head -n1 | sed 's/\/zabbix.php//g');
     fi
     if [ -f /etc/redhat-release -o -f /etc/system-release ]; then
-#        PATHDEF="/var/www/html";
         GERENCIADOR_PACOTES='yum ';
         PARAMETRO_INSTALL=' install -y ';
         TMP=`cat /etc/redhat-release | head -n1 | tr "[:upper:]" "[:lower:]"`;
@@ -120,11 +119,9 @@ identificaDistro() {
         LINUX_DISTRO=`echo $TMP | head -n1 | awk -F' ' '{print $1}'` ;
         LINUX_VER=`echo $TMP | sed 's/release//g' | awk -F' ' '{print $2}'`;
         if [ `which zypper 2>&-  | wc -l` -eq 1 ]; then
-#            PATHDEF="/usr/share/zabbix";
             GERENCIADOR_PACOTES='zypper ';
             PARAMETRO_INSTALL=' install -y ';
         else
-#            PATHDEF="/var/www";
             GERENCIADOR_PACOTES='apt-get ';
             PARAMETRO_INSTALL=' install -y ';
         fi
@@ -138,7 +135,7 @@ identificaDistro() {
     fi
 
     case $LINUX_DISTRO in
-	"ubuntu" | "debian" | "red hat" | "red" | "centos" | "opensuse" | "opensuse" | "amazon" | "oracle" | "zabbix - server" )
+	"ubuntu" | "debian" | "red hat" | "red" | "centos" | "opensuse" | "opensuse" | "amazon" | "oracle"  )
             CAMINHO_RCLOCAL="/etc/rc.local";
             registra "Versao do Linux - OK ($LINUX_DISTRO - $LINUX_VER)"
             ;;
@@ -674,7 +671,7 @@ fi
 identificaDistro;
 preReq;
 idioma;
-tipoInstallZabbix;
+#tipoInstallZabbix;
 caminhoFrontend;
 confirmaDownload;
 confirmaApache;

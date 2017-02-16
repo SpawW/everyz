@@ -72,7 +72,7 @@ if (hasRequest('filter_rst')) { // Clean the filter parameters
 /* * ***************************************************************************
  * Display
  * ************************************************************************** */
-zbxeJSLoad(['d3/d3.min.js', 'everyzD3Functions.js.php', 'd3/gauge.js']);
+zbxeJSLoad(['d3/d3.min.js', 'everyzD3Functions.js', 'd3/gauge.js']);
 
 commonModuleHeader($moduleName, $moduleTitle, true);
 $widget = newFilterWidget($moduleName);

@@ -30,15 +30,15 @@ $divName = "body-$moduleName";
 // Common fields
 addFilterActions();
 // Specific fields
-addFilterParameter("format", T_ZBX_INT, 0, false, false, false);
-addFilterParameter("hostids", T_ZBX_INT, 0, false, false, false);
+//addFilterParameter("format", T_ZBX_INT, 0, false, false, false);
+//addFilterParameter("hostids", T_ZBX_INT, 0, false, false, false);
 // Field validation
 check_fields($fields);
 
 /* * ***************************************************************************
  * Access Control
  * ************************************************************************** */
-$hosts = checkAccessHost('hostids');
+//$hosts = checkAccessHost('hostids');
 
 /* * ***************************************************************************
  * Module Functions
@@ -52,7 +52,7 @@ function top5TemplatesData() {
    AND hos.status = 0
   GROUP BY hte.templateid
  ORDER BY total DESC
-LIMIT 0, 5
+LIMIT 5 OFFSET 0
 ";
     $res = DBselect($query);
     $jsonResult = [];
@@ -70,7 +70,7 @@ LIMIT 0, 5
 /* * ***************************************************************************
  * Get Data
  * ************************************************************************** */
-zbxeJSLoad(['d3/d3.min.js', 'd3/d3pie.js','everyzD3Functions.js.php']);
+zbxeJSLoad(['d3/d3.min.js', 'd3/d3pie.js','everyzD3Functions.js']);
 ?>
 <script>
     container="<?php echo $divName; ?>";

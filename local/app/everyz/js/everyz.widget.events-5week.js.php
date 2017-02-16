@@ -30,15 +30,16 @@ $divName = "body-$moduleName";
 // Common fields
 addFilterActions();
 // Specific fields
-addFilterParameter("format", T_ZBX_INT, 0, false, false, false);
-addFilterParameter("hostids", T_ZBX_INT, 0, false, false, false);
+//addFilterParameter("format", T_ZBX_INT, 0, false, false, false);
+//addFilterParameter("hostids", T_ZBX_INT, 0, false, false, false);
 // Field validation
 check_fields($fields);
 
 /* * ***************************************************************************
  * Access Control
  * ************************************************************************** */
-$hosts = checkAccessHost('hostids');
+
+//$hosts = checkAccessHost('hostids');
 
 /* * ***************************************************************************
  * Module Functions
@@ -62,14 +63,18 @@ function getStartAndEndDate($week, $year) {
 }
 
 function events5WeekData() {
-    $query = "select COUNT(subt.week) as total, subt.week FROM
-  (select CONCAT(DATE_FORMAT(sub1.clock,'%Y'),DATE_FORMAT(sub1.clock,'%U')) as week from 
-    (select FROM_UNIXTIME(eve.clock) as clock from events eve WHERE 
+    global $DB;
+    $query = "SELECT COUNT(subt.week) as total, subt.week FROM
+  (SELECT CONCAT(" . ($DB['TYPE'] == ZBX_DB_POSTGRESQL ? " TO_CHAR(sub1.clock,'YYYY'),TO_CHAR(sub1.clock,'WW') " :
+                    //MySQL
+                    "DATE_FORMAT(sub1.clock,'%Y'),DATE_FORMAT(sub1.clock,'%U') " )
+            . ") AS week FROM
+    (SELECT " . ($DB['TYPE'] == ZBX_DB_POSTGRESQL ? "TO_TIMESTAMP" : "FROM_UNIXTIME") . "(eve.clock) AS clock FROM events eve WHERE 
     source = 0) sub1
   ) subt
-group by week
+GROUP BY week
 ORDER BY week DESC
-LIMIT 0, 5
+LIMIT 5 OFFSET 0
 ";
     $res = DBselect($query);
     $jsonResult = [];
@@ -91,12 +96,12 @@ LIMIT 0, 5
 /* * ***************************************************************************
  * Get Data
  * ************************************************************************** */
-zbxeJSLoad(['d3/d3.min.js', 'd3/d3pie.js','everyzD3Functions.js.php']);
+zbxeJSLoad(['d3/d3.min.js', 'd3/d3pie.js', 'everyzD3Functions.js']);
 ?>
 <script>
-    container="<?php echo $divName; ?>";
-    data=<?php echo events5WeekData(); ?>;
-    newD3Pie(container,data,"{label}: {value} <?php echo strtolower(_("Events")); ?>",true,350);
+    container = "<?php echo $divName; ?>";
+    data =<?php echo events5WeekData(); ?>;
+    newD3Pie(container, data, "{label}: {value} <?php echo strtolower(_("Events")); ?>", true, 350);
 </script>
 <?php
 
