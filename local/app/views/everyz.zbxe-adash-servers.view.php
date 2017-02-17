@@ -49,54 +49,6 @@ checkAccessGroup('groupids');
  * Module Functions
  * ************************************************************************** */
 
-function newWidget($id, $content) {
-    return [(new CSpan($content))->setAttribute('id', "cpu" . $id . "Gauge")
-        , (new CSpan($content))->setAttribute('id', "mem" . $id . "Gauge")
-        , (new CSpan($content))->setAttribute('id', "fs" . $id . "Gauge")];
-    ;
-}
-
-/* * ***************************************************************************
- * Get Data
- * ************************************************************************** */
-// Filtros =====================================================================
-if (hasRequest('filter_rst')) { // Clean the filter parameters
-    resetProfile('groupids', true);
-    $filter['filter_rst'] = NULL;
-} else { // Put the date in required format
-    //var_dump($filter["groupids"]);
-    //var_dump(selectHostsByGroup($filter["groupids"],['location_lat', 'location_lon', 'location']));
-}
-
-
-/* * ***************************************************************************
- * Display
- * ************************************************************************** */
-zbxeJSLoad(['d3/d3.min.js', 'everyzD3Functions.js', 'd3/gauge.js']);
-
-commonModuleHeader($moduleName, $moduleTitle, true);
-$widget = newFilterWidget($moduleName);
-
-// Left collumn
-$tmpColumn = new CFormList();
-$tmpColumn->addRow(_('Host Groups'), multiSelectHostGroups(selectedHostGroups($filter['groupids'])));
-$tmpColumn->addItem(new CInput('hidden', 'action', $filter["action"]));
-$widget->addColumn($tmpColumn);
-// Left collumn
-
-$dashboard->addItem($widget);
-
-// Get data for report ---------------------------------------------------------
-if (hasRequest('filter_set')) {
-    // Sample Check if all required fields have values
-    if ($requiredMissing) {
-        error("check data required!");
-        //checkRequiredField("centerLat", _zeT("You need to entered center Latitude data!"));  
-    }
-} else {
-    zbxeNeedFilter(_zeT('Specify some filter condition to see the geolocation.'));
-}
-
 function getItems($groupids, $itemType, $key_) {
     global $itemids, $reportData;
     $result = API::Item()->get([
@@ -111,6 +63,23 @@ function getItems($groupids, $itemType, $key_) {
     return $result;
 }
 
+function newWidget($id, $content) {
+    return [(new CSpan($content))->setAttribute('id', "cpu" . $id . "Gauge")
+        , (new CSpan($content))->setAttribute('id', "mem" . $id . "Gauge")
+        , (new CSpan($content))->setAttribute('id', "fs" . $id . "Gauge")];
+    ;
+}
+
+/* * ***************************************************************************
+ * Get Data
+ * ************************************************************************** */
+if (hasRequest('filter_rst')) { // Clean the filter parameters
+    resetProfile('groupids', true);
+    $filter['filter_rst'] = NULL;
+} else { // Put the date in required format
+    //var_dump($filter["groupids"]);
+    //var_dump(selectHostsByGroup($filter["groupids"],['location_lat', 'location_lon', 'location']));
+}
 $allHosts = API::Host()->get([
     'output' => ['hostid', 'name'],
     'groupids' => $filter["groupids"]
@@ -132,8 +101,6 @@ $itemValues = API::Trend()->get([
     'output' => ['itemid', 'clock', 'num', $trendProjection], //"value_min", "value_avg", "value_max"],
     'itemids' => $itemids
         ]);
-// Varrer os hosts e coletar seus itens e valores
-// Varrer o array e organizar como "item" "valor"
 foreach ($itemValues as $itemValue) {
     foreach ($reportData as $key => $host) {
         if ($host['cpu']['itemid'] == $itemValue['itemid']) {
@@ -145,17 +112,15 @@ foreach ($itemValues as $itemValue) {
         }
     }
 }
-//var_dump($reportData);
 $hostNames = $hostData = [];
 
 $hostCount = 20;
 $cont = 0;
-//for ($i = 0; $i < count($allHosts); $i++) {
 foreach ($reportData as $key => $host) {
     if (isset($host['name'])) {
         $tmp = [
             "hostid" => $key,
-            "name" => $host['name'], 
+            "name" => $host['name'],
             "cpu" => $host['cpu']['value'],
             "memory" => $host['memory']['value'],
             "fs" => $host['fs']['value']
@@ -171,7 +136,36 @@ foreach ($reportData as $key => $host) {
             $cont = 0;
         }
     }
-}
+} 
+
+
+/* * ***************************************************************************
+ * Display - Report
+ * ************************************************************************** */
+
+zbxeJSLoad(['d3/d3.min.js', 'everyzD3Functions.js', 'd3/gauge.js']);
+
+commonModuleHeader($moduleName, $moduleTitle, true);
+$widget = newFilterWidget($moduleName);
+
+// Left collumn
+$tmpColumn = new CFormList();
+$tmpColumn->addRow(_('Host Groups'), multiSelectHostGroups(selectedHostGroups($filter['groupids'])));
+$tmpColumn->addItem(new CInput('hidden', 'action', $filter["action"]));
+
+// CPU
+// Memory
+// FS
+// Colluns configuration
+
+$widget->addColumn($tmpColumn);
+// Left collumn
+
+$dashboard->addItem($widget);
+
+/* * ***************************************************************************
+ ******* Filter
+ * ************************************************************************** */
 
 if ($cont > 0) {
     $table->addRow($hostNames);
@@ -182,10 +176,6 @@ $dashboard->addItem($form)->show();
 ?>
 <script language="JavaScript">
     var gauges = [];
-    function getRandomValue(gauge) {
-        var overflow = 0; //10;
-        return gauge.config.min - overflow + (gauge.config.max - gauge.config.min + overflow * 2) * Math.random();
-    }
     function addGauges(hostid, cpu, mem, fs) {
         createGauge("cpu" + hostid, "CPU", cpu);
         createGauge("mem" + hostid, "Memory", mem);
@@ -195,10 +185,6 @@ $dashboard->addItem($form)->show();
     for (i = 0; i < hostData.length; i++) {
         addGauges(hostData[i]['hostid'], hostData[i]['cpu'], hostData[i]['memory'], hostData[i]['fs']);
     }
-    /*for (var key in gauges) {
-     var value = getRandomValue(gauges[key])
-     gauges[key].redraw(value);
-     }*/
 // Full Screen
     var filterButton = document.getElementById('filter-mode');
     var titleBar = document.getElementsByClassName("header-title");

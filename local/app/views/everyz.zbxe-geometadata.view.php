@@ -215,13 +215,16 @@ $subTable->addRow([
 $leftCol->addRow(_('Line'), $subTable);
 // Multiline
 
-$subTable2 = (new CTableInfo())->setHeader(['New configuration', '']);
-$subTable2->addRow([ (new CTextArea('jsonResult', ''))->setWidth(ZBX_TEXTAREA_BIG_WIDTH)]);
-$subTable2->addRow([ (new CButton('btnvalidate', _('Validate')))->onClick('javascript:validateJSON();'), (new CButton('btnReset', _('Reset')))->onClick('javascript:resetJSON();')]);
+$subTable2 = (new CTableInfo())->setHeader([_zeT('New configuration'), '']);
+$subTable2->addRow([ (new CTextArea('jsonResult', ''))->setWidth(ZBX_TEXTAREA_BIG_WIDTH)], '');
+$subTable2->addRow([(new CTableInfo())
+            ->addRow(['', (new CButton('btnvalidate', _('Validate JSON')))->onClick('javascript:validateJSON();'), (new CButton('btnReset', _('Reset')))->onClick('javascript:resetJSON();')])
+            ->setAttribute('style', 'width: 10%;')]);
 
-$rightCol->addRow($subTable2);
+$leftCol->addRow($subTable2);
 
-$table->addRow([$leftCol, $rightCol]);
+$table->addRow([$leftCol]);
+$table->setAttribute('style', 'width: 50%;');
 
 /* * ***************************************************************************
  * Display Footer 

@@ -160,7 +160,7 @@ foreach ($hostData as $key => $host) {
                 // Tratamento dos Circles
                 if (isset($jsonArray['circle']))
                     foreach ($jsonArray['circle'] as $value) {
-                        $hostData[$cont]['circle'][] = ['size' => $value['size'], 'color' => $value['color']];
+                        $hostData[$cont]['circle'][] = ['size' => $value['size'], 'color' => (!strpos($value['color'], "#") ? "#" : "") . $value['color']];
                     }
                 // Tratamento dos Lines
                 if (isset($jsonArray['line']))

@@ -6,8 +6,8 @@
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com"; 
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="Beta_20170216_1";
-VERSAO_EZ="1.0-beta9";
+VERSAO_INST="Beta_20170217_1";
+VERSAO_EZ="1.0-beta10";
 UPDATEBD="S";
 BRANCH="master";
 NOME_PLUGIN="EVERYZ";
@@ -58,6 +58,45 @@ if [ $# -gt 0 ]; then
                 fi
                 shift # past argument=value
             ;;
+            -i=*|--distro=*)
+                LINUX_DISTRO=$(paramValue $i  | tr '[:upper:]' '[:lower:]' );
+                case $LINUX_DISTRO in
+                    "ubuntu" | "debian")
+                        if [ `which apt-get 2>&-  | wc -l` -eq 0 ]; then
+                            registra "APT-GET command not found ($LINUX_DISTRO)";
+                            exit
+                        fi
+                    ;;
+                    "redhat" | "red" | "centos"  | "oracle" | "amazon" )
+                        if [ `which yum 2>&-  | wc -l` -eq 0 ]; then
+                            registra "YUM command not found ($LINUX_DISTRO)";
+                            exit
+                        fi
+                    ;;
+                    "opensuse" )
+                        if [ `which zipper 2>&-  | wc -l` -eq 0 ]; then
+                            registra "ZIPPER command not found ($LINUX_DISTRO)";
+                            exit
+                        fi
+                    ;;
+                    "freebsd" )
+                        if [ `which pkg 2>&-  | wc -l` -eq 0 ]; then
+                            registra "PKG command not found ($LINUX_DISTRO)";
+                            exit
+                        fi
+                    ;;
+                    *) 
+                        echo "Invalid DISTRO option: $LINUX_DISTRO";
+                        exit;
+                    ;;
+                esac
+                echo "DISTRO option: [$LINUX_DISTRO]";
+                if [ `which wget 2>&-  | wc -l` -eq 0 ]; then
+                    registra "GET command not found ($LINUX_DISTRO) cant install!";
+                    exit
+                fi
+                shift # past argument=value
+            ;;
             *)
                 DEFAULT=YES
                 echo "default";
@@ -68,16 +107,27 @@ if [ $# -gt 0 ]; then
             ;;
         esac
     done
-    echo "Have parameters";
+    PARAM_ENABLED="S";
+    echo "Installation using parameters! No packages are installed and absent requirements can broken the installation. ";
+else
+    PARAM_ENABLED="N";
 fi
+
+# Tenta carregar o frontend do Zabbix para criar as tabelas e evitar mensagens de erro
+primeiroAcesso() {
+    echo "Try to get the first access to avoid interface errors...";
+    php $CAMINHO_FRONTEND/index.php  | grep EveryZ 
+}
 
 # Parametros de configuração ===================================================
 
 instalaPacote() {
+    if ["$PARAM_ENABLED" !== "S"]; then
     registra "============== Instalando pacote(s) ($1 $2 $3 $4 $5 $6 $7 $8 $9) =================";
     $GERENCIADOR_PACOTES $PARAMETRO_INSTALL $1 $2 $3 $4 $5 $6 $7 $8 $9  ${10} \
-  ${11} ${12} ${13} ${14} ${15} ${16} ${17} ${18} ${19} ${20} \
-  ${21} ${22} ${23} ${24} ${25} ${26} ${27} ${28} ${29} ${30};
+ ${11} ${12} ${13} ${14} ${15} ${16} ${17} ${18} ${19} ${20} \
+ ${21} ${22} ${23} ${24} ${25} ${26} ${27} ${28} ${29} ${30};
+    fi
 }
 
 backupArquivo() {
@@ -104,65 +154,66 @@ installMgs() {
 }
 
 identificaDistro() {
-    if [ "$CAMINHO_FRONTEND" = "" ]; then
-        registra "Finding zabbix frontend location...";    
-        PATHDEF=$(find / -name zabbix.php | head -n1 | sed 's/\/zabbix.php//g');
-    fi
-    if [ -f /etc/redhat-release -o -f /etc/system-release ]; then
-        GERENCIADOR_PACOTES='yum ';
-        PARAMETRO_INSTALL=' install -y ';
-        TMP=`cat /etc/redhat-release | head -n1 | tr "[:upper:]" "[:lower:]"`;
-        LINUX_DISTRO=`echo $TMP | awk -F' ' '{print $1}'` ;
-        LINUX_VER=`echo $TMP | awk -F' ' '{print $4}'`;
-    else
-        TMP=`cat  /etc/issue | head -n1 | tr "[:upper:]" "[:lower:]" | sed 's/release//g' | sed 's/  / /g' | sed 's/welcome\ to\ //g' `;
-        LINUX_DISTRO=`echo $TMP | head -n1 | awk -F' ' '{print $1}'` ;
-        LINUX_VER=`echo $TMP | sed 's/release//g' | awk -F' ' '{print $2}'`;
-        if [ `which zypper 2>&-  | wc -l` -eq 1 ]; then
-            GERENCIADOR_PACOTES='zypper ';
+    if [ -z "$LINUX_DISTRO" ]; then
+        if [ "$CAMINHO_FRONTEND" = "" ]; then
+            registra "Finding zabbix frontend location...";    
+            PATHDEF=$(find / -name zabbix.php | head -n1 | sed 's/\/zabbix.php//g');
+        fi
+        if [ -f /etc/redhat-release -o -f /etc/system-release ]; then
+            GERENCIADOR_PACOTES='yum ';
             PARAMETRO_INSTALL=' install -y ';
+            TMP=`cat /etc/redhat-release | head -n1 | tr "[:upper:]" "[:lower:]"`;
+            LINUX_DISTRO=`echo $TMP | awk -F' ' '{print $1}'` ;
+            LINUX_VER=`echo $TMP | awk -F' ' '{print $4}'`;
         else
-            GERENCIADOR_PACOTES='apt-get ';
-            PARAMETRO_INSTALL=' install -y ';
-        fi
-    fi
-
-    if [ -f /tmp/upgZabbix/logInstall.log ]; then
-        TMP=`cat /tmp/upgZabbix/logInstall.log | grep "Path do frontend" | tail -n1 | awk -F[ '{print $2}' | awk -F] '{print $1}'`;
-        if [ ! -z $TMP ]; then
-            PATHDEF=$TMP;
-        fi
-    fi
-
-    case $LINUX_DISTRO in
-	"ubuntu" | "debian" | "red hat" | "red" | "centos" | "opensuse" | "opensuse" | "amazon" | "oracle"  )
-            CAMINHO_RCLOCAL="/etc/rc.local";
-            registra "Versao do Linux - OK ($LINUX_DISTRO - $LINUX_VER)"
-            ;;
-	*) 
-            echo "$M_ERRO_DISTRO Required: wget, unzip, dialog";
-            dialog \
-                --title 'Problem'        \
-                --radiolist "$M_ERRO_DISTRO"  \
-                0 0 0                                    \
-                S   "$M_DISTRO_SIM"  on    \
-                N   "$M_DISTRO_NAO"  off   \
-                2> $TMP_DIR/resposta_dialog.txt
-            CONTINUA=`cat $TMP_DIR/resposta_dialog.txt `;
-            registra " Distribuicao nao prevista, continuar [$DOWNLOADFILES [$LINUX_DISTRO - $LINUX_VER] ";
-            if [ "$CONTINUA" = "S" ]; then
-                PATHDEF=$(find / -name zabbix.php | head -n1 | sed 's/\/zabbix.php//g');
-                #PATHDEF="/var/www";
-                GERENCIADOR_PACOTES='echo ';
-                CAMINHO_RCLOCAL="/etc/rc.local";
-                $LINUX_DISTRO="OUTROS";
+            TMP=`cat  /etc/issue | head -n1 | tr "[:upper:]" "[:lower:]" | sed 's/release//g' | sed 's/  / /g' | sed 's/welcome\ to\ //g' `;
+            LINUX_DISTRO=`echo $TMP | head -n1 | awk -F' ' '{print $1}'` ;
+            LINUX_VER=`echo $TMP | sed 's/release//g' | awk -F' ' '{print $2}'`;
+            if [ `which zypper 2>&-  | wc -l` -eq 1 ]; then
+                GERENCIADOR_PACOTES='zypper ';
+                PARAMETRO_INSTALL=' install -y ';
             else
-                exit 1;
+                GERENCIADOR_PACOTES='apt-get ';
+                PARAMETRO_INSTALL=' install -y ';
             fi
-            #registra "Distribucao nao prevista ($LINUX_DISTRO)... favor contactar $AUTOR"; exit 1; 
-        ;;
-    esac
+        fi
 
+        if [ -f /tmp/upgZabbix/logInstall.log ]; then
+            TMP=`cat /tmp/upgZabbix/logInstall.log | grep "Path do frontend" | tail -n1 | awk -F[ '{print $2}' | awk -F] '{print $1}'`;
+            if [ ! -z $TMP ]; then
+                PATHDEF=$TMP;
+            fi
+        fi
+
+        case $LINUX_DISTRO in
+            "ubuntu" | "debian" | "red hat" | "red" | "centos" | "opensuse" | "opensuse" | "amazon" | "oracle"  )
+                CAMINHO_RCLOCAL="/etc/rc.local";
+                registra "Versao do Linux - OK ($LINUX_DISTRO - $LINUX_VER)"
+                ;;
+            *) 
+                echo "$M_ERRO_DISTRO Required: wget, unzip, dialog";
+                dialog \
+                    --title 'Problem'        \
+                    --radiolist "$M_ERRO_DISTRO"  \
+                    0 0 0                                    \
+                    S   "$M_DISTRO_SIM"  on    \
+                    N   "$M_DISTRO_NAO"  off   \
+                    2> $TMP_DIR/resposta_dialog.txt
+                CONTINUA=`cat $TMP_DIR/resposta_dialog.txt `;
+                registra " Distribuicao nao prevista, continuar [$DOWNLOADFILES [$LINUX_DISTRO - $LINUX_VER] ";
+                if [ "$CONTINUA" = "S" ]; then
+                    PATHDEF=$(find / -name zabbix.php | head -n1 | sed 's/\/zabbix.php//g');
+                    #PATHDEF="/var/www";
+                    GERENCIADOR_PACOTES='echo ';
+                    CAMINHO_RCLOCAL="/etc/rc.local";
+                    $LINUX_DISTRO="OUTROS";
+                else
+                    exit 1;
+                fi
+                #registra "Distribucao nao prevista ($LINUX_DISTRO)... favor contactar $AUTOR"; exit 1; 
+            ;;
+        esac
+    fi
 }
 
 # Pre-requisitos para o funcionamento do instalador ============================
@@ -315,8 +366,6 @@ caminhoFrontend() {
         if [ ! -f "$CAMINHO_FRONTEND/zabbix.php" ]; then
             registra " $M_ERRO_CAMINHO2 ($CAMINHO_FRONTEND). $M_ERRO_ABORT.";
             exit;
-        #else
-        #    DBUSER=`cat "$CAMINHO_FRONTEND/conf/zabbix.conf.php" | `;
         fi
         registra " Path do frontend: [$CAMINHO_FRONTEND] ";
     fi
@@ -385,6 +434,7 @@ instalaMenus() {
         NOVO="$IDENT\n$TAG_INICIO\n, ' | ', (new CLink('EveryZ '.EVERYZ_VERSION, 'http:\/\/www.everyz.org\/'))\n\t->addClass(ZBX_STYLE_GREY)\n\t->addClass(ZBX_STYLE_LINK_ALT)\n\t->setAttribute('target', '_blank')\n$TAG_FINAL";
         sed -i "s/$IDENT/$NOVO/" include/html.inc.php
     fi
+    cat include/defines.inc.php | grep -v "EVERYZ_VERSION" > include/defines.inc.php;
     if [ "`cat include/defines.inc.php | grep \"EVERYZ_VERSION\" | wc -l`" -eq 0 ]; then
         echo "define ('EVERYZ_VERSION','$VERSAO_EZ');" >> include/defines.inc.php;
     fi
@@ -685,6 +735,7 @@ corTituloMapa;
 configuraApache;
 instalaGit;  
 instalaPortletNS;
+primeiroAcesso;
  
 echo "Installed - [ $VERSAO_INST ]";
 echo "You need to check your apache server and restart!";
