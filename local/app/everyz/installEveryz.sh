@@ -434,7 +434,9 @@ instalaMenus() {
         NOVO="$IDENT\n$TAG_INICIO\n, ' | ', (new CLink('EveryZ '.EVERYZ_VERSION, 'http:\/\/www.everyz.org\/'))\n\t->addClass(ZBX_STYLE_GREY)\n\t->addClass(ZBX_STYLE_LINK_ALT)\n\t->setAttribute('target', '_blank')\n$TAG_FINAL";
         sed -i "s/$IDENT/$NOVO/" include/html.inc.php
     fi
-    cat include/defines.inc.php | grep -v "EVERYZ_VERSION" > include/defines.inc.php;
+    unalias mv
+    mv include/defines.inc.php include/defines.inc.php.old
+    cat include/defines.inc.php.old | grep -v "EVERYZ_VERSION" > include/defines.inc.php;
     if [ "`cat include/defines.inc.php | grep \"EVERYZ_VERSION\" | wc -l`" -eq 0 ]; then
         echo "define ('EVERYZ_VERSION','$VERSAO_EZ');" >> include/defines.inc.php;
     fi
