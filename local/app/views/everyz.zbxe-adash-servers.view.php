@@ -36,6 +36,9 @@ addFilterActions();
 
 // Specific fields
 addFilterParameter("groupids", PROFILE_TYPE_STR, [], true, true);
+addFilterParameter("cpuKey", T_ZBX_STR, 'system.cpu.load[percpu,avg1]');
+addFilterParameter("memoryKey", T_ZBX_STR, 'vm.memory.size[pavailable]');
+addFilterParameter("fsKey", T_ZBX_STR, 'vfs.fs.size[/,pfree]');
 
 check_fields($fields);
 
@@ -92,9 +95,9 @@ foreach ($allHosts as $value) {
 }
 
 // ----- Get ItemIds -----------------------------------------------------------
-$cpuItens = getItems($filter["groupids"], 'cpu', 'system.cpu.load[percpu,avg1]');
-$memoryItens = getItems($filter["groupids"], 'memory', 'vm.memory.size[pavailable]');
-$fsItens = getItems($filter["groupids"], 'fs', 'vfs.fs.size[/,pfree]');
+$cpuItens = getItems($filter["groupids"], 'cpu', $filter['cpuKey']);
+$memoryItens = getItems($filter["groupids"], 'memory', $filter['memoryKey']);
+$fsItens = getItems($filter["groupids"], 'fs', $filter['fsKey']);
 // ----- Get Trends ------------------------------------------------------------
 $trendProjection = 'value_max';
 $itemValues = API::Trend()->get([
@@ -103,11 +106,11 @@ $itemValues = API::Trend()->get([
         ]);
 foreach ($itemValues as $itemValue) {
     foreach ($reportData as $key => $host) {
-        if ($host['cpu']['itemid'] == $itemValue['itemid']) {
+        if (isset($host['cpu']) && $host['cpu']['itemid'] == $itemValue['itemid']) {
             $reportData[$key]['cpu']['value'] = $itemValue[$trendProjection];
-        } elseif ($host['memory']['itemid'] == $itemValue['itemid']) {
+        } elseif (isset($host['memory']) && $host['memory']['itemid'] == $itemValue['itemid']) {
             $reportData[$key]['memory']['value'] = $itemValue[$trendProjection];
-        } elseif ($host['fs']['itemid'] == $itemValue['itemid']) {
+        } elseif (isset($host['fs']) && $host['fs']['itemid'] == $itemValue['itemid']) {
             $reportData[$key]['fs']['value'] = $itemValue[$trendProjection];
         }
     }
@@ -126,6 +129,9 @@ $widget = newFilterWidget($moduleName);
 // Left collumn
 $tmpColumn = new CFormList();
 $tmpColumn->addRow(_('Host Groups'), multiSelectHostGroups(selectedHostGroups($filter['groupids'])));
+$tmpColumn->addRow(_('CPU Key'), [ (new CTextBox('cpuKey', $filter['cpuKey']))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH)]);
+$tmpColumn->addRow(_('Memory Key'), [ (new CTextBox('memoryKey', $filter['memoryKey']))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH)]);
+$tmpColumn->addRow(_('FileSystem Key'), [ (new CTextBox('fsKey', $filter['fsKey']))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH)]);
 $tmpColumn->addItem(new CInput('hidden', 'action', $filter["action"]));
 
 // CPU
@@ -144,9 +150,9 @@ foreach ($reportData as $key => $host) {
         $tmp = [
             "hostid" => $key,
             "name" => $host['name'],
-            "cpu" => $host['cpu']['value'],
-            "memory" => $host['memory']['value'],
-            "fs" => $host['fs']['value']
+            "cpu" => (isset($host['cpu']) ? $host['cpu']['value'] : 0),
+            "memory" => (isset($host['memory']) ? $host['memory']['value'] : 0),
+            "fs" => (isset($host['fs']) ? $host['fs']['value'] : 0)
         ];
         $cont++;
         $hostData[] = $tmp;
@@ -159,7 +165,7 @@ foreach ($reportData as $key => $host) {
             $cont = 0;
         }
     }
-} 
+}
 
 if ($cont > 0) {
     $table->addRow($hostNames);
