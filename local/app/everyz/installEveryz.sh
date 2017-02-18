@@ -122,7 +122,7 @@ primeiroAcesso() {
 # Parametros de configuração ===================================================
 
 instalaPacote() {
-    if ["$PARAM_ENABLED" !== "S"]; then
+    if [ "$PARAM_ENABLED" != "S" ]; then
     registra "============== Instalando pacote(s) ($1 $2 $3 $4 $5 $6 $7 $8 $9) =================";
     $GERENCIADOR_PACOTES $PARAMETRO_INSTALL $1 $2 $3 $4 $5 $6 $7 $8 $9  ${10} \
  ${11} ${12} ${13} ${14} ${15} ${16} ${17} ${18} ${19} ${20} \
