@@ -78,6 +78,15 @@ function newWidget($id, $content) {
  * ************************************************************************** */
 if (hasRequest('filter_rst')) { // Clean the filter parameters
     resetProfile('groupids', true);
+    resetProfile('cpuKey', true);
+    resetProfile('memoryKey', true);
+    resetProfile('fsKey', true);
+
+    $filter["cpuKey"] = 'system.cpu.load[percpu,avg1]';
+    $filter["memoryKey"] = 'vm.memory.size[pavailable]';
+    $filter["fsKey"] = 'vfs.fs.size[/,pfree]';
+
+    $filter['filter_set'] = NULL;
     $filter['filter_rst'] = NULL;
 } else { // Put the date in required format
     //var_dump($filter["groupids"]);
@@ -104,14 +113,18 @@ $itemValues = API::Trend()->get([
     'output' => ['itemid', 'clock', 'num', $trendProjection], //"value_min", "value_avg", "value_max"],
     'itemids' => $itemids
         ]);
+$cpu = $memory = $fs = 0;
 foreach ($itemValues as $itemValue) {
     foreach ($reportData as $key => $host) {
         if (isset($host['cpu']) && $host['cpu']['itemid'] == $itemValue['itemid']) {
             $reportData[$key]['cpu']['value'] = $itemValue[$trendProjection];
+            $cpu++;
         } elseif (isset($host['memory']) && $host['memory']['itemid'] == $itemValue['itemid']) {
             $reportData[$key]['memory']['value'] = $itemValue[$trendProjection];
+            $memory++;
         } elseif (isset($host['fs']) && $host['fs']['itemid'] == $itemValue['itemid']) {
             $reportData[$key]['fs']['value'] = $itemValue[$trendProjection];
+            $fs++;
         }
     }
 }
@@ -124,6 +137,7 @@ $hostNames = $hostData = [];
 zbxeJSLoad(['d3/d3.min.js', 'everyzD3Functions.js', 'd3/gauge.js']);
 
 commonModuleHeader($moduleName, $moduleTitle, true);
+
 $widget = newFilterWidget($moduleName);
 
 // Left collumn
@@ -132,6 +146,15 @@ $tmpColumn->addRow(_('Host Groups'), multiSelectHostGroups(selectedHostGroups($f
 $tmpColumn->addRow(_('CPU Key'), [ (new CTextBox('cpuKey', $filter['cpuKey']))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH)]);
 $tmpColumn->addRow(_('Memory Key'), [ (new CTextBox('memoryKey', $filter['memoryKey']))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH)]);
 $tmpColumn->addRow(_('FileSystem Key'), [ (new CTextBox('fsKey', $filter['fsKey']))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH)]);
+if (count($reportData) > $cpu) {
+    show_messages(true, "Existem hosts sem a chave informada para as informação de CPU!");
+}
+if (count($reportData) > $memory) {
+    show_messages(true, "Existem hosts sem a chave informada para as informação de memória!");
+}
+if (count($reportData) > $fs) {
+    show_messages(true, "Existem hosts sem a chave informada para as informação de sistema de arquivos!");
+}
 $tmpColumn->addItem(new CInput('hidden', 'action', $filter["action"]));
 
 // CPU
@@ -144,32 +167,34 @@ $widget->addColumn($tmpColumn);
 
 $dashboard->addItem($widget);
 
-$cont = 0;
-foreach ($reportData as $key => $host) {
-    if (isset($host['name'])) {
-        $tmp = [
-            "hostid" => $key,
-            "name" => $host['name'],
-            "cpu" => (isset($host['cpu']) ? $host['cpu']['value'] : -111),
-            "memory" => (isset($host['memory']) ? $host['memory']['value'] : -111),
-            "fs" => (isset($host['fs']) ? $host['fs']['value'] : -111)
-        ];
-        $cont++;
-        $hostData[] = $tmp;
-        $gauges[] = newWidget($tmp['hostid'], "");
-        $hostNames[] = $tmp["name"];
-        if ($cont > 2) {
-            $table->addRow($hostNames);
-            $table->addRow($gauges);
-            $hostNames = $gauges = [];
-            $cont = 0;
+if (hasRequest('filter_set')) { // Clean the filter parameters
+    $cont = 0;
+    foreach ($reportData as $key => $host) {
+        if (isset($host['name'])) {
+            $tmp = [
+                "hostid" => $key,
+                "name" => $host['name'],
+                "cpu" => (isset($host['cpu']) ? $host['cpu']['value'] : -111),
+                "memory" => (isset($host['memory']) ? $host['memory']['value'] : -111),
+                "fs" => (isset($host['fs']) ? $host['fs']['value'] : -111)
+            ];
+            $cont++;
+            $hostData[] = $tmp;
+            $gauges[] = newWidget($tmp['hostid'], "");
+            $hostNames[] = $tmp["name"];
+            if ($cont > 2) {
+                $table->addRow($hostNames);
+                $table->addRow($gauges);
+                $hostNames = $gauges = [];
+                $cont = 0;
+            }
         }
     }
-}
 
-if ($cont > 0) {
-    $table->addRow($hostNames);
-    $table->addRow($gauges);
+    if ($cont > 0) {
+        $table->addRow($hostNames);
+        $table->addRow($gauges);
+    }
 }
 $form->addItem([$table]);
 $dashboard->addItem($form)->show();
