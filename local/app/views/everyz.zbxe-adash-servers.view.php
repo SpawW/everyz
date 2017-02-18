@@ -150,9 +150,9 @@ foreach ($reportData as $key => $host) {
         $tmp = [
             "hostid" => $key,
             "name" => $host['name'],
-            "cpu" => (isset($host['cpu']) ? $host['cpu']['value'] : 0),
-            "memory" => (isset($host['memory']) ? $host['memory']['value'] : 0),
-            "fs" => (isset($host['fs']) ? $host['fs']['value'] : 0)
+            "cpu" => (isset($host['cpu']) ? $host['cpu']['value'] : -111),
+            "memory" => (isset($host['memory']) ? $host['memory']['value'] : -111),
+            "fs" => (isset($host['fs']) ? $host['fs']['value'] : -111)
         ];
         $cont++;
         $hostData[] = $tmp;
@@ -177,9 +177,15 @@ $dashboard->addItem($form)->show();
 <script language="JavaScript">
     var gauges = [];
     function addGauges(hostid, cpu, mem, fs) {
-        createGauge("cpu" + hostid, "CPU", cpu);
-        createGauge("mem" + hostid, "Memory", mem);
-        createGauge("fs" + hostid, "FileSystem", fs);
+        if (cpu > -1) {
+            createGauge("cpu" + hostid, "CPU", cpu);
+        }
+        if (mem > -1) {
+            createGauge("mem" + hostid, "Memory", mem);
+        }
+        if (fs > -1) {
+            createGauge("fs" + hostid, "FileSystem", fs);
+        }
     }
     hostData = <?php echo json_encode($hostData, JSON_UNESCAPED_UNICODE); ?>;
     for (i = 0; i < hostData.length; i++) {
