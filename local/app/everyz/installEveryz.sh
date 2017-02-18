@@ -6,7 +6,7 @@
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com"; 
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="Beta_20170217_1";
+VERSAO_INST="Beta_20170217_2";
 VERSAO_EZ="1.0-beta10";
 UPDATEBD="S";
 BRANCH="master";
@@ -239,11 +239,11 @@ preReq() {
         STATUSPR="Changed";
     fi
     # Verificando e instalando o php-curl
-    if [ `which unzip 2>&-  | wc -l` -eq 0 ]; then
-        registra "Installing php-curl";
-        instalaPacote "php-curl php5-curl";
-        STATUSPR="Changed";
-    fi
+    #if [ `which unzip 2>&-  | wc -l` -eq 0 ]; then
+    #    registra "Installing php-curl";
+    #    instalaPacote "php-curl php5-curl";
+    #    STATUSPR="Changed";
+    #fi
     registra "Pre-req verification - $STATUSPR";
 }
 
@@ -640,7 +640,7 @@ apacheDirectoryConf() {
     echo "<Directory \"$CAMINHO_FRONTEND/local/app/everyz/$1\"> " >> $APACHEROOT/everyz.conf
     echo " Options FollowSymLinks " >> $APACHEROOT/everyz.conf
     echo " AllowOverride All " >> $APACHEROOT/everyz.conf
-    echo " Require all granted " >> $APACHEROOT/everyz.conf
+    #echo " Require all granted " >> $APACHEROOT/everyz.conf
     echo " Order allow,deny" >> $APACHEROOT/everyz.conf
     echo " Allow from all" >> $APACHEROOT/everyz.conf
     echo "</Directory>" >> $APACHEROOT/everyz.conf;
