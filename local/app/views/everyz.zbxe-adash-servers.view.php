@@ -114,31 +114,6 @@ foreach ($itemValues as $itemValue) {
 }
 $hostNames = $hostData = [];
 
-$hostCount = 20;
-$cont = 0;
-foreach ($reportData as $key => $host) {
-    if (isset($host['name'])) {
-        $tmp = [
-            "hostid" => $key,
-            "name" => $host['name'],
-            "cpu" => $host['cpu']['value'],
-            "memory" => $host['memory']['value'],
-            "fs" => $host['fs']['value']
-        ];
-        $cont++;
-        $hostData[] = $tmp;
-        $gauges[] = newWidget($tmp['hostid'], "");
-        $hostNames[] = $tmp["name"];
-        if ($cont > 2) {
-            $table->addRow($hostNames);
-            $table->addRow($gauges);
-            $hostNames = $gauges = [];
-            $cont = 0;
-        }
-    }
-} 
-
-
 /* * ***************************************************************************
  * Display - Report
  * ************************************************************************** */
@@ -163,9 +138,28 @@ $widget->addColumn($tmpColumn);
 
 $dashboard->addItem($widget);
 
-/* * ***************************************************************************
- ******* Filter
- * ************************************************************************** */
+$cont = 0;
+foreach ($reportData as $key => $host) {
+    if (isset($host['name'])) {
+        $tmp = [
+            "hostid" => $key,
+            "name" => $host['name'],
+            "cpu" => $host['cpu']['value'],
+            "memory" => $host['memory']['value'],
+            "fs" => $host['fs']['value']
+        ];
+        $cont++;
+        $hostData[] = $tmp;
+        $gauges[] = newWidget($tmp['hostid'], "");
+        $hostNames[] = $tmp["name"];
+        if ($cont > 2) {
+            $table->addRow($hostNames);
+            $table->addRow($gauges);
+            $hostNames = $gauges = [];
+            $cont = 0;
+        }
+    }
+} 
 
 if ($cont > 0) {
     $table->addRow($hostNames);

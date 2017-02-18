@@ -76,6 +76,7 @@ GROUP BY week
 ORDER BY week DESC
 LIMIT 5 OFFSET 0
 ";
+//    echo $query;
     $res = DBselect($query);
     $jsonResult = [];
     while ($row = DBfetch($res)) {
