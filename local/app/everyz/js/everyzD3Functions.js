@@ -69,8 +69,8 @@ function newD3Pie(container, data, tooltipStandard, showLabels, canvasWidth, can
         }
     });
 }
-var gauges = [];
 
+var gauges = [];
 function createGauge(name, label, value, min, max) {
     var config =
             {

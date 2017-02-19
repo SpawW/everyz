@@ -441,12 +441,12 @@ function checkRequiredField($p_name, $p_message = "") {
     global $requiredMissing;
     $value = getRequest2($p_name);
     $requiredMissing = ($requiredMissing == true ? true : false);
+    //var_dump($value);
     if (is_array($value) && $value == array(0)) {
         $requiredMissing = true;
+        error(_zeT($p_message));
     } else if ($value == "") {
         $requiredMissing = true;
-    }
-    if ($requiredMissing) {
         error(_zeT($p_message));
     }
 }
