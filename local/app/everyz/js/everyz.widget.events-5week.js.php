@@ -44,23 +44,40 @@ check_fields($fields);
 /* * ***************************************************************************
  * Module Functions
  * ************************************************************************** */
-
-function getStartAndEndDate($week, $year) {
-    $time = strtotime("1 January $year", time());
-    $day = date('w', $time);
-    $time += ((7 * $week) + 1 - $day) * 24 * 3600;
-    $mask = 'j M'; //'Y-n-j'
-    $tmp = date($mask, $time);
-    $start = explode(' ', $tmp);
-    $time += 6 * 24 * 3600;
-    $tmp = date($mask, $time);
-    $end = explode(' ', $tmp);
+/*
+  function getStartAndEndDate($week, $year) {
+  $time = strtotime("1 January $year", time());
+  $day = date('w', $time);
+  $time += ((7 * $week) + 1 - $day) * 24 * 3600;
+  $mask = 'j M'; //'Y-n-j'
+  $tmp = date($mask, $time);
+  $start = explode(' ', $tmp);
+  $time += 6 * 24 * 3600;
+  $tmp = date($mask, $time);
+  $end = explode(' ', $tmp);
+  if ($start[1] == $end[1]) {
+  return $start[0] . " a " . $end[0] . "/" . _($end[1]);
+  } else {
+  return $start[0] . "/" . _($start[1]) . " a " . $end[0] . "/" . _($end[1]);
+  }
+  }
+ */
+function getStartAndEndDate($week, $year) {    
+    $dto = new DateTime();
+    $dto->setISODate($year, $week);
+    $ret['week_start'] = $dto->format('d m');
+    $dto->modify('+6 days');
+    $ret['week_end'] = $dto->format('d m');
+    $start = explode(' ', $ret['week_start']);
+    $end = explode(' ', $ret['week_end']);
     if ($start[1] == $end[1]) {
         return $start[0] . " a " . $end[0] . "/" . _($end[1]);
     } else {
         return $start[0] . "/" . _($start[1]) . " a " . $end[0] . "/" . _($end[1]);
     }
 }
+
+
 
 function events5WeekData() {
     global $DB;
@@ -70,13 +87,13 @@ function events5WeekData() {
                     "DATE_FORMAT(sub1.clock,'%Y'),DATE_FORMAT(sub1.clock,'%U') " )
             . ") AS week FROM
     (SELECT " . ($DB['TYPE'] == ZBX_DB_POSTGRESQL ? "TO_TIMESTAMP" : "FROM_UNIXTIME") . "(eve.clock) AS clock FROM events eve WHERE 
-    source = 0) sub1
+    source = 0 AND value =1) sub1
   ) subt
 GROUP BY week
 ORDER BY week DESC
 LIMIT 5 OFFSET 0
 ";
-//    echo $query;
+    //echo $query;
     $res = DBselect($query);
     $jsonResult = [];
     while ($row = DBfetch($res)) {
