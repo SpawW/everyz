@@ -21,12 +21,6 @@
 
 <script type="text/javascript">
 
-    /* *************************************************************************
-     * 
-     * Dynamic Data 
-     * 
-     * ********************************************************************** */
-    //Parametrizar
     var setViewLat = <?php echo $filter['centerLat'] ?>;
     var setViewLong = <?php echo $filter['centerLong'] ?>;
     var setViewZoom = <?php echo getRequest2("zoomLevel", 19) ?>;
@@ -91,8 +85,8 @@ echo $mapBackgroud[$filter["map"]]; //"streets"
             L.marker([lat, lon], {icon: zbxImage(hostid)}).addTo(ZabGeomap).bindPopup(name + description);
         }
 
-        function addAlert (lat, lon, radiusSize, fillColor = '#303', borderColor = '', opacity = 0.2){
-        L.circle([lat, lon], {color: borderColor, fillColor: fillColor, fillOpacity: opacity, radius: radiusSize}).addTo(ZabGeoalert);
+        function addAlert (lat, lon, radiusSize, fillColor = '#303', borderColor = '', opacity = 0.2, title = ''){
+        L.circle([lat, lon], {color: borderColor, fillColor: fillColor, fillOpacity: opacity, radius: radiusSize}).addTo(ZabGeoalert).bindPopup(title);
     }
 
     //
@@ -138,12 +132,13 @@ foreach ($hostData as $host) {
         }
         if ($bigPriority > 0) {
             //$myZoomLevel = getRequest2("zoomLevel");
-            $circleAlert = pow(2, (13.5 - (getRequest2("zoomLevel")))) * 500;
+            $circleAlert = pow(2, (13 - (getRequest2("zoomLevel")))) * 500;
+//            $circleAlert = pow(2, (30.5 - (getRequest2("zoomLevel")))) * 500;
             //echo "\n console.log('$myZoomLevel')";
             //echo "\n console.log('$circleAlert')";
             $color = getSeverityColor($bigPriority, [$config]);
             echo "\n addAlert (" . $host["location_lat"] . "," . $host["location_lon"] . ",$circleAlert,'#"
-            . $color . "','#" . $color . "',0.7);\n";
+            . $color . "','#" . $color . "',0.7,'".$host["name"]."');\n";
         }
         // Add lines
         if (isset($host["line"])) {
@@ -195,6 +190,7 @@ foreach ($hostData as $host) {
     //Change for repeat to read JSON and add Circle inf note exist
     //If radius exist add Circle [use lat and long more radius]
     //Capture point in map using double click 
+    
     var popup = L.popup();
     function onMapClick(e) {
         popup
@@ -280,5 +276,23 @@ foreach ($hostData as $host) {
         onEachFeature: onEachFeature
     }).addTo(ZabGeolines);
 
+    /*var myZoom = {
+      start:  ZabGeomap.getZoom(),
+      end: ZabGeomap.getZoom()
+    };
+
+    ZabGeomap.on('zoomstart', function(e) {
+       myZoom.start = ZabGeomap.getZoom();
+    });
+
+    ZabGeomap.on('zoomend', function(e) {
+        myZoom.end = ZabGeomap.getZoom();
+        var diff = myZoom.start - myZoom.end;
+        if (diff > 0) {
+            circle.setRadius(circle.getRadius() * 2);
+        } else if (diff < 0) {
+            circle.setRadius(circle.getRadius() / 2);
+        }
+    });*/
 
 </script>

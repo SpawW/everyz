@@ -6,7 +6,7 @@
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com"; 
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="Beta_20170220_1";
+VERSAO_INST="Beta_20170221_1";
 VERSAO_EZ="1.0-beta13";
 UPDATEBD="S";
 BRANCH="master";
