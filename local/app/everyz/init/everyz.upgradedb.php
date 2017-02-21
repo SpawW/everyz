@@ -19,10 +19,6 @@
  * * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  * */
 
-/* * ***************************************************************************
- * Module Variables
- * ************************************************************************** */
-
 if (isset($argv)) {
     parse_str(implode('&', array_slice($argv, 1)), $_GET);
 }
@@ -33,15 +29,22 @@ $PATH = realpath(dirname(__FILE__));
  * Update data
  * ************************************************************************** */
 try {
-    /* *************************************************************************
-     * Upgrade from 1 to 2
+    /*     * *******************************************************************
+     * DML Updates
+     * ********************************************************************** */
+    if ($ezCurrent < 4) {
+        DBexecute(zbxeStandardDML("ALTER TABLE `zbxe_preferences` ADD `module_id` VARCHAR(20) NULL"));
+        DBexecute(zbxeStandardDML("UPDATE `zbxe_preferences` SET `module_id` = 'everyz4' "));
+    }
+
+    /*     * *******************************************************************
+     * Data Update
      * ********************************************************************** */
     for ($i = 2; $i <= EVERYZBUILD; $i++) {
         if ($i > $ezCurrent) {
             $debug = false;
             $resultOK = true;
             DBstart();
-            // If is needed, I can create upgrade commands using this standard. Delete operations need to be here.
             if (file_exists("$PATH/everyz_upgrade.$i.php")) {
                 require_once "$PATH/everyz_upgrade.$i.php";
             }
@@ -59,6 +62,7 @@ try {
     }
     if (isset($resultOK)) {
         DBend($resultOK);
+        show_messages(true, _s(_zeT('EveryZ - Configuration update to %1$s version!'), EVERYZBUILD));
     }
 } catch (Exception $e) {
     if (zbxeFieldValue("select COUNT(*) as total from zbxe_preferences", "total") < 2)

@@ -257,25 +257,4 @@ $form->addItem([ $table]);
 $dashboard->addItem($form)->show();
 
 require_once 'local/app/everyz/js/everyz-zbxe-geolocation.js.php';
-?>
-<script language="JavaScript">
-    var filterButton = document.getElementById('filter-mode');
-    var titleBar = document.getElementsByClassName("header-title");
-    var filterDIV = document.getElementById('filter-space');
-    for (i = 0; i <= titleBar[0].children.length - 1; i++) {
-        if (titleBar[0].children[i].tagName.toLowerCase() == 'ul') {
-            titleUL = titleBar[0].children[i];
-            var newItem = document.createElement("LI");
-            var textnode = document.createTextNode(" ")
-            //newItem.appendChild(textnode);
-            //             .titleUL.appendChild(newItem);
-            titleUL.appendChild(filterButton);
-            btnMin = document.getElementsByClassName("btn-min");
-            if (btnMin.length > 0) {
-                filterDIV.style = 'display: none;'
-            }
-        }
-    }
-</script>
 
-<?php

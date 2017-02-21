@@ -46,7 +46,8 @@ try {
       `userid` int NOT NULL,
       `tx_option` varchar(60) NOT NULL,
       `tx_value` varchar(255) NOT NULL,
-      `st_ativo` int NOT NULL
+      `st_ativo` int NOT NULL,
+      `module_id` varchar(20)
     )";
         $dmlTranslation = "CREATE TABLE zbxe_translation (
       `lang` varchar(255) NOT NULL,

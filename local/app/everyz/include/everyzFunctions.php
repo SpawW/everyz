@@ -23,7 +23,7 @@
 define("ZE_VER", "3.0");
 define("EZ_TITLE", 'EveryZ - ');
 define("ZE_COPY", ", ZE " . ZE_VER);
-define("EVERYZBUILD", 4);
+define("EVERYZBUILD", 5);
 
 global $VG_DEBUG;
 global $zeMessages, $zeLocale, $baseName, $requiredMissing, $zbxeLoadedJS;
@@ -1267,6 +1267,12 @@ function isJson($string) {
 
 function optArrayValue($array, $value) {
     return (isset($array[$value]) ? $array[$value] : "");
+}
+
+function zbxeFullScreen() {
+    if (zbxeConfigValue('custom_full_screen') == "S") {
+        zbxeJSLoad(['everyzFunctions.js']);
+    }
 }
 
 // End Functions ===============================================================

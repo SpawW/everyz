@@ -22,76 +22,71 @@
 <script type="text/javascript">
 
     var setViewLat = <?php echo $filter['centerLat'] ?>;
-    var setViewLong = <?php echo $filter['centerLong'] ?>;
-    var setViewZoom = <?php echo getRequest2("zoomLevel", 19) ?>;
-    var showCircles = <?php echo ( in_array($filter["layers"], [3, 99]) ? 1 : 0); ?>; //(0=disable/1=enable)
-    var showLines = <?php echo ( in_array($filter["layers"], [2, 99]) ? 1 : 0); ?>; //(0=disable/1=enable)
+            var setViewLong = <?php echo $filter['centerLong'] ?>;
+            var setViewZoom = <?php echo getRequest2("zoomLevel", 19) ?>;
+            var showCircles = <?php echo ( in_array($filter["layers"], [3, 99]) ? 1 : 0); ?>; //(0=disable/1=enable)
+            var showLines = <?php echo ( in_array($filter["layers"], [2, 99]) ? 1 : 0); ?>; //(0=disable/1=enable)
 
-    vDiv = document.getElementById("mapid");
-
-    vDiv.style.width = screen.availWidth;
-    vDiv.style.height = screen.availHeight;
-    //Define area for Map (setup this data in database ZabbixExtras)
-    var ZabGeomap = L.map('mapid').setView([setViewLat, setViewLong], setViewZoom);
-
-    //Create layerGroup Circle
-    var ZabGeocircle = new L.LayerGroup();
-
-    //Create layerGroup Lines
-    var ZabGeolines = new L.LayerGroup();
-
-    //Create layerGroup Alert
-    var ZabGeoalert = new L.LayerGroup();
-
-
-    //User will need change this token for the theirs token, acquire in https://www.mapbox.com/studio/account/
-    //(setup this data in database ZabbixExtras)
-    //pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw
-    var mbToken = '<?php echo zbxeConfigValue('geo_token') ?>';
-    console.log("Tamanho do Token MapBox: " + mbToken.length);
-    if (mbToken.length <= 1) {
-        window.alert("Alert! \n Please check EveryZ - Customization. Token is required for ZabGeo!");
-<?php //error("Alert! Please check EveryZ - Customization. Token is required for ZabGeo!");         ?>
+            vDiv = document.getElementById("mapid");
+            vDiv.style.width = screen.availWidth;
+            vDiv.style.height = screen.availHeight;
+            //Define area for Map (setup this data in database ZabbixExtras)
+            var ZabGeomap = L.map('mapid').setView([setViewLat, setViewLong], setViewZoom);
+            //Create layerGroup Circle
+            var ZabGeocircle = new L.LayerGroup();
+            //Create layerGroup Lines
+            var ZabGeolines = new L.LayerGroup();
+            //Create layerGroup Alert
+            var ZabGeoalert = new L.LayerGroup();
+            //User will need change this token for the theirs token, acquire in https://www.mapbox.com/studio/account/
+            //(setup this data in database ZabbixExtras)
+            //pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw
+            var mbToken = '<?php echo zbxeConfigValue('geo_token') ?>';
+            console.log("Tamanho do Token MapBox: " + mbToken.length);
+            if (mbToken.length <= 1) {
+    window.alert("Alert! \n Please check EveryZ - Customization. Token is required for ZabGeo!");
+<?php //error("Alert! Please check EveryZ - Customization. Token is required for ZabGeo!");               ?>
     }
     var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
             '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
             'Imagery &copy <a href="http://mapbox.com">Mapbox</a>',
             mbUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' + mbToken;
-
-
-    //Display Copyright 
-    L.tileLayer(mbUrl, {
-        maxZoom: 18,
-        attribution: mbAttr,
-        id: 'mapbox.<?php
+            //Display Copyright 
+            L.tileLayer(mbUrl, {
+            maxZoom: 18,
+                    attribution: mbAttr,
+                    id: 'mapbox.<?php
 // array com os nomes dos mapas
 $mapBackgroud = [ "light", "streets", "dark", "outdoors", "satellite", "emerald"];
 echo $mapBackgroud[$filter["map"]]; //"streets"             
 ?>'
-    }).addTo(ZabGeomap);
-    // Cria dinamicamente a referencia para o icone do host 
-    function zbxImage(p_iconid) {
-        return L.icon({
-            iconUrl: 'imgstore.php?iconid=' + p_iconid,
-            iconSize: [32, 32],
-            iconAnchor: [16, 32],
-            popupAnchor: [2, -38],
-        });
-        }
-        function addCircle (lat, lon, radiusSize, fillColor = '#303', borderColor = '', opacity = 0.2){
+            }).addTo(ZabGeomap);
+            // Cria dinamicamente a referencia para o icone do host 
+                    function zbxImage(p_iconid, width = 32, height = 32) {
+                    return L.icon({
+                    iconUrl: 'imgstore.php?iconid=' + p_iconid,
+                            iconSize: [width, height],
+                            iconAnchor: [Math.round(width / 2), height],
+                            popupAnchor: [2, - 38],
+                    });
+                    }
+            function addCircle (lat, lon, radiusSize, fillColor = '#303', borderColor = '', opacity = 0.2){
             L.circle([lat, lon], {color: borderColor, fillColor: fillColor, fillOpacity: opacity, radius: radiusSize}).addTo(ZabGeocircle).bindPopup(radiusSize + 'm');
-        }
-        function addHost(lat, lon, hostid, name, description) {
+            }
+            function addHost(lat, lon, hostid, name, description) {
             L.marker([lat, lon], {icon: zbxImage(hostid)}).addTo(ZabGeomap).bindPopup(name + description);
-        }
+            }
+            function addErrorHost(lat, lon, hostid, name, description) {
+            L.marker([lat, lon], {icon: zbxImage(hostid, 40, 40)}).addTo(ZabGeomap).bindPopup(name + description);
+            }
 
-        function addAlert (lat, lon, radiusSize, fillColor = '#303', borderColor = '', opacity = 0.2, title = ''){
-        L.circle([lat, lon], {color: borderColor, fillColor: fillColor, fillOpacity: opacity, radius: radiusSize}).addTo(ZabGeoalert).bindPopup(title);
-    }
+            function addAlert (lat, lon, radiusSize, fillColor = '#303', borderColor = '', opacity = 0.2, title = ''){
+            L.circle([lat, lon], {color: borderColor, fillColor: fillColor, fillOpacity: opacity, radius: radiusSize}).addTo(ZabGeoalert).bindPopup(title);
+            }
 
-    //
-    //Change for repeat to read JSON and add Markers if lat and long exist
-    //Put marker in Map
+            //
+            //Change for repeat to read JSON and add Markers if lat and long exist
+            //Put marker in Map
 <?php
 
 function showTitle($host) {
@@ -100,15 +95,25 @@ function showTitle($host) {
     ;
 }
 
+function bigSeverity($host) {
+    $bigPriority = 0;
+    if (isset($host["events"])) {
+        $eventList = "";
+        foreach ($host["events"] as $key => $value) {
+            $bigPriority = ($bigPriority > $value["priority"] ? $bigPriority : $value["priority"]);
+        }
+    }
+    return $bigPriority;
+}
+
 function showEvents($host) {
-    global $bigPriority, $config;
+    global $config;
     if (isset($host["events"])) {
         $eventList = "";
         foreach ($host["events"] as $key => $value) {
             $eventList .= "<li style=\'background: #" . getSeverityColor($value["priority"], [$config])
                     . "; list-style:square;\'><a href=\'tr_events.php?triggerid="
                     . $value["triggerid"] . "&eventid=" . $value["eventid"] . "\'> " . $value["description"] . "</a></li>";
-            $bigPriority = ($bigPriority > $value["priority"] ? $bigPriority : $value["priority"]);
         }
         return "<hr width=\'99%\' color=\'gray\'><ul>" . $eventList . "</ul>";
     } else {
@@ -116,12 +121,21 @@ function showEvents($host) {
     }
 }
 
+// Array com os índices de imagens de erro
+echo "\n errorImages = [";
+for ($i = 0; $i < 6; $i++) {
+    echo ($i == 0 ? "" : ","), zbxeImageId('zbxe_icon_error_' . $i);
+}
+echo "]; ";
 // Cria os hosts no mapa
 $linesPackage = "";
 foreach ($hostData as $host) {
     if (array_key_exists("location_lat", $host)) {
-        $bigPriority = 0;
+        $bigPriority = bigSeverity($host);
         // Add host
+        if ($bigPriority > 0) {
+            echo "\n addErrorHost(" . $host["location_lat"] . "," . $host["location_lon"] . ",errorImages[$bigPriority]," . showTitle($host) . showEvents($host) . "' );";
+        }
         echo "\n addHost(" . $host["location_lat"] . "," . $host["location_lon"] . "," . $host["iconid"] . "," . showTitle($host) . showEvents($host) . "' );";
         // Add circles
         if (isset($host["circle"])) {
@@ -129,16 +143,6 @@ foreach ($hostData as $host) {
                 echo "addCircle(" . $host["location_lat"] . "," . $host["location_lon"] . "," . $circles['size'] . ",'" . $circles['color'] . "');";
 //                echo "addCircle(" . $host["location_lat"] . "," . $host["location_lon"] . "," . $circles[1] . ",'" . $circles[2] . "');";
             }
-        }
-        if ($bigPriority > 0) {
-            //$myZoomLevel = getRequest2("zoomLevel");
-            $circleAlert = pow(2, (13 - (getRequest2("zoomLevel")))) * 500;
-//            $circleAlert = pow(2, (13.5 - (getRequest2("zoomLevel")))) * 500;
-            //echo "\n console.log('$myZoomLevel')";
-            //echo "\n console.log('$circleAlert')";
-            $color = getSeverityColor($bigPriority, [$config]);
-            echo "\n addAlert (" . $host["location_lat"] . "," . $host["location_lon"] . ",$circleAlert,'#"
-            . $color . "','#" . $color . "',0.7,'".$host["name"]."');\n";
         }
         // Add lines
         if (isset($host["line"])) {
@@ -187,112 +191,85 @@ foreach ($hostData as $host) {
     }
 }
 ?>
-    //Change for repeat to read JSON and add Circle inf note exist
-    //If radius exist add Circle [use lat and long more radius]
-    //Capture point in map using double click 
-    
-    var popup = L.popup();
-    function onMapClick(e) {
-        popup
-                .setLatLng(e.latlng)
-                .setContent("You selected here: " + e.latlng.toString())
-                .openOn(ZabGeomap);
-    }
+            //Change for repeat to read JSON and add Circle inf note exist
+            //If radius exist add Circle [use lat and long more radius]
+            //Capture point in map using double click 
 
-    ZabGeomap.on('contextmenu', onMapClick);
+            var popup = L.popup();
+                    function onMapClick(e) {
+                    popup
+                            .setLatLng(e.latlng)
+                            .setContent("You selected here: " + e.latlng.toString())
+                            .openOn(ZabGeomap);
+                    }
 
-    //Add Scale in maps
-    L.control.scale().addTo(ZabGeomap);
+            ZabGeomap.on('contextmenu', onMapClick);
+                    //Add Scale in maps
+                    L.control.scale().addTo(ZabGeomap);
+                    function addTileLayer(name) {
+                    return L.tileLayer(mbUrl, {id: 'mapbox.' + name, attribution: mbAttr});
+                    }
+            // Mapas disponíveis =======================================================
+            grayscale = addTileLayer("light");
+                    streets = addTileLayer("streets");
+                    dark = addTileLayer("dark");
+                    outdoors = addTileLayer("outdoors");
+                    satellite = addTileLayer("satellite");
+                    emerald = addTileLayer("emerald");
+                    var baseMaps = {
+                    "Grayscale": grayscale
+                            , "Streets": streets
+                            , "Dark": dark
+                            , "Outdoors": outdoors
+                            , "Satellite": satellite
+                            , "Emerald": emerald
+                    };
+                    var overlayMaps = {
+                    "Circles": ZabGeocircle,
+                            "Lines": ZabGeolines,
+                            "Alert": ZabGeoalert,
+                    };
+                    //layerControl = L.control.layers(baseMaps).addTo(ZabGeomap);
+                    layerControl = L.control.layers(baseMaps).addTo(ZabGeomap).setPosition('topleft');
+                    //If filter Circle Actived show Circles 
+                    if (showCircles == 1) {
+            ZabGeomap.addLayer(ZabGeocircle);
+            }
 
-    function addTileLayer(name) {
-        return L.tileLayer(mbUrl, {id: 'mapbox.' + name, attribution: mbAttr});
-    }
-    // Mapas disponíveis =======================================================
-    grayscale = addTileLayer("light");
-    streets = addTileLayer("streets");
-    dark = addTileLayer("dark");
-    outdoors = addTileLayer("outdoors");
-    satellite = addTileLayer("satellite");
-    emerald = addTileLayer("emerald");
+            //If filter Lines Actived show Lines 
+            if (showLines == 1) {
+            ZabGeomap.addLayer(ZabGeolines);
+            }
 
-    var baseMaps = {
-        "Grayscale": grayscale
-        , "Streets": streets
-        , "Dark": dark
-        , "Outdoors": outdoors
-        , "Satellite": satellite
-        , "Emerald": emerald
-    };
-
-    var overlayMaps = {
-        "Circles": ZabGeocircle,
-        "Lines": ZabGeolines,
-        "Alert": ZabGeoalert,
-    };
-
-    layerControl = L.control.layers(baseMaps).addTo(ZabGeomap);
-
-    //If filter Circle Actived show Circles 
-    if (showCircles == 1) {
-        ZabGeomap.addLayer(ZabGeocircle);
-    }
-
-    //If filter Lines Actived show Lines 
-    if (showLines == 1) {
-        ZabGeomap.addLayer(ZabGeolines);
-    }
-
-    //Active layer Alert
-    ZabGeomap.addLayer(ZabGeoalert);
-
-    layerControl.addOverlay(ZabGeocircle, "Circle");
-    layerControl.addOverlay(ZabGeolines, "Lines");
-    //Add lines between hosts
-    var lineHosts = {
-        "type": "FeatureCollection",
-        "features": [
+            //Active layer Alert
+            ZabGeomap.addLayer(ZabGeoalert);
+                    layerControl.addOverlay(ZabGeocircle, "Circle");
+                    layerControl.addOverlay(ZabGeolines, "Lines");
+                    //Add lines between hosts
+                    var lineHosts = {
+                    "type": "FeatureCollection",
+                            "features": [
 <?php echo $linesPackage; ?>
-        ]
-    };
+                            ]
+                    };
+                    var myStyle = {
+                    "color": "#ff7800",
+                            "weight": 2,
+                            "opacity": 0.5
+                    };
+                    function onEachFeature(feature, layer) {
+                    var popupContent = "";
+                            if (feature.properties && feature.properties.popupContent) {
+                    popupContent += feature.properties.popupContent;
+                    }
+                    layer.bindPopup(popupContent);
+                    }
 
 
-    var myStyle = {
-        "color": "#ff7800",
-        "weight": 2,
-        "opacity": 0.5
-    };
-
-    function onEachFeature(feature, layer) {
-        var popupContent = "";
-        if (feature.properties && feature.properties.popupContent) {
-            popupContent += feature.properties.popupContent;
-        }
-        layer.bindPopup(popupContent);
-    }
-
-
-    L.geoJSON(lineHosts, {
-        //style: myStyle,
-        onEachFeature: onEachFeature
-    }).addTo(ZabGeolines);
-
-    /*var myZoom = {
-      start:  ZabGeomap.getZoom(),
-      end: ZabGeomap.getZoom()
-    };
-
-    ZabGeomap.on('zoomstart', function(e) {
-       myZoom.start = ZabGeomap.getZoom();
-    });
-
-    ZabGeomap.on('zoomend', function(e) {
-        myZoom.end = ZabGeomap.getZoom();
-        var diff = myZoom.start - myZoom.end;
-        if (diff > 0) {
-            circle.setRadius(circle.getRadius() * 2);
-        } else if (diff < 0) {
-            circle.setRadius(circle.getRadius() / 2);
-        }
-    });*/
+            L.geoJSON(lineHosts, {
+            //style: myStyle,
+            onEachFeature: onEachFeature
+            }).addTo(ZabGeolines);
 
 </script>
+
