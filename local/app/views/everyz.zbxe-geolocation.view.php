@@ -214,9 +214,13 @@ $tmpColumn->addItem(new CInput('hidden', 'action', $filter["action"]));
 $widget->addColumn($tmpColumn);
 // Left collumn
 $tmpColumn = new CFormList();
-$radioZoom = (new CRadioButtonList('zoomLevel', (int) $filter['zoomLevel']))->setModern(true);
-for ($i = 5; $i < 14; $i++) {
-    $radioZoom->addValue(_($i), $i);
+/* $radioZoom = (new CRadioButtonList('zoomLevel', (int) $filter['zoomLevel']))->setModern(true);
+  for ($i = 5; $i < 14; $i++) {
+  $radioZoom->addValue(_($i), $i);
+  } */
+$radioZoom = new CComboBox('zoomLevel', (int) $filter['zoomLevel']);
+for ($i = 1; $i < 18; $i++) {
+    $radioZoom->additem($i, $i);
 }
 $tmpColumn->addRow(_('Center'), [
             _zeT('Latitude'), SPACE, (new CTextBox('centerLat', $filter['centerLat']))->setWidth(ZBX_TEXTAREA_TINY_WIDTH), SPACE,

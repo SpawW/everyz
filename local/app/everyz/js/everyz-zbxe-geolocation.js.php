@@ -133,7 +133,7 @@ foreach ($hostData as $host) {
         if ($bigPriority > 0) {
             //$myZoomLevel = getRequest2("zoomLevel");
             $circleAlert = pow(2, (13 - (getRequest2("zoomLevel")))) * 500;
-//            $circleAlert = pow(2, (30.5 - (getRequest2("zoomLevel")))) * 500;
+//            $circleAlert = pow(2, (13.5 - (getRequest2("zoomLevel")))) * 500;
             //echo "\n console.log('$myZoomLevel')";
             //echo "\n console.log('$circleAlert')";
             $color = getSeverityColor($bigPriority, [$config]);
