@@ -32,6 +32,7 @@ addFilterActions();
 // Specific fields
 addFilterParameter("hostids", PROFILE_TYPE_STR, [], true, true);
 addFilterParameter("item", T_ZBX_STR);
+addFilterParameter("inactiveHosts", T_ZBX_INT, 1);
 addFilterParameter("groupids", PROFILE_TYPE_STR, [], true, true);
 
 check_fields($fields);
@@ -86,10 +87,12 @@ if (hasRequest('filter_set')) {
             '     on (hos.hostid = ite.hostid) '
             . ($hostFilter == "" ? "" : " AND ") . $hostFilter
             . $hostGroupFilter
+            . ($filter['inactiveHosts'] == 1 ? "and hos.status = 1" : "")
             . ' where ite.state = 1 AND ite.status = 0 '
             . ($filter["item"] == "" ? "" : ' AND ite.key_ like ' . quotestr($filter["item"] . "%"))
             . ' order by hos.host, ite.name'
     ;
+    //var_dump($query);
     // Build a list of items with required key ---------------------------------
     $result = DBselect($query);
     $cont = 0;
@@ -142,6 +145,7 @@ switch ($filter["format"]) {
                 ->addRow(_('Hosts'), multiSelectHosts($multiSelectHostData))
 //                ->addRow(_zeT('Output format'), (new CRadioButtonList('format', (int) $filter['format']))->addValue('HTML', 0)->addValue('CSV', 1)->setModern(true))
                 ->addRow(_zeT('Output format'), buttonOutputFormat('format', (int) $filter['format']))
+                ->addRow(bold(_zeT('Inactive hosts')), buttonOptions("inactiveHosts", $filter["inactiveHosts"], [_('Show'), _('Hide')]))
         ;
         $widget->addColumn($tmpColumn);
         $dashboard->addItem($widget);
