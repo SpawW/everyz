@@ -6,8 +6,8 @@
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com"; 
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="Beta_20170221_2";
-VERSAO_EZ="1.0-beta14";
+VERSAO_INST="Beta_20170222_1";
+VERSAO_EZ="1.0-beta15";
 UPDATEBD="S";
 BRANCH="master";
 NOME_PLUGIN="EVERYZ";
@@ -640,7 +640,7 @@ apacheDirectoryConf() {
     echo "<Directory \"$CAMINHO_FRONTEND/local/app/everyz/$1\"> " >> $APACHEROOT/everyz.conf
     echo " Options FollowSymLinks " >> $APACHEROOT/everyz.conf
     echo " AllowOverride All " >> $APACHEROOT/everyz.conf
-    #echo " Require all granted " >> $APACHEROOT/everyz.conf
+    echo " Require all granted " >> $APACHEROOT/everyz.conf
     echo " Order allow,deny" >> $APACHEROOT/everyz.conf
     echo " Allow from all" >> $APACHEROOT/everyz.conf
     echo "</Directory>" >> $APACHEROOT/everyz.conf;
