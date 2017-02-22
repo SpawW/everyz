@@ -6,8 +6,8 @@
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com"; 
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="Beta_20170222_1";
-VERSAO_EZ="1.0-beta15";
+VERSAO_INST="Beta_20170222_2";
+VERSAO_EZ="1.0-beta16";
 UPDATEBD="S";
 BRANCH="master";
 NOME_PLUGIN="EVERYZ";
@@ -709,7 +709,7 @@ instalaPortletNS() {
     fi
     sed -i "$INIINST,$FIMINST d" $ARQUIVO;
     #TXT_CUSTOM="new CSpan(\$status['items_count_not_supported'], 'unknown')";
-    TXT_CUSTOM="new CLink(\$status['items_count_not_supported']\, 'everyz.php?item=&action=zbxe-ns&filter_set=1')";
+    TXT_CUSTOM="new CLink(\$status['items_count_not_supported']\, 'everyz.php?fullscreen=0&item=&action=zbxe-ns&format=0&filter_set=1')";
     sed -i "$INIINST i$TAG_INICIO\n$TXT_CUSTOM\n$TAG_FINAL" $ARQUIVO
 }
 
