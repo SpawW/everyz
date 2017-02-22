@@ -23,7 +23,7 @@
 define("ZE_VER", "3.0");
 define("EZ_TITLE", 'EveryZ - ');
 define("ZE_COPY", ", ZE " . ZE_VER);
-define("EVERYZBUILD", 5);
+define("EVERYZBUILD", 6);
 
 global $VG_DEBUG;
 global $zeMessages, $zeLocale, $baseName, $requiredMissing, $zbxeLoadedJS;

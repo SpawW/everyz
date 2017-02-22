@@ -36,6 +36,12 @@ try {
         DBexecute(zbxeStandardDML("ALTER TABLE `zbxe_preferences` ADD `module_id` VARCHAR(20) NULL"));
         DBexecute(zbxeStandardDML("UPDATE `zbxe_preferences` SET `module_id` = 'everyz4' "));
     }
+    if ($ezCurrent < 6) {
+        DBexecute(zbxeStandardDML("DROP TABLE `zbxe_preferences` "));
+        DBexecute(zbxeStandardDML("DROP TABLE `zbxe_translation` "));
+        $path = str_replace("/everyz/include", "/everyz", dirname(__FILE__));
+        require_once $path . '/init/everyz.initdb.php';
+    }
 
     /*     * *******************************************************************
      * Data Update
