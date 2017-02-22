@@ -37,10 +37,18 @@ try {
         DBexecute(zbxeStandardDML("UPDATE `zbxe_preferences` SET `module_id` = 'everyz4' "));
     }
     if ($ezCurrent < 6) {
-        DBexecute(zbxeStandardDML("DROP TABLE `zbxe_preferences` "));
-        DBexecute(zbxeStandardDML("DROP TABLE `zbxe_translation` "));
+        try {
+            DBexecute(zbxeStandardDML("DROP TABLE `zbxe_preferences` "));
+        } catch (Exception $e) {
+            
+        }
+        try {
+            DBexecute(zbxeStandardDML("DROP TABLE `zbxe_translation` "));
+        } catch (Exception $e) {
+            
+        }
         $path = str_replace("/everyz/include", "/everyz", dirname(__FILE__));
-        require_once $path . '/init/everyz.initdb.php';
+        require_once $path . '/everyz.initdb.php';
     }
 
     /*     * *******************************************************************
