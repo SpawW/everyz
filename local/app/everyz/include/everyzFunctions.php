@@ -30,7 +30,7 @@ global $zeMessages, $zeLocale, $baseName, $requiredMissing, $zbxeLoadedJS;
 
 $requiredMissing = false;
 $zbxeLoadedJS = [];
-$VG_DEBUG = (isset($_REQUEST['p_debug']) && $_REQUEST['p_debug'] == 'S' ? TRUE : FALSE );
+$VG_DEBUG = (isset($_REQUEST['p_debug']) && $_REQUEST['p_debug'] == 'S' ? true : false );
 
 // End of define and global variables
 // Functions required ==========================================================
@@ -1291,7 +1291,7 @@ function zbxeResetConfiguration() {
 }
 
 function zbxeErrorLog($show, $message) {
-    if ($show) {
+    if ($show == true) {
         error_log($message, 0);
     }
 }

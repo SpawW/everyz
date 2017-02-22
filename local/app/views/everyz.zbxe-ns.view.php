@@ -190,7 +190,7 @@ foreach ($report as $row) {
                 , (new CCol($item["name_expanded"], 1))->addClass($state_css)
                 , (new CCol($item["key_"], 1))->addClass($state_css)
                 , (new CCol($row["error"], 1))->addClass($state_css)
-                , [(new CLink(_('Disable'), ""))->onClick("javascript: return redirect('items.php?group_itemid=" . $row['itemid']
+                , [(new CLink(_('Disable'), ""))->onClick("javascript: return redirect('items.php?group_itemid[]=" . $row['itemid']
                             . "&hostid=" . $row['hostid']
                             . "&action=item.massdisable&sid=180b233e4008f20e', 'post', 'sid', true);"
                     )]
