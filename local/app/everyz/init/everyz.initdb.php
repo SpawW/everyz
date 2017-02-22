@@ -38,10 +38,11 @@ try {
         $oldZE = DBfetch(DBselect('select tx_value from zbxe_preferences WHERE tx_option = ' . quotestr("logo_company")));
 
         if (!empty($result)) {
-            debugInfo("Versão antiga do BD!");
+            DBexecute(zbxeStandardDML("DROP TABLE `zbxe_preferences` "));
+            DBexecute(zbxeStandardDML("DROP TABLE `zbxe_translation` "));
         }
         $resultOK = true;
-        debugInfo("EveryZ tables does not exists. Creating the configuration table:", true);
+        zbxeErrorLog($VG_DEBUG, 'EveryZ - Creating tables');
         $dmlPreferences = "CREATE TABLE zbxe_preferences (
       `userid` int NOT NULL,
       `tx_option` varchar(60) NOT NULL,
@@ -70,10 +71,12 @@ try {
         $debug = false;
         $resultOK = true;
         DBstart();
+        zbxeErrorLog($VG_DEBUG, 'EveryZ - Insert data on preferences');
         // Configuration
         $json = json_decode(file_get_contents("$PATH/everyz_config.json"), true);
         zbxeUpdateConfig($json, $resultOK, $debug);
         // Translation
+        zbxeErrorLog($VG_DEBUG, 'EveryZ - Insert data on translation');
         $json = json_decode(file_get_contents("$PATH/everyz_lang_ALL.json"), true);
         zbxeUpdateTranslation($json, $resultOK, $debug);
 

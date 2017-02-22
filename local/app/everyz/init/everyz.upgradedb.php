@@ -61,7 +61,7 @@ try {
             DBstart();
             if (file_exists("$PATH/everyz_upgrade.$i.php")) {
                 require_once "$PATH/everyz_upgrade.$i.php";
-            }
+            } 
             // Update Configuration
             if (file_exists("$PATH/everyz_config.$i.json")) {
                 $json = json_decode(file_get_contents("$PATH/everyz_config.$i.json"), true);
@@ -72,6 +72,7 @@ try {
                 $json = json_decode(file_get_contents("$PATH/everyz_lang.$i.json"), true);
                 zbxeUpdateTranslation($json, $resultOK, $debug);
             }
+            zbxeUpdateConfig("everyz_version", $i);
         }
     }
     if (isset($resultOK)) {

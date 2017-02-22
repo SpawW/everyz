@@ -25,9 +25,12 @@
  * * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  * */
 
+$VG_IMAGE = true;
 require_once dirname(__FILE__) . '/include/config.inc.php';
 require_once dirname(__FILE__) . '/local/app/everyz/include/everyzFunctions.php';
+$VG_IMAGE = false;
 header("Content-type: image/png");
 $imageid = zbxeConfigValue("company_logo_" . (getRequest2("mode") == "login" ? "login" : "site"));
 $query = "SELECT image FROM images WHERE imageid = " . $imageid;
+zbxeErrorLog($VG_DEBUG, 'Logotipo do EverZ [' . $query . ']');
 echo zbx_unescape_image(zbxeFieldValue($query, 'image'));

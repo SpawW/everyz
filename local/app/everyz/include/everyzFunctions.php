@@ -34,7 +34,7 @@ $VG_DEBUG = (isset($_REQUEST['p_debug']) && $_REQUEST['p_debug'] == 'S' ? TRUE :
 
 // End of define and global variables
 // Functions required ==========================================================
-# Zabbix-Extras - Global Variables Start
+# Zabbix-Extras - Global Variables Start 
 function zbxeFieldValue($p_query, $p_field) {
     $res = "";
     $result = prepareQuery($p_query);
@@ -1275,6 +1275,27 @@ function zbxeFullScreen() {
     }
 }
 
+function zbxeResetConfiguration() {
+    try {
+        DBexecute(zbxeStandardDML("DROP TABLE `zbxe_preferences` "));
+    } catch (Exception $e) {
+        
+    }
+    try {
+        DBexecute(zbxeStandardDML("DROP TABLE `zbxe_translation` "));
+    } catch (Exception $e) {
+        
+    }
+    $path = str_replace("/everyz/include", "/everyz", dirname(__FILE__));
+    require_once $path . '/everyz.initdb.php';
+}
+
+function zbxeErrorLog($show, $message) {
+    if ($show) {
+        error_log($message, 0);
+    }
+}
+
 // End Functions ===============================================================
 // Enviroment configuration
 try {
@@ -1284,13 +1305,15 @@ try {
     $ezCurrent = DBfetch(DBselect('select tx_value from zbxe_preferences WHERE tx_option = ' . quotestr("everyz_version")));
 
     if (empty($ezCurrent)) {
+        zbxeErrorLog($VG_DEBUG, 'EveryZ - Fresh install');
         $path = str_replace("/everyz/include", "/everyz", dirname(__FILE__));
         require_once $path . '/init/everyz.initdb.php';
     } else {
         $VG_BANCO_OK = true;
         $ezCurrent = $ezCurrent['tx_value'];
     }
-    if ($VG_BANCO_OK && $ezCurrent !== EVERYZBUILD) {
+    if ($VG_BANCO_OK && (int) $ezCurrent !== (int) EVERYZBUILD) {
+        zbxeErrorLog($VG_DEBUG, 'EveryZ - Upgrade - [Current: ' . $ezCurrent . ' / New:' . EVERYZBUILD.'] ');
         $path = str_replace("/everyz/include", "/everyz", dirname(__FILE__));
         require_once $path . '/init/everyz.upgradedb.php';
     }
