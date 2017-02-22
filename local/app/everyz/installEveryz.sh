@@ -116,7 +116,7 @@ fi
 # Tenta carregar o frontend do Zabbix para criar as tabelas e evitar mensagens de erro
 primeiroAcesso() {
     echo "Try to get the first access to avoid interface errors...";
-    php $CAMINHO_FRONTEND/index.php  | grep EveryZ 
+    php $CAMINHO_FRONTEND/index.php  | grep EveryZ  | wc -l
 }
 
 # Parametros de configuração ===================================================
@@ -640,7 +640,7 @@ apacheDirectoryConf() {
     echo "<Directory \"$CAMINHO_FRONTEND/local/app/everyz/$1\"> " >> $APACHEROOT/everyz.conf
     echo " Options FollowSymLinks " >> $APACHEROOT/everyz.conf
     echo " AllowOverride All " >> $APACHEROOT/everyz.conf
-    echo " Require all granted " >> $APACHEROOT/everyz.conf
+    echo " <IfModule mod_authz_core.c> Require all granted  </IfModule>" >> $APACHEROOT/everyz.conf
     echo " Order allow,deny" >> $APACHEROOT/everyz.conf
     echo " Allow from all" >> $APACHEROOT/everyz.conf
     echo "</Directory>" >> $APACHEROOT/everyz.conf;
