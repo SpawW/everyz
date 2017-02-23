@@ -62,6 +62,24 @@ addFilterParameter("action", T_ZBX_STR, "dashboard");
 $config = select_config();
 $action = getRequest2("action");
 $module = "dashboard";
+
+if (hasRequest('zbxe_reset_all') && getRequest2('zbxe_reset_all') == "EveryZ ReseT" && $action == "zbxe-config") {
+    // Remover tabelas do EveryZ
+    // Remover profiles
+    try {
+        show_message(_zeT('EveryZ configuration back to default factory values! Please click on "EveryZ menu!'));
+        DBexecute(zbxeStandardDML("DROP TABLE `zbxe_preferences` "));
+        DBexecute(zbxeStandardDML("DROP TABLE `zbxe_translation` "));
+        DBexecute(zbxeStandardDML("DELETE FROM `profiles` where idx like 'everyz%' "));
+        $path = str_replace("local/app/views", "local/app/everyz/init", dirname(__FILE__));
+        require_once $path . '/everyz.initdb.php';
+        exit;
+    } catch (Exception $e) {
+        
+    }
+}
+
+
 $res = DBselect('SELECT userid, tx_option, tx_value from zbxe_preferences zpre '
         . ' WHERE userid in (0,' . CWebUser::$data['userid'] . ') and st_ativo = 1 '
         . ' and tx_value like ' . quotestr($action . '|%')

@@ -143,12 +143,12 @@ $table->addRow(
 );
 $dashboardGrid[1][0] = newWidget('geo', _zeT("ZabGeo", ''), $table);
 
-// Options for reset data
+// Options for reset data ==========================================================
 $table = (new CTable());
 $table->addRow(
         (new CFormList())
                 ->addRow(_('Reset'), [(new CTextBox('zbxe_reset_all'
-                    , 'Type here: '.'"Reset"'))->setWidth(ZBX_TEXTAREA_BIG_WIDTH)]
+                    , _zeT('Type here:') . ' "EveryZ ReseT"'))->setWidth(ZBX_TEXTAREA_BIG_WIDTH)]
                 )
 );
 $dashboardGrid[1][10] = newWidget('reset', _zeT("Reset configuration", ''), $table);

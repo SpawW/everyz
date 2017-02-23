@@ -87,7 +87,7 @@ if (hasRequest('filter_set')) {
             '     on (hos.hostid = ite.hostid) '
             . ($hostFilter == "" ? "" : " AND ") . $hostFilter
             . $hostGroupFilter
-            . ($filter['inactiveHosts'] == 1 ? "and hos.status = 1" : "")
+            . ($filter['inactiveHosts'] == 1 ? "and hos.status = 0" : "")
             . ' where ite.state = 1 AND ite.status = 0 '
             . ($filter["item"] == "" ? "" : ' AND ite.key_ like ' . quotestr($filter["item"] . "%"))
             . ' order by hos.host, ite.name'
