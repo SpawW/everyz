@@ -1296,7 +1296,7 @@ function zbxeErrorLog($show, $message) {
     }
 }
 
-function zbxeCustomMenu() {
+function zbxeCustomMenu() { 
     $logoSize = zbxeConfigValue("company_logo_width", 0, 120) . "px";
     $logoCompany = new CDiv(SPACE, '');
     $logoCompany->setAttribute('style', 'float: left; margin: 10px 0px 0 0; background: url("zbxe-logo.php") no-repeat; height: 25px; width: '
