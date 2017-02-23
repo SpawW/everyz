@@ -1296,6 +1296,20 @@ function zbxeErrorLog($show, $message) {
     }
 }
 
+function zbxeCustomMenu() {
+    $logoSize = zbxeConfigValue("company_logo_width", 0, 120) . "px";
+    $logoCompany = new CDiv(SPACE, '');
+    $logoCompany->setAttribute('style', 'float: left; margin: 10px 0px 0 0; background: url("zbxe-logo.php") no-repeat; height: 25px; width: '
+            . $logoSize . '; cursor: pointer;');
+    $logoZE = new CDiv(SPACE, '');
+    $logoZE->setAttribute('style', 'float: left; margin: 10px 0px 0 0; background: url("local/app/everyz/images/zbxe-logo.png") no-repeat; height: 25px; width: 30px; cursor: pointer;');
+    $return = (new CLink($logoCompany, 'zabbix.php?action=dashboard.view'));
+    if (zbxeConfigValue("show_everyz_logo", 0, 1) == 1) {
+        $return->addItem(new CLink($logoZE, 'http://www.everyz.org'));
+    }
+    return $return;
+}
+
 // End Functions ===============================================================
 // Enviroment configuration
 try {
@@ -1313,7 +1327,7 @@ try {
         $ezCurrent = $ezCurrent['tx_value'];
     }
     if ($VG_BANCO_OK && (int) $ezCurrent !== (int) EVERYZBUILD) {
-        zbxeErrorLog($VG_DEBUG, 'EveryZ - Upgrade - [Current: ' . $ezCurrent . ' / New:' . EVERYZBUILD.'] ');
+        zbxeErrorLog($VG_DEBUG, 'EveryZ - Upgrade - [Current: ' . $ezCurrent . ' / New:' . EVERYZBUILD . '] ');
         $path = str_replace("/everyz/include", "/everyz", dirname(__FILE__));
         require_once $path . '/init/everyz.upgradedb.php';
     }

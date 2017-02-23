@@ -6,8 +6,8 @@
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com"; 
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="Beta_20170223_1";
-VERSAO_EZ="1.0-beta20";
+VERSAO_INST="Beta_20170223_2";
+VERSAO_EZ="1.0-beta21";
 UPDATEBD="S";
 BRANCH="master";
 NOME_PLUGIN="EVERYZ";
@@ -458,8 +458,9 @@ customLogo() {
         sed -i "$INIINST,$FIMINST d" $ARQUIVO;
     fi
 # Logo do site
-    TXT_CUSTOM_LOGO="\t\$logoCompany = new CDiv(SPACE, '')\;\n\t\$logoCompany->setAttribute('style', 'float: left; margin: 10px 0px 0 0; background: url(\"zbxe-logo.php\") no-repeat; height: 25px; width: 120px; cursor: pointer;');";
-    TXT_CUSTOM_LOGO="$TXT_CUSTOM_LOGO\n\t\$logoZE = new CDiv(SPACE, '');\n\t\$logoZE->setAttribute('style', 'float: left; margin: 10px 0px 0 0; background: url(\"local\/app\/everyz\/images\/zbxe-logo.png\") no-repeat; height: 25px; width: 30px; cursor: pointer;');";
+    #TXT_CUSTOM_LOGO="\t\$logoCompany = new CDiv(SPACE, '')\;\n\t\$logoCompany->setAttribute('style', 'float: left; margin: 10px 0px 0 0; background: url(\"zbxe-logo.php\") no-repeat; height: 25px; width: 120px; cursor: pointer;');";
+    #TXT_CUSTOM_LOGO="$TXT_CUSTOM_LOGO\n\t\$logoZE = new CDiv(SPACE, '');\n\t\$logoZE->setAttribute('style', 'float: left; margin: 10px 0px 0 0; background: url(\"local\/app\/everyz\/images\/zbxe-logo.png\") no-repeat; height: 25px; width: 30px; cursor: pointer;');";
+    TXT_CUSTOM_LOGO="  "
     TAG1="\/\/ 1st level menu";
     NOVO="$TAG1\n$TAG_INICIO\n$TXT_CUSTOM_LOGO\n$TAG_FINAL";
     sed -i "s/$TAG1/$NOVO/" $ARQUIVO
@@ -470,7 +471,8 @@ customLogo() {
         FIMINST=`cat $ARQUIVO | sed -ne "/$TAG_FINAL/{=;q;}"`;
         sed -i "$INIINST,$FIMINST d" $ARQUIVO;
     fi
-    TXT_CUSTOM1="\t(new CLink(\$logoCompany,'zabbix.php?action=dashboard.view'))\n\t->addItem(new CLink(\$logoZE,'http:\/\/www.everyz.org'))";
+#    TXT_CUSTOM1="\t(new CLink(\$logoCompany,'zabbix.php?action=dashboard.view'))\n\t->addItem(new CLink(\$logoZE,'http:\/\/www.everyz.org'))";
+    TXT_CUSTOM1="\t zbxeCustomMenu()";
     TAG1="(new CLink((new CDiv())->addClass(ZBX_STYLE_LOGO), 'zabbix.php?action=dashboard.view'))";
     NOVO="#$TAG1\n$TAG_INICIO\n$TXT_CUSTOM1\n$TAG_FINAL";
     sed -i "s/$TAG1/$NOVO/" $ARQUIVO

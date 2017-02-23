@@ -59,8 +59,10 @@ $updated = false;
 foreach ($_REQUEST as $key => $value) {
     if (strpos($key, 'nf_')) {
         $configKey = substr($key, 4);
-        zbxeUpdateConfigValue($configKey, $value);
-        $updated = true;
+        if (zbxeConfigValue($configKey) !== $value) {
+            zbxeUpdateConfigValue($configKey, $value);
+            $updated = true;
+        }
     }
 }
 
@@ -128,6 +130,7 @@ $table->addRow(
                         , 'company_logo_img', zbxeConfigValue('company_logo_width'), 25))->setId("img_company_logo_site"))
                 ->addRow(_zeT('Login Logo'), $cmbLogoLogin)
                 ->addRow((new CImg('imgstore.php?iconid=' . $idLogoLogin, 'company_logo_img', 120, 25))->setId("img_company_logo_login"))
+                ->addRow(_zeT('EveryZ Logo'), buttonOptions("cnf_show_everyz_logo", zbxeConfigValue("show_everyz_logo", 0, 1), [_('Hide'), _('Show')]))
 );
 $dashboardGrid[0][1] = newWidget('company', _zeT("Company"), $table);
 

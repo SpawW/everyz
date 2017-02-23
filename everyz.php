@@ -67,7 +67,7 @@ if (hasRequest('zbxe_reset_all') && getRequest2('zbxe_reset_all') == "EveryZ Res
     // Remover tabelas do EveryZ
     // Remover profiles
     try {
-        show_message(_zeT('EveryZ configuration back to default factory values! Please click on "EveryZ menu!'));
+        show_message(_zeT('EveryZ configuration back to default factory values! Please click on "EveryZ" menu!'));
         DBexecute(zbxeStandardDML("DROP TABLE `zbxe_preferences` "));
         DBexecute(zbxeStandardDML("DROP TABLE `zbxe_translation` "));
         DBexecute(zbxeStandardDML("DELETE FROM `profiles` where idx like 'everyz%' "));
