@@ -68,9 +68,9 @@ try {
  * *************************************************************************** */
 try {
     if (zbxeFieldValue("select COUNT(*) as total from zbxe_preferences", "total") < 2) {
-        $debug = false;
+        $debug = true;
         $resultOK = true;
-        DBstart();
+#        DBstart();
         zbxeErrorLog($VG_DEBUG, 'EveryZ - Insert data on preferences');
         // Configuration
         $json = json_decode(file_get_contents("$PATH/everyz_config.json"), true);
@@ -80,7 +80,7 @@ try {
         $json = json_decode(file_get_contents("$PATH/everyz_lang_ALL.json"), true);
         zbxeUpdateTranslation($json, $resultOK, $debug);
 
-        DBend($resultOK);
+ #       DBend($resultOK);
     }
 } catch (Exception $e) {
     if (zbxeFieldValue("select COUNT(*) as total from zbxe_preferences", "total") < 2)

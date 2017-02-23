@@ -116,7 +116,8 @@ fi
 # Tenta carregar o frontend do Zabbix para criar as tabelas e evitar mensagens de erro
 primeiroAcesso() {
     echo "Try to get the first access to avoid interface errors...";
-    php $CAMINHO_FRONTEND/index.php  | grep EveryZ  | wc -l
+    php $CAMINHO_FRONTEND/index.php | grep EveryZ  | wc -l
+#    php $CAMINHO_FRONTEND/everyz.php action=zbxe-config zbxe_reset_all="EveryZ ReseT"  | grep EveryZ  | wc -l
 }
 
 # Parametros de configuração ===================================================

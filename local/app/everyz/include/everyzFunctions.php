@@ -1129,7 +1129,9 @@ function zbxeUpdateTranslation($json, $resultOK, $debug = false) {
  * @param boolean $debug     If true the function will show debug messages instead run sql commands
  */
 function zbxeUpdateConfig($json, $resultOK, $debug = false) {
+    $report = [];
     if (isset($json["config"])) {
+        $report['config'] = ['source' => count($json["config"]), 'insert' => 0, 'update' => 0];
         $sql = zbxeStandardDML('SELECT * FROM `zbxe_preferences` ORDER BY userid, tx_option');
         $config = zbxeSQLList($sql);
         foreach ($json["config"] as $row) {
@@ -1137,28 +1139,32 @@ function zbxeUpdateConfig($json, $resultOK, $debug = false) {
             if (!isset($config[$cIndex]['tx_option'])) {
                 $sql = zbxeInsert("zbxe_preferences", ['userid', 'tx_option', 'tx_value', 'st_ativo']
                         , [$row['userid'], $row['tx_option'], $row['tx_value'], $row['st_ativo']]);
+                $report['config']['insert'] ++;
             } else {
                 $sql = ($config[$cIndex]['tx_value'] == $row['tx_value'] ? '' :
                                 zbxeUpdate("zbxe_preferences", ['userid', 'tx_option', 'tx_value', 'st_ativo']
                                         , [$row['userid'], $row['tx_option'], $row['tx_value'], $row['st_ativo']]
                                         , ['tx_option'], [$row['tx_option']]));
+                $report['config']['update'] ++;
             }
             if (trim($sql) !== '') {
-                if ($debug)
-                    debugInfo($sql, true);
-                else {
-                    $resultOK = DBexecute($sql);
-                    if (!$resultOK)
-                        return false;
-                }
+                $resultOK = DBexecute($sql);
+                if (!$resultOK)
+                    return false;
             }
+        }
+        if ($debug) {
+            zbxeErrorLog($VG_DEBUG, 'EveryZ - Configuration update: [new values: ' . $report['config']['insert']
+                    . '| updated values: ' . $report['config']['update'] . ']');
         }
     }
     // Import images
     if (isset($json["images"])) {
+        $report['images'] = ['source' => count($json["config"]), 'insert' => 0, 'update' => 0];
         foreach ($json["images"] as $row) {
             $imageIDs = updateImage($row);
             $imageID = $imageIDs['imageids'][0];
+            $report['config']['update'] ++;
             if ($imageID !== $row['imageid']) {
                 $newImageIDs[$row['imageid']] = $imageID;
                 //zbxeConfigImageIDs();
@@ -1172,6 +1178,9 @@ function zbxeUpdateConfig($json, $resultOK, $debug = false) {
                     //var_dump(['Configuracao a atualizar', $newImageIDs[$row['imageid']], $row]);
                 }
             }
+        }
+        if ($debug) {
+            zbxeErrorLog($VG_DEBUG, 'EveryZ - Images update: ' . $report['images']['update'] . ']');
         }
     }
 }
@@ -1296,7 +1305,7 @@ function zbxeErrorLog($show, $message) {
     }
 }
 
-function zbxeCustomMenu() { 
+function zbxeCustomMenu() {
     $logoSize = zbxeConfigValue("company_logo_width", 0, 120) . "px";
     $logoCompany = new CDiv(SPACE, '');
     $logoCompany->setAttribute('style', 'float: left; margin: 10px 0px 0 0; background: url("zbxe-logo.php") no-repeat; height: 25px; width: '
