@@ -43,6 +43,7 @@ addFilterParameter("titleKey1", T_ZBX_STR, 'CPU');
 addFilterParameter("titleKey2", T_ZBX_STR, 'MEM');
 addFilterParameter("titleKey3", T_ZBX_STR, 'FS');
 addFilterParameter("colCount", T_ZBX_INT, 4);
+addFilterParameter("inactiveHosts", T_ZBX_INT, 1);
 
 check_fields($fields);
 
@@ -110,16 +111,19 @@ if (hasRequest('filter_rst')) { // Clean the filter parameters
     //var_dump(selectHostsByGroup($filter["groupids"],['location_lat', 'location_lon', 'location']));
 }
 $allHosts = API::Host()->get([
-    'output' => ['hostid', 'name'],
-    'groupids' => $filter["groupids"]
+    'output' => ['hostid', 'name', 'status'],
+    'groupids' => $filter["groupids"],
+    'status' => 1
         ]);
 
 $reportData = [];
 $totalHosts = $gaugeKey1 = $gaugeKey2 = $gaugeKey3 = 0;
 
 foreach ($allHosts as $value) {
-    $reportData[$value['hostid']]['name'] = $value['name'];
-    $totalHosts++;
+    if ($filter['inactiveHosts'] == 0 || $value['status'] == 0) {
+        $reportData[$value['hostid']]['name'] = $value['name'];
+        $totalHosts++;
+    }
 }
 
 // ----- Get ItemIds -----------------------------------------------------------
@@ -152,9 +156,11 @@ $leftColumn->addRow(_('Host Groups'), multiSelectHostGroups(selectedHostGroups($
 $radioCol = (new CRadioButtonList('colCount', (int) $filter['colCount']))->setModern(true);
 for ($i = 1; $i < 6; $i++) {
     //Caption | value
-    $radioCol->addValue($i, $i-1);
+    $radioCol->addValue($i, $i - 1);
 }
-$leftColumn->addRow(_('Columns'), [$radioCol]);
+$leftColumn->addRow(_('Columns'), [$radioCol])
+        ->addRow(bold(_zeT('Inactive hosts')), buttonOptions("inactiveHosts", $filter["inactiveHosts"], [_('Show'), _('Hide')]))
+;
 
 $rightColumn = new CFormList();
 $rightColumn->addRow(_('Key 1'), [ (new CTextBox('gaugeKey1', $filter['gaugeKey1']))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH)
@@ -173,7 +179,7 @@ $widget->addColumn($rightColumn);
 // Left collumn
 
 $dashboard->addItem($widget);
-if (hasRequest('filter_set') ) { // Clean the filter parameters
+if (hasRequest('filter_set')) { // Clean the filter parameters
     checkRequiredField("groupids", _zeT("You need to provide a least one host group in filter!"));
     if (!$requiredMissing) {
         $cont = 0;

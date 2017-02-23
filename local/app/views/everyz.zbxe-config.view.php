@@ -147,11 +147,11 @@ $dashboardGrid[1][0] = newWidget('geo', _zeT("ZabGeo", ''), $table);
 $table = (new CTable());
 $table->addRow(
         (new CFormList())
-                ->addRow(_('Reset'), [(new CTextBox('cnf_geo_token'
-                    , zbxeConfigValue('geo_token')))->setWidth(ZBX_TEXTAREA_BIG_WIDTH)]
+                ->addRow(_('Reset'), [(new CTextBox('zbxe_reset_all'
+                    , 'Type here: '.'"Reset"'))->setWidth(ZBX_TEXTAREA_BIG_WIDTH)]
                 )
 );
-$dashboardGrid[1][1] = newWidget('reset', _zeT("Reset configuration", ''), $table);
+$dashboardGrid[1][10] = newWidget('reset', _zeT("Reset configuration", ''), $table);
 
 
 $dashboardRow = [];
