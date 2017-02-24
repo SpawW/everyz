@@ -1145,8 +1145,11 @@ function zbxeUpdateConfigImages($json, $resultOK, $debug = false) {
         }
         // Updating config image references
         if (isset($json["imageReferences"])) {
+            //var_dump(['new_image_id',$newImageIDs]);
+            //var_dump(['old_references',$json["imageReferences"]]);
             foreach ($json["imageReferences"] as $row) {
-                if ($newImageIDs[$row['imageid']] !== $row[$row['imageid']]) {
+                //var_dump($row['imageid']);
+                if ($newImageIDs[$row['imageid']] !== $row['imageid']) {
                     zbxeUpdateConfigValue($row['tx_option'], $newImageIDs[$row['imageid']]);
                     //var_dump(['Configuracao a atualizar', $newImageIDs[$row['imageid']], $row]);
                 }
@@ -1359,6 +1362,12 @@ try {
             $path = str_replace("/everyz/include", "/everyz", dirname(__FILE__));
             require_once $path . '/init/everyz.upgradedb.php';
         }
+    }
+    // Verificar se as imagens existem
+    if (zbxeFieldValue("select COUNT(*) as total from images where name like \"zbxe_%\" ", "total") !== 8) {
+        $path = str_replace('/include', "", realpath(dirname(__FILE__)))."/init";
+        $json = json_decode(file_get_contents("$path/everyz_config.json"), true);
+        zbxeUpdateConfigImages($json, true, false);
     }
 } catch (Exception $e) {
     return FALSE;

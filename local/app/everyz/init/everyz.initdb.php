@@ -35,7 +35,7 @@ if (isset($argv)) {
     parse_str(implode('&', array_slice($argv, 1)), $_GET);
 }
 $VG_DEBUG = true;
-$PATH = realpath(dirname(__FILE__));
+$path = realpath(dirname(__FILE__));
 
 /* * ***************************************************************************
  * DML commands
@@ -87,20 +87,14 @@ try {
 #        DBstart();
         zbxeErrorLog($debug, 'EveryZ - Insert data on preferences');
         // Configuration
-        $json = json_decode(file_get_contents("$PATH/everyz_config.json"), true);
+        $json = json_decode(file_get_contents("$path/everyz_config.json"), true);
         zbxeUpdateConfig($json, $resultOK, $debug);
         // Translation
         zbxeErrorLog($debug, 'EveryZ - Insert data on translation');
-        $json = json_decode(file_get_contents("$PATH/everyz_lang_ALL.json"), true);
+        $json = json_decode(file_get_contents("$path/everyz_lang_ALL.json"), true);
         zbxeUpdateTranslation($json, $resultOK, $debug);
 #       DBend($resultOK);
-    } else {
-        // Verificar se as imagens existem
-        if (zbxeFieldValue("select COUNT(*) as total from images where name like \"zbxe_%\" ", "total") !== 8) {
-            $json = json_decode(file_get_contents("$PATH/everyz_config.json"), true);
-            zbxeUpdateConfigImages($json, $resultOK, $debug);
-        }
-    }
+    } 
 } catch (Exception $e) {
     if (zbxeFieldValue("select COUNT(*) as total from zbxe_preferences", "total") < 2)
         error($e->getMessage());
