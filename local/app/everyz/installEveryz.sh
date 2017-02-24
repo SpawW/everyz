@@ -2,17 +2,22 @@
 # Autor: Adail Horst
 # Email: the.spaww@gmail.com 
 # Objective: Install everyz / zabbix extras 
-
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com"; 
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="Beta_20170224_1";
-VERSAO_EZ="1.0-beta23";
+VERSAO_INST="Beta_20170225_1";
+VERSAO_EZ="1.0-beta25";
 UPDATEBD="S";
 BRANCH="master";
 NOME_PLUGIN="EVERYZ";
 HORARIO_BKP=$(date +"%Y_%d_%m_%H-%M");
 BKP_FILE="/tmp/zeBackup$HORARIO_BKP.tgz";
+
+registra() {
+    [ -d ${TMP_DIR} ] || mkdir ${TMP_DIR}
+    echo $(date)" - $1" >> $TMP_DIR/logInstall.log; 
+    echo "--> Mensagem | $1";
+}
 
 paramValue() {
   echo $(echo $1 | awk -F'=' '{print $2}' );
@@ -138,19 +143,13 @@ backupArquivo() {
     fi
 }
 
-registra() {
-    [ -d ${TMP_DIR} ] || mkdir ${TMP_DIR}
-    echo $(date)" - $1" >> $TMP_DIR/logInstall.log; 
-    echo "-->Mensagem $1";
-}
-
 installMgs() {
     if [ "$1" = "U" ]; then
         tipo="Upgrade";
     else
         tipo="Clean";
     fi
-    registra " $tipo install ($2)...";
+    registra "$tipo install ($2)...";
 }
 
 identificaDistro() {
@@ -364,10 +363,10 @@ caminhoFrontend() {
     else
         # Verificar se o arquivo zabbix.php existe no caminho informado --------
         if [ ! -f "$CAMINHO_FRONTEND/zabbix.php" ]; then
-            registra " $M_ERRO_CAMINHO2 ($CAMINHO_FRONTEND). $M_ERRO_ABORT.";
+            registra "$M_ERRO_CAMINHO2 ($CAMINHO_FRONTEND). $M_ERRO_ABORT.";
             exit;
         fi
-        registra " Path do frontend: [$CAMINHO_FRONTEND] ";
+        registra "Path do frontend: [$CAMINHO_FRONTEND] ";
     fi
     cd $CAMINHO_FRONTEND;
 
@@ -434,7 +433,9 @@ instalaMenus() {
         NOVO="$IDENT\n$TAG_INICIO\n, ' | ', (new CLink('EveryZ '.EVERYZ_VERSION, 'http:\/\/www.everyz.org\/'))\n\t->addClass(ZBX_STYLE_GREY)\n\t->addClass(ZBX_STYLE_LINK_ALT)\n\t->setAttribute('target', '_blank')\n$TAG_FINAL";
         sed -i "s/$IDENT/$NOVO/" include/html.inc.php
     fi
-    unalias mv
+    if [ "`alias | grep mv= | wc -l`" -eq 1 ]; then
+        unalias mv
+    fi
     mv include/defines.inc.php include/defines.inc.php.old
     cat include/defines.inc.php.old | grep -v "EVERYZ_VERSION" > include/defines.inc.php;
     if [ "`cat include/defines.inc.php | grep \"EVERYZ_VERSION\" | wc -l`" -eq 0 ]; then
@@ -748,5 +749,4 @@ corTituloMapa;
 configuraApache;
 instalaPortletNS;
  
-echo "Installed - [ $VERSAO_INST ]";
-echo "You need to check your apache server and restart!";
+registra "Installed - [ $VERSAO_INST ]";
