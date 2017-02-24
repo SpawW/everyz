@@ -115,9 +115,8 @@ fi
 
 # Tenta carregar o frontend do Zabbix para criar as tabelas e evitar mensagens de erro
 primeiroAcesso() {
-    echo "==>Database install...";
-    php $CAMINHO_FRONTEND/local/app/everyz/init/everyz.initdb.php 
-#| grep EveryZ  | wc -l
+    registra "==>Database install...";
+    php $CAMINHO_FRONTEND/local/app/everyz/init/everyz.initdb.php | grep EveryZ  | wc -l
 #    php $CAMINHO_FRONTEND/everyz.php action=zbxe-config zbxe_reset_all="EveryZ ReseT"  | grep EveryZ  | wc -l
 }
 
