@@ -1122,6 +1122,44 @@ function zbxeUpdateTranslation($json, $resultOK, $debug = false) {
 }
 
 /**
+ * zbxeUpdateConfigImages
+ *
+ * Importa as imagens padrões do everyz
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param array   $json      JSON data converted to PHP array
+ * @param boolean $resultOK  Variable with information about problems runing SQL commands
+ * @param boolean $debug     If true the function will show debug messages instead run sql commands
+ */
+function zbxeUpdateConfigImages($json, $resultOK, $debug = false) {
+    if (isset($json["images"])) {
+        $report['images'] = ['source' => count($json["images"]), 'insert' => 0, 'update' => 0];
+        foreach ($json["images"] as $row) {
+            $imageIDs = updateImage($row);
+            $imageID = $imageIDs['imageids'][0];
+            $report['images']['update'] ++;
+            if ($imageID !== $row['imageid']) {
+                $newImageIDs[$row['imageid']] = $imageID;
+                //zbxeConfigImageIDs();
+            }
+        }
+        // Updating config image references
+        if (isset($json["imageReferences"])) {
+            foreach ($json["imageReferences"] as $row) {
+                if ($newImageIDs[$row['imageid']] !== $row[$row['imageid']]) {
+                    zbxeUpdateConfigValue($row['tx_option'], $newImageIDs[$row['imageid']]);
+                    //var_dump(['Configuracao a atualizar', $newImageIDs[$row['imageid']], $row]);
+                }
+            }
+        }
+        if ($debug) {
+            zbxeErrorLog(true, 'EveryZ - Images update: [from file: ' . $report['images']['source']
+                    . '| Updated: ' . $report['images']['update'] . ']');
+        }
+    }
+}
+
+/**
  * zbxeUpdateConfig
  *
  * Importa configurações do EveryZ e de seus módulos
@@ -1163,31 +1201,7 @@ function zbxeUpdateConfig($json, $resultOK, $debug = false) {
         }
     }
     // Import images
-    if (isset($json["images"])) {
-        $report['images'] = ['source' => count($json["images"]), 'insert' => 0, 'update' => 0];
-        foreach ($json["images"] as $row) {
-            $imageIDs = updateImage($row);
-            $imageID = $imageIDs['imageids'][0];
-            $report['images']['update'] ++;
-            if ($imageID !== $row['imageid']) {
-                $newImageIDs[$row['imageid']] = $imageID;
-                //zbxeConfigImageIDs();
-            }
-        }
-        // Updating config image references
-        if (isset($json["imageReferences"])) {
-            foreach ($json["imageReferences"] as $row) {
-                if ($newImageIDs[$row['imageid']] !== $row[$row['imageid']]) {
-                    zbxeUpdateConfigValue($row['tx_option'], $newImageIDs[$row['imageid']]);
-                    //var_dump(['Configuracao a atualizar', $newImageIDs[$row['imageid']], $row]);
-                }
-            }
-        }
-        if ($debug) {
-            zbxeErrorLog(true, 'EveryZ - Images update: [from file: ' . $report['images']['source']
-                    . '| Updated: ' . $report['images']['update'] . ']');
-        }
-    }
+    zbxeUpdateConfigImages($json, $resultOK, $debug);
 }
 
 /**

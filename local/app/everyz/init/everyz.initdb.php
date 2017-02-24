@@ -45,9 +45,9 @@ try {
     if (!$VG_BANCO_OK) {
         // se tabelas na versão anterior do zabbix extras existirem, remover....
         $oldZE = DBfetch(DBselect('select tx_value from zbxe_preferences WHERE tx_option = ' . quotestr("logo_company")));
-        //DBexecute(zbxeStandardDML("DROP TABLE `zbxe_preferences` "));
-        //DBexecute(zbxeStandardDML("DROP TABLE `zbxe_translation` "));
-        //DBexecute(zbxeStandardDML("delete from images where name like 'logo_%' or name like 'zbxe_%' "));
+        DBexecute(zbxeStandardDML("DROP TABLE `zbxe_preferences` "));
+        DBexecute(zbxeStandardDML("DROP TABLE `zbxe_translation` "));
+        DBexecute(zbxeStandardDML("delete from images where name like 'logo_%' or name like 'zbxe_%' "));
 
         zbxeErrorLog(true, 'EveryZ - Old tables verification [' . (int) $oldZE . ']');
         if (!intval($oldZE) > 0) {
@@ -94,6 +94,12 @@ try {
         $json = json_decode(file_get_contents("$PATH/everyz_lang_ALL.json"), true);
         zbxeUpdateTranslation($json, $resultOK, $debug);
 #       DBend($resultOK);
+    } else {
+        // Verificar se as imagens existem
+        if (zbxeFieldValue("select COUNT(*) as total from images where name like \"zbxe_%\" ", "total") !== 8) {
+            $json = json_decode(file_get_contents("$PATH/everyz_config.json"), true);
+            zbxeUpdateConfigImages($json, $resultOK, $debug);
+        }
     }
 } catch (Exception $e) {
     if (zbxeFieldValue("select COUNT(*) as total from zbxe_preferences", "total") < 2)
