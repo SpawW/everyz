@@ -38,9 +38,9 @@ addFilterActions();
 addFilterParameter("groupids", PROFILE_TYPE_STR, [], true, true);
 addFilterParameter("iconmapid", T_ZBX_INT);
 
-addFilterParameter("centerLat", T_ZBX_STR, "", false, false);
-addFilterParameter("centerLong", T_ZBX_STR, "", false, false);
-addFilterParameter("zoomLevel", T_ZBX_INT);
+addFilterParameter("centerLat", T_ZBX_STR, "-12.70894", false, false);
+addFilterParameter("centerLong", T_ZBX_STR, "-47.19727", false, false);
+addFilterParameter("zoomLevel", T_ZBX_INT,5);
 addFilterParameter("map", T_ZBX_STR, "1", false, false);
 addFilterParameter("layers", T_ZBX_INT);
 
@@ -77,6 +77,10 @@ function hostIndex($hostid, $hostArray) {
 if (hasRequest('filter_rst')) { // Clean the filter parameters
     resetProfile('groupids', true);
     resetProfile('iconmapid', true);
+    resetProfile('centerLat', true);
+    resetProfile('centerLon', true);
+    resetProfile('zoomLevel', true);
+    
     $filter['filter_rst'] = NULL;
 } else { // Put the date in required format
     //var_dump($filter["groupids"]);
@@ -199,10 +203,13 @@ if ($filter['map'] == "") {
     $filter['map'] = 1;
 }
 if ($filter['centerLat'] == "") {
-    $filter['centerLat'] = -12.8;
+    $filter['centerLat'] = -12.70894;
 }
 if ($filter['centerLong'] == "") {
-    $filter['centerLong'] = -44.8;
+    $filter['centerLong'] = -47.19727;
+}
+if ($filter['zoomLevel'] == "") {
+    $filter['zoomLevel'] = 5;
 }
 $tmpColumn->addRow(_('Host Groups'), multiSelectHostGroups(selectedHostGroups($filter['groupids'])))
         ->addRow(_zeT('Automatic icon mapping'), [zbxeComboIconMap('iconmapid', $filter['iconmapid'])])
@@ -214,10 +221,6 @@ $tmpColumn->addItem(new CInput('hidden', 'action', $filter["action"]));
 $widget->addColumn($tmpColumn);
 // Left collumn
 $tmpColumn = new CFormList();
-/* $radioZoom = (new CRadioButtonList('zoomLevel', (int) $filter['zoomLevel']))->setModern(true);
-  for ($i = 5; $i < 14; $i++) {
-  $radioZoom->addValue(_($i), $i);
-  } */
 $radioZoom = new CComboBox('zoomLevel', (int) $filter['zoomLevel']);
 for ($i = 1; $i < 18; $i++) {
     $radioZoom->additem($i, $i);

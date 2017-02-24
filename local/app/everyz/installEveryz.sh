@@ -2,6 +2,7 @@
 # Autor: Adail Horst
 # Email: the.spaww@gmail.com 
 # Objective: Install everyz / zabbix extras 
+
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com"; 
 TMP_DIR="/tmp/upgZabbix";
@@ -12,12 +13,6 @@ BRANCH="master";
 NOME_PLUGIN="EVERYZ";
 HORARIO_BKP=$(date +"%Y_%d_%m_%H-%M");
 BKP_FILE="/tmp/zeBackup$HORARIO_BKP.tgz";
-
-registra() {
-    [ -d ${TMP_DIR} ] || mkdir ${TMP_DIR}
-    echo $(date)" - $1" >> $TMP_DIR/logInstall.log; 
-    echo "--> Mensagem | $1";
-}
 
 paramValue() {
   echo $(echo $1 | awk -F'=' '{print $2}' );
@@ -120,7 +115,7 @@ fi
 
 # Tenta carregar o frontend do Zabbix para criar as tabelas e evitar mensagens de erro
 primeiroAcesso() {
-    registra "==>Database install...";
+    registra "Database install...";
     php $CAMINHO_FRONTEND/local/app/everyz/init/everyz.initdb.php | grep EveryZ  | wc -l
 }
 
@@ -143,13 +138,19 @@ backupArquivo() {
     fi
 }
 
+registra() {
+    [ -d ${TMP_DIR} ] || mkdir ${TMP_DIR}
+    echo $(date)" - $1" >> $TMP_DIR/logInstall.log; 
+    echo "-->Mensagem $1";
+}
+
 installMgs() {
     if [ "$1" = "U" ]; then
         tipo="Upgrade";
     else
         tipo="Clean";
     fi
-    registra "$tipo install ($2)...";
+    registra " $tipo install ($2)...";
 }
 
 identificaDistro() {
@@ -363,10 +364,10 @@ caminhoFrontend() {
     else
         # Verificar se o arquivo zabbix.php existe no caminho informado --------
         if [ ! -f "$CAMINHO_FRONTEND/zabbix.php" ]; then
-            registra "$M_ERRO_CAMINHO2 ($CAMINHO_FRONTEND). $M_ERRO_ABORT.";
+            registra " $M_ERRO_CAMINHO2 ($CAMINHO_FRONTEND). $M_ERRO_ABORT.";
             exit;
         fi
-        registra "Path do frontend: [$CAMINHO_FRONTEND] ";
+        registra " Path do frontend: [$CAMINHO_FRONTEND] ";
     fi
     cd $CAMINHO_FRONTEND;
 
@@ -749,4 +750,5 @@ corTituloMapa;
 configuraApache;
 instalaPortletNS;
  
-registra "Installed - [ $VERSAO_INST ]";
+echo "Installed - [ $VERSAO_INST ]";
+echo "You need to check your apache server and restart!";
