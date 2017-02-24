@@ -18,6 +18,15 @@
  * * along with this program; if not, write to the Free Software
  * * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  * */
+if (php_sapi_name() == "cli") {
+    // In cli-mode
+    $path = str_replace('/local/app/everyz/init', "", dirname(__FILE__));
+    require_once $path . '/include/config.inc.php';
+    global $VG_INSTALL;
+    $VG_INSTALL = true;
+    require_once $path . '/local/app/everyz/include/everyzFunctions.php';
+    $VG_BANCO_OK = false;
+}
 
 /* * ***************************************************************************
  * Module Variables
@@ -36,8 +45,13 @@ try {
     if (!$VG_BANCO_OK) {
         // se tabelas na versão anterior do zabbix extras existirem, remover....
         $oldZE = DBfetch(DBselect('select tx_value from zbxe_preferences WHERE tx_option = ' . quotestr("logo_company")));
+        //DBexecute(zbxeStandardDML("DROP TABLE `zbxe_preferences` "));
+        //DBexecute(zbxeStandardDML("DROP TABLE `zbxe_translation` "));
+        //DBexecute(zbxeStandardDML("delete from images where name like 'logo_%' or name like 'zbxe_%' "));
 
-        if (!empty($result)) {
+        zbxeErrorLog(true, 'EveryZ - Old tables verification [' . (int) $oldZE . ']');
+        if (!intval($oldZE) > 0) {
+            zbxeErrorLog(true, 'EveryZ - Dropping old tables');
             DBexecute(zbxeStandardDML("DROP TABLE `zbxe_preferences` "));
             DBexecute(zbxeStandardDML("DROP TABLE `zbxe_translation` "));
         }
@@ -60,9 +74,9 @@ try {
         DBexecute(zbxeStandardDML($dmlTranslation));
     }
 } catch (Exception $e) {
+    zbxeErrorLog(true, 'EveryZ - Creating tables fail');
     error($e->getMessage());
 }
-
 /* * ***************************************************************************
  * Update data
  * *************************************************************************** */
@@ -71,16 +85,15 @@ try {
         $debug = true;
         $resultOK = true;
 #        DBstart();
-        zbxeErrorLog($VG_DEBUG, 'EveryZ - Insert data on preferences');
+        zbxeErrorLog($debug, 'EveryZ - Insert data on preferences');
         // Configuration
         $json = json_decode(file_get_contents("$PATH/everyz_config.json"), true);
         zbxeUpdateConfig($json, $resultOK, $debug);
         // Translation
-        zbxeErrorLog($VG_DEBUG, 'EveryZ - Insert data on translation');
+        zbxeErrorLog($debug, 'EveryZ - Insert data on translation');
         $json = json_decode(file_get_contents("$PATH/everyz_lang_ALL.json"), true);
         zbxeUpdateTranslation($json, $resultOK, $debug);
-
- #       DBend($resultOK);
+#       DBend($resultOK);
     }
 } catch (Exception $e) {
     if (zbxeFieldValue("select COUNT(*) as total from zbxe_preferences", "total") < 2)

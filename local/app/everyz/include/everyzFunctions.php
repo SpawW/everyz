@@ -1085,6 +1085,7 @@ function zbxeArraySearch($array, $key, $value) {
  */
 function zbxeUpdateTranslation($json, $resultOK, $debug = false) {
     if (isset($json["translation"])) {
+        $insert = $update = 0;
         foreach ($json["translation"] as $row) {
             // Populate translations array
             if (!isset($translations[$row['lang']])) {
@@ -1096,6 +1097,7 @@ function zbxeUpdateTranslation($json, $resultOK, $debug = false) {
                 $sql = "INSERT INTO zbxe_translation (lang, tx_original, tx_new, module_id) VALUES ("
                         . quotestr($row['lang']) . "," . quotestr($row['tx_original'])
                         . "," . quotestr($row['tx_new']) . ", " . quotestr($row['module_id']) . ")";
+                $insert++;
             } else {
                 $translate = $translations[$row['lang']][$translate];
                 //var_dump($translate);
@@ -1103,16 +1105,17 @@ function zbxeUpdateTranslation($json, $resultOK, $debug = false) {
                                 'UPDATE zbxe_translation SET tx_new = ' . quotestr($row['tx_new'])
                                 . ' WHERE lang = ' . quotestr($row['lang']) . ' and tx_original = '
                                 . quotestr($row['tx_original']));
+                $update++;
             }
             if (trim($sql) !== '') {
-                if ($debug)
-                    debugInfo($sql, true);
-                else {
-                    $resultOK = DBexecute($sql);
-                    if (!$resultOK)
-                        return false;
-                }
+                $resultOK = DBexecute($sql);
+                if (!$resultOK)
+                    return false;
             }
+        }
+        if ($debug) {
+            zbxeErrorLog(true, 'EveryZ - Translation update: [from file: ' . count($json["translation"])
+                    . '| new values: ' . $insert . '| updated values: ' . $update . ']');
         }
         return count($json["translation"]);
     }
@@ -1154,17 +1157,18 @@ function zbxeUpdateConfig($json, $resultOK, $debug = false) {
             }
         }
         if ($debug) {
-            zbxeErrorLog($VG_DEBUG, 'EveryZ - Configuration update: [new values: ' . $report['config']['insert']
+            zbxeErrorLog(true, 'EveryZ - Configuration update: [from file: ' . $report['config']['source']
+                    . '| new values: ' . $report['config']['insert']
                     . '| updated values: ' . $report['config']['update'] . ']');
         }
     }
     // Import images
     if (isset($json["images"])) {
-        $report['images'] = ['source' => count($json["config"]), 'insert' => 0, 'update' => 0];
+        $report['images'] = ['source' => count($json["images"]), 'insert' => 0, 'update' => 0];
         foreach ($json["images"] as $row) {
             $imageIDs = updateImage($row);
             $imageID = $imageIDs['imageids'][0];
-            $report['config']['update'] ++;
+            $report['images']['update'] ++;
             if ($imageID !== $row['imageid']) {
                 $newImageIDs[$row['imageid']] = $imageID;
                 //zbxeConfigImageIDs();
@@ -1180,7 +1184,8 @@ function zbxeUpdateConfig($json, $resultOK, $debug = false) {
             }
         }
         if ($debug) {
-            zbxeErrorLog($VG_DEBUG, 'EveryZ - Images update: ' . $report['images']['update'] . ']');
+            zbxeErrorLog(true, 'EveryZ - Images update: [from file: ' . $report['images']['source']
+                    . '| Updated: ' . $report['images']['update'] . ']');
         }
     }
 }
@@ -1235,14 +1240,12 @@ function updateImage($image) {
             'name' => $image['name'],
             'image' => $image['image']
         ]);
-//        var_dump([$result, "update - " . $image['name']]);
     } else {
         $result = API::Image()->create([
             'name' => $image['name'],
             'imagetype' => $image['imagetype'],
             'image' => $image['image']
         ]);
-//        var_dump([$result, "insert - " . $image['name']]);
     }
     return $result;
 }
@@ -1322,23 +1325,26 @@ function zbxeCustomMenu() {
 // End Functions ===============================================================
 // Enviroment configuration
 try {
-    global $VG_BANCO_OK;
-    $VG_BANCO_OK = false;
-    zbxeStartDefinitions();
-    $ezCurrent = DBfetch(DBselect('select tx_value from zbxe_preferences WHERE tx_option = ' . quotestr("everyz_version")));
-
-    if (empty($ezCurrent)) {
-        zbxeErrorLog($VG_DEBUG, 'EveryZ - Fresh install');
-        $path = str_replace("/everyz/include", "/everyz", dirname(__FILE__));
-        require_once $path . '/init/everyz.initdb.php';
-    } else {
-        $VG_BANCO_OK = true;
-        $ezCurrent = $ezCurrent['tx_value'];
-    }
-    if ($VG_BANCO_OK && (int) $ezCurrent !== (int) EVERYZBUILD) {
-        zbxeErrorLog($VG_DEBUG, 'EveryZ - Upgrade - [Current: ' . $ezCurrent . ' / New:' . EVERYZBUILD . '] ');
-        $path = str_replace("/everyz/include", "/everyz", dirname(__FILE__));
-        require_once $path . '/init/everyz.upgradedb.php';
+    global $VG_INSTALL;
+    if (!isset($VG_INSTALL)) {
+        zbxeErrorLog(true, 'EveryZ - Fresh install');
+        global $VG_BANCO_OK;
+        $VG_BANCO_OK = false;
+        zbxeStartDefinitions();
+        $ezCurrent = DBfetch(DBselect('select tx_value from zbxe_preferences WHERE tx_option = ' . quotestr("everyz_version")));
+        if (empty($ezCurrent)) {
+            zbxeErrorLog($VG_DEBUG, 'EveryZ - Fresh install');
+            $path = str_replace("/everyz/include", "/everyz", dirname(__FILE__));
+            require_once $path . '/init/everyz.initdb.php';
+        } else {
+            $VG_BANCO_OK = true;
+            $ezCurrent = $ezCurrent['tx_value'];
+        }
+        if ($VG_BANCO_OK && (int) $ezCurrent !== (int) EVERYZBUILD) {
+            zbxeErrorLog($VG_DEBUG, 'EveryZ - Upgrade - [Current: ' . $ezCurrent . ' / New:' . EVERYZBUILD . '] ');
+            $path = str_replace("/everyz/include", "/everyz", dirname(__FILE__));
+            require_once $path . '/init/everyz.upgradedb.php';
+        }
     }
 } catch (Exception $e) {
     return FALSE;

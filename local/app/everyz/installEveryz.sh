@@ -6,8 +6,8 @@
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com"; 
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="Beta_20170223_3";
-VERSAO_EZ="1.0-beta22";
+VERSAO_INST="Beta_20170224_1";
+VERSAO_EZ="1.0-beta23";
 UPDATEBD="S";
 BRANCH="master";
 NOME_PLUGIN="EVERYZ";
@@ -115,8 +115,9 @@ fi
 
 # Tenta carregar o frontend do Zabbix para criar as tabelas e evitar mensagens de erro
 primeiroAcesso() {
-    echo "Try to get the first access to avoid interface errors...";
-    php $CAMINHO_FRONTEND/index.php | grep EveryZ  | wc -l
+    echo "==>Database install...";
+    php $CAMINHO_FRONTEND/local/app/everyz/init/everyz.initdb.php 
+#| grep EveryZ  | wc -l
 #    php $CAMINHO_FRONTEND/everyz.php action=zbxe-config zbxe_reset_all="EveryZ ReseT"  | grep EveryZ  | wc -l
 }
 
@@ -600,13 +601,17 @@ unzipPackage() {
     
     cd /tmp;
     # Descompacta em TMP
-    if [ -e $DIR_TMP ]; then
-        rm -rf $DIR_TMP;
-    fi
-    unzip $ARQ_TMP > /tmp/tmp_unzip_ze.log;
-    cd $DIR_TMP
-    if [ ! -e "$DIR_DEST" ]; then
-        mkdir -p "$DIR_DEST";
+    if [ -f "$ARQ_TMP" ]; then
+        if [ -e $DIR_TMP ]; then
+            rm -rf $DIR_TMP;
+        fi
+        unzip $ARQ_TMP > /tmp/tmp_unzip_ze.log;
+        cd $DIR_TMP
+        if [ ! -e "$DIR_DEST" ]; then
+            mkdir -p "$DIR_DEST";
+        fi 
+    else
+        echo "===>Instalacao usando cache local";
     fi
 }
 
@@ -736,14 +741,14 @@ confirmaApache;
 ####### Download de arquivos ---------------------------------------------------
 
 ####### Instalacao -------------------------------------------------------------
+instalaGit;  
+primeiroAcesso;
 instalaMenus;
 customLogo;
 instalaLiteral;
 corTituloMapa;
 configuraApache;
-instalaGit;  
 instalaPortletNS;
-primeiroAcesso;
  
 echo "Installed - [ $VERSAO_INST ]";
 echo "You need to check your apache server and restart!";

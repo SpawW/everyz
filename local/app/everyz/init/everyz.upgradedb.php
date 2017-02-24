@@ -32,10 +32,6 @@ try {
     /*     * *******************************************************************
      * DML Updates
      * ********************************************************************** */
-    if ($ezCurrent < 4) {
-        DBexecute(zbxeStandardDML("ALTER TABLE `zbxe_preferences` ADD `module_id` VARCHAR(20) NULL"));
-        DBexecute(zbxeStandardDML("UPDATE `zbxe_preferences` SET `module_id` = 'everyz4' "));
-    }
     if ($ezCurrent < 6) {
         try {
             DBexecute(zbxeStandardDML("DROP TABLE `zbxe_preferences` "));
@@ -61,7 +57,7 @@ try {
             DBstart();
             if (file_exists("$PATH/everyz_upgrade.$i.php")) {
                 require_once "$PATH/everyz_upgrade.$i.php";
-            } 
+            }
             // Update Configuration
             if (file_exists("$PATH/everyz_config.$i.json")) {
                 $json = json_decode(file_get_contents("$PATH/everyz_config.$i.json"), true);
@@ -72,9 +68,10 @@ try {
                 $json = json_decode(file_get_contents("$PATH/everyz_lang.$i.json"), true);
                 zbxeUpdateTranslation($json, $resultOK, $debug);
             }
-            zbxeUpdateConfig("everyz_version", $i);
+            zbxeUpdateConfigValue("everyz_version", $i, true);
         }
     }
+    //$ezCurrent = EVERYZBUILD;
     if (isset($resultOK)) {
         DBend($resultOK);
         show_messages(true, _s(_zeT('EveryZ - Configuration update to %1$s version!'), EVERYZBUILD));

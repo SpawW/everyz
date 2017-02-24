@@ -61,7 +61,6 @@ function newText($text, $class = ZBX_STYLE_GREEN, $margin = "10px") {
  * ************************************************************************** */
 if (isset($_FILES['import_file']) && $filter['actionType'] == 0) {
     $resultOK = false;
-
     try {
         $file = new CUploadFile($_FILES['import_file']);
         $json = json_decode($file->getContent(), true);
