@@ -155,6 +155,13 @@ $table->addRow(
                 )
 );
 $dashboardGrid[1][10] = newWidget('reset', _zeT("Reset configuration", ''), $table);
+// Options for reset data ==========================================================
+$table = (new CTable());
+$table->addRow(
+        (new CFormList())
+                ->addRow(_zeT('FullScreen'), buttonOptions("cnf_custom_full_screen", zbxeConfigValue("custom_full_screen", 0, 1), [_('Regular'), _('Extra')]))
+);
+$dashboardGrid[1][1] = newWidget('general', _zeT("General", ''), $table);
 
 
 $dashboardRow = [];

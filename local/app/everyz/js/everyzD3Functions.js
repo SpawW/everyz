@@ -1,6 +1,6 @@
 /*
  * * Purpose: Functions to use d3.js
- * * Adail Horst / Aristoteles Araujo.
+ * * Adail Horst.
  * *
  * * This program is free software; you can redistribute it and/or modify
  * * it under the terms of the GNU General Public License as published by

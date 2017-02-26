@@ -200,10 +200,11 @@ $hostData = $tmp;
 
 /* * ***************************************************************************
  * Display
+<script src="local/app/everyz/js/leaflet.js"></script>
  * ************************************************************************** */
+zbxeJSLoad(['leaflet.js','everyzD3Functions.js']);
 ?>
 <link rel="stylesheet" href="local/app/everyz/css/leaflet.css" />
-<script src="local/app/everyz/js/leaflet.js"></script>
 <?php
 commonModuleHeader($moduleName, $moduleTitle, true);
 $widget = newFilterWidget($moduleName);
@@ -247,7 +248,6 @@ $tmpColumn->addRow(_('Center'), [
 
 ;
 $widget->addColumn($tmpColumn);
-
 $dashboard->addItem($widget);
 
 // Get data for report ---------------------------------------------------------
@@ -256,7 +256,7 @@ if (hasRequest('filter_set')) {
     checkRequiredField("centerLat", _zeT("You need to entered center Latitude data!"));
     checkRequiredField("centerLong", _zeT("You need to entered center Longitude data!"));
     if ($requiredMissing) {
-        error("check data required!");
+        error("Check data required!");
         //checkRequiredField("centerLat", _zeT("You need to entered center Latitude data!"));  
     }
 } else {

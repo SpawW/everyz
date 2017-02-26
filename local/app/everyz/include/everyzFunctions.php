@@ -1299,7 +1299,7 @@ function optArrayValue($array, $value) {
 }
 
 function zbxeFullScreen() {
-    if (zbxeConfigValue('custom_full_screen') == "S") {
+    if (zbxeConfigValue('custom_full_screen') == "1") {
         zbxeJSLoad(['everyzFunctions.js']);
     }
 }
@@ -1364,7 +1364,8 @@ try {
         }
     }
     // Verificar se as imagens existem
-    if (zbxeFieldValue("select COUNT(*) as total from images where name like 'zbxe_%' ", "total") !== 8) {
+    if (zbxeFieldValue("select COUNT(*) as total from images where name like 'zbxe_%' ", "total") !== "8") {
+        //var_dump(zbxeFieldValue("select COUNT(*) as total from images where name like 'zbxe_%' ", "total"));
         $path = str_replace('/include', "", realpath(dirname(__FILE__)))."/init";
         $json = json_decode(file_get_contents("$path/everyz_config.json"), true);
         zbxeUpdateConfigImages($json, true, false);
