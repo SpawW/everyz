@@ -40,7 +40,7 @@ addFilterParameter("iconmapid", T_ZBX_INT);
 
 addFilterParameter("centerLat", T_ZBX_STR, "-12.70894", false, false);
 addFilterParameter("centerLong", T_ZBX_STR, "-47.19727", false, false);
-addFilterParameter("zoomLevel", T_ZBX_INT,5);
+addFilterParameter("zoomLevel", T_ZBX_INT, 5);
 addFilterParameter("map", T_ZBX_STR, "1", false, false);
 addFilterParameter("layers", T_ZBX_INT);
 
@@ -80,7 +80,7 @@ if (hasRequest('filter_rst')) { // Clean the filter parameters
     resetProfile('centerLat', true);
     resetProfile('centerLon', true);
     resetProfile('zoomLevel', true);
-    
+
     $filter['filter_rst'] = NULL;
 } else { // Put the date in required format
     //var_dump($filter["groupids"]);
@@ -186,6 +186,17 @@ foreach ($hostData as $key => $host) {
     $cont++;
 }
 
+// Ordenar hosts por existência de evento
+$tmp = [];
+foreach ($hostData as $key => $host) {
+    if ($host['maxPriority'] > -1) {
+        array_push($tmp, $host);
+    } else {
+        array_unshift($tmp, $host);
+    }
+    //$hostData
+}
+$hostData = $tmp;
 
 /* * ***************************************************************************
  * Display

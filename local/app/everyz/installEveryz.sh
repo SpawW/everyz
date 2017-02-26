@@ -6,8 +6,8 @@
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com"; 
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="Beta_20170225_1";
-VERSAO_EZ="1.0-beta25";
+VERSAO_INST="Beta_20170226_1";
+VERSAO_EZ="1.0-beta26";
 UPDATEBD="S";
 BRANCH="master";
 NOME_PLUGIN="EVERYZ";
@@ -17,6 +17,7 @@ BKP_FILE="/tmp/zeBackup$HORARIO_BKP.tgz";
 paramValue() {
   echo $(echo $1 | awk -F'=' '{print $2}' );
 }
+
 # Parametros de configuração para automatização ================================
 if [ $# -gt 0 ]; then
     for i in "$@"
@@ -150,7 +151,7 @@ installMgs() {
     else
         tipo="Clean";
     fi
-    registra " $tipo install ($2)...";
+    registra "$tipo install ($2)...";
 }
 
 identificaDistro() {
