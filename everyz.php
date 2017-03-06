@@ -42,16 +42,16 @@ switch (getRequest('format')) {
         break;
     default:
         $page['type'] = detect_page_type(PAGE_TYPE_HTML);
+        $page['scripts'] = array('class.calendar.js', 'multiselect.js', 'gtlc.js');
+        require_once dirname(__FILE__) . '/include/page_header.php';
         ?>
         <link href="local/app/everyz/css/everyz.css" rel="stylesheet" type="text/css" id="skinSheet">
         <?php
         break;
 }
-$page['scripts'] = array('class.calendar.js', 'multiselect.js', 'gtlc.js');
 
 $filter = $fields = [];
 
-require_once dirname(__FILE__) . '/include/page_header.php';
 
 addFilterParameter("action", T_ZBX_STR, "dashboard");
 
@@ -101,3 +101,4 @@ if ($module == "dashboard") {
 
 zbxeFullScreen();
 require_once dirname(__FILE__) . '/include/page_footer.php';
+

@@ -1344,13 +1344,12 @@ function zbxeCustomMenu() {
 try {
     global $VG_INSTALL;
     if (!isset($VG_INSTALL)) {
-        zbxeErrorLog(true, 'EveryZ - Fresh install');
         global $VG_BANCO_OK;
         $VG_BANCO_OK = false;
         zbxeStartDefinitions();
         $ezCurrent = DBfetch(DBselect('select tx_value from zbxe_preferences WHERE tx_option = ' . quotestr("everyz_version")));
         if (empty($ezCurrent)) {
-            zbxeErrorLog($VG_DEBUG, 'EveryZ - Fresh install');
+            zbxeErrorLog($VG_DEBUG, 'EveryZ - Fresh install [' . $ezCurrent . '] ...');
             $path = str_replace("/everyz/include", "/everyz", dirname(__FILE__));
             require_once $path . '/init/everyz.initdb.php';
         } else {
@@ -1366,7 +1365,7 @@ try {
     // Verificar se as imagens existem
     if (zbxeFieldValue("select COUNT(*) as total from images where name like 'zbxe_%' ", "total") !== "8") {
         //var_dump(zbxeFieldValue("select COUNT(*) as total from images where name like 'zbxe_%' ", "total"));
-        $path = str_replace('/include', "", realpath(dirname(__FILE__)))."/init";
+        $path = str_replace('/include', "", realpath(dirname(__FILE__))) . "/init";
         $json = json_decode(file_get_contents("$path/everyz_config.json"), true);
         zbxeUpdateConfigImages($json, true, false);
     }

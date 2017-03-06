@@ -21,15 +21,48 @@ var filterButton = document.getElementById('filter-mode');
 var titleBar = document.getElementsByClassName("header-title");
 var filterDIV = document.getElementById('filter-space');
 if (titleBar[0].children[0].tagName.toLowerCase() == 'div') {
+    ZBX_VER="3.2";
     titleUL = titleBar[0].children[1].children[0];
 } else {
+    ZBX_VER="3.0";
     titleUL = titleBar[0].children[1];
 }
-
-var newItem = document.createElement("LI");
-var textnode = document.createTextNode(" ")
-titleUL.appendChild(filterButton);
-btnMin = document.getElementsByClassName("btn-min");
-if (btnMin.length > 0) {
-    filterDIV.style = 'display: none;'
+if (titleBar[0].children.length > 1) {
+    var newItem = document.createElement("LI");
+    var textnode = document.createTextNode(" ")
+    titleUL.appendChild(filterButton);
+    btnMin = document.getElementsByClassName("btn-min");
+    if (btnMin.length > 0) {
+        filterDIV.style = 'display: none;'
+    }
 }
+
+function zbxeSearch(mode) {
+    inputSearch = document.getElementById("search");
+    switch (mode) {
+        case "share":
+            PopUp("https://share.zabbix.com/search?searchword="+inputSearch.value+"&search_cat=1");
+            break;
+        case "doc":
+            PopUp("https://www.zabbix.com/documentation/"+ZBX_VER+"/start?do=search&id="+inputSearch.value);
+            break;
+    }
+}
+
+/*
+// Search bar customization
+var inputValue = document.getElementById("search");
+var onFocus = function () {
+    //this.classList.remove("search");
+    this.classList.add("input-expand");
+};
+var onBlur = function () {
+    if (!this.value)
+        this.classList.remove("input-expand");
+};
+inputValue.addEventListener('focus', onFocus, false);
+inputValue.addEventListener('blur', onBlur, false);
+inputValue.classList.remove("search");
+inputValue.classList.add("input-value");
+
+*/

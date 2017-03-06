@@ -6,8 +6,8 @@
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com"; 
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="Beta_20170226_1";
-VERSAO_EZ="1.0-beta26";
+VERSAO_INST="Beta_20170306_1";
+VERSAO_EZ="1.0-beta27";
 UPDATEBD="S";
 BRANCH="master";
 NOME_PLUGIN="EVERYZ";
@@ -475,7 +475,6 @@ customLogo() {
         FIMINST=`cat $ARQUIVO | sed -ne "/$TAG_FINAL/{=;q;}"`;
         sed -i "$INIINST,$FIMINST d" $ARQUIVO;
     fi
-#    TXT_CUSTOM1="\t(new CLink(\$logoCompany,'zabbix.php?action=dashboard.view'))\n\t->addItem(new CLink(\$logoZE,'http:\/\/www.everyz.org'))";
     TXT_CUSTOM1="\t (zbxeCustomMenu())";
     TAG1="(new CLink((new CDiv())->addClass(ZBX_STYLE_LOGO), 'zabbix.php?action=dashboard.view'))";
     NOVO="#$TAG1\n$TAG_INICIO\n$TXT_CUSTOM1\n$TAG_FINAL";
@@ -484,6 +483,32 @@ customLogo() {
     # Comentando classe de logo 
     TAG1="->addClass(ZBX_STYLE_HEADER_LOGO)";
     sed -i "s/$TAG1/#$TAG1/" $ARQUIVO
+
+    # aqui Customizacao do global search ============================================
+    registra "Configurando suporte a global search personalizado...";
+    TAG_INICIO="##$NOME_PLUGIN-custom-search-share";
+    TAG_FINAL="$TAG_INICIO-FIM";
+    INIINST=`cat $ARQUIVO | sed -ne "/$TAG_INICIO/{=;q;}"`;
+    if [ ! -z $INIINST ]; then
+        FIMINST=`cat $ARQUIVO | sed -ne "/$TAG_FINAL/{=;q;}"`;
+        sed -i "$INIINST,$FIMINST d" $ARQUIVO;
+    fi
+#    Share
+    TAG1="(new CLink('Share'";
+    LINHA=`cat $ARQUIVO | sed -ne "/$TAG1/{=;q;}"`;
+    sed -i "s/$TAG1/#$TAG1/g" $ARQUIVO
+    TAG1="(new CLink('', ''))->setAttribute('onclick','zbxeSearch(\"share\");')";
+    sed -i "$LINHA i\\$TAG1" $ARQUIVO;
+#    Documentation
+    TAG1="(new CLink(SPACE, 'h";
+    LINHA=`cat $ARQUIVO | sed -ne "/$TAG1/{=;q;}"`;
+    sed -i "s/$TAG1/#$TAG1/g" $ARQUIVO
+    TAG1="(new CLink('', ''))->setAttribute('onclick','zbxeSearch(\"doc\");')";
+    sed -i "$LINHA i\\$TAG1" $ARQUIVO;
+
+    #Comentando o target
+    TAG1="->setAttribute('target', '_blank')";
+    sed -i "s/$TAG1/#$TAG1/g" $ARQUIVO
 
     FIMINST=$(($FIMINST+1));
     # ==========================================================================

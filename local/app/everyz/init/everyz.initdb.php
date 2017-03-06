@@ -18,7 +18,8 @@
  * * along with this program; if not, write to the Free Software
  * * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  * */
-if (php_sapi_name() == "cli") {
+if (php_sapi_name() === "cli") {
+    zbxeErrorLog(true, 'EveryZ - AQUI [' . php_sapi_name() . '] ');
     // In cli-mode
     $path = str_replace('/local/app/everyz/init', "", dirname(__FILE__));
     require_once $path . '/include/config.inc.php';

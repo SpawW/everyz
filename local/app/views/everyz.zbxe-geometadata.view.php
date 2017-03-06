@@ -56,13 +56,9 @@ checkAccessHost('hostids');
     jq2 = jQuery.noConflict();
     var json, txJson = '';
     jq2(function ($) {
-        // Code using $ as usual goes here; the actual jQuery object is jq2
-        //
-        //json = JSON.parse('{"circle":[{"size":5000,"color":"#e6e600"},{"size":3000,"color":"#e6e600"}],"line":[{"lat":-3.73082,"lon":-38.53935},{"lat":-3.77091,"lon":-38.56922,"popup":"Link 1"}],"link":[{"hostid":10781},{"hostid":11781}]}');
         json = JSON.parse('{}');
         txJson = document.getElementById('jsonResult');
         txJson.value = formatJSON();
-        //alert(txJson);
     });
 
     function formatJSON() {
