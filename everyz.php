@@ -99,6 +99,6 @@ if ($module == "dashboard") {
     }
 }
 
-zbxeFullScreen();
+#zbxeFullScreen();
 require_once dirname(__FILE__) . '/include/page_footer.php';
 

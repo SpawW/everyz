@@ -6,8 +6,8 @@
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com"; 
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="Beta_20170306_1";
-VERSAO_EZ="1.0-beta27";
+VERSAO_INST="Beta_20170306_2";
+VERSAO_EZ="1.0-beta28";
 UPDATEBD="S";
 BRANCH="master";
 NOME_PLUGIN="EVERYZ";
@@ -447,26 +447,24 @@ instalaMenus() {
 }
 
 customLogo() {
+    registra "Configurando suporte aos scripts e estilos do EveryZ...";
+    ARQUIVO="include/page_footer.php";
+    TAG_INICIO="##$NOME_PLUGIN-footer";
+    TAG_FINAL="$TAG_INICIO-FIM";
+    INIINST=`cat $ARQUIVO | sed -ne "/$TAG_INICIO/{=;q;}"`;
+    if [ ! -z $INIINST ]; then
+        FIMINST=`cat $ARQUIVO | sed -ne "/$TAG_FINAL/{=;q;}"`;
+        sed -i "$INIINST,$FIMINST d" $ARQUIVO;
+    fi
+    TXT_CUSTOM1="zbxeEveryZGlobal();";
+    TAG1="exit;";
+    NOVO="\n$TAG_INICIO\n$TXT_CUSTOM1\n$TAG_FINAL\n$TAG1";
+    sed -i "s/$TAG1/$NOVO/" $ARQUIVO
+#aqui
+
     registra "Configurando suporte a logotipo personalizado...";
     ARQUIVO="app/views/layout.htmlpage.menu.php";
     backupArquivo $ARQUIVO;
-#    TAG_INICIO="##$NOME_PLUGIN-logo-obects-custom";
-#    TAG_FINAL="$TAG_INICIO-FIM";
-#    INIINST=`cat $ARQUIVO | sed -ne "/$TAG_INICIO/{=;q;}"`;
-#    if [ -z $INIINST ]; then
-#        installMgs "N" "logo"; 
-#    else
-#        installMgs "U" "logo"; 
-#        FIMINST=`cat $ARQUIVO | sed -ne "/$TAG_FINAL/{=;q;}"`;
-#        sed -i "$INIINST,$FIMINST d" $ARQUIVO;
-#    fi
-# Logo do site
-    #TXT_CUSTOM_LOGO="\t\$logoCompany = new CDiv(SPACE, '')\;\n\t\$logoCompany->setAttribute('style', 'float: left; margin: 10px 0px 0 0; background: url(\"zbxe-logo.php\") no-repeat; height: 25px; width: 120px; cursor: pointer;');";
-    #TXT_CUSTOM_LOGO="$TXT_CUSTOM_LOGO\n\t\$logoZE = new CDiv(SPACE, '');\n\t\$logoZE->setAttribute('style', 'float: left; margin: 10px 0px 0 0; background: url(\"local\/app\/everyz\/images\/zbxe-logo.png\") no-repeat; height: 25px; width: 30px; cursor: pointer;');";
-#    TXT_CUSTOM_LOGO="  "
-#    TAG1="\/\/ 1st level menu";
-#    NOVO="$TAG1\n$TAG_INICIO\n$TXT_CUSTOM_LOGO\n$TAG_FINAL";
-#    sed -i "s/$TAG1/$NOVO/" $ARQUIVO
 
     TAG_INICIO="##$NOME_PLUGIN-logo-custom";
     TAG_FINAL="$TAG_INICIO-FIM";
@@ -484,7 +482,7 @@ customLogo() {
     TAG1="->addClass(ZBX_STYLE_HEADER_LOGO)";
     sed -i "s/$TAG1/#$TAG1/" $ARQUIVO
 
-    # aqui Customizacao do global search ============================================
+    # Customizacao do global search ============================================
     registra "Configurando suporte a global search personalizado...";
     TAG_INICIO="##$NOME_PLUGIN-custom-search-share";
     TAG_FINAL="$TAG_INICIO-FIM";
@@ -498,13 +496,20 @@ customLogo() {
     LINHA=`cat $ARQUIVO | sed -ne "/$TAG1/{=;q;}"`;
     sed -i "s/$TAG1/#$TAG1/g" $ARQUIVO
     TAG1="(new CLink('', ''))->setAttribute('onclick','zbxeSearch(\"share\");')";
-    sed -i "$LINHA i\\$TAG1" $ARQUIVO;
+    sed -i "$LINHA i\\$TAG_INICIO\n$TAG1\n$TAG_FINAL" $ARQUIVO;
 #    Documentation
+    TAG_INICIO="##$NOME_PLUGIN-custom-search-doc";
+    TAG_FINAL="$TAG_INICIO-FIM";
+    INIINST=`cat $ARQUIVO | sed -ne "/$TAG_INICIO/{=;q;}"`;
+    if [ ! -z $INIINST ]; then
+        FIMINST=`cat $ARQUIVO | sed -ne "/$TAG_FINAL/{=;q;}"`;
+        sed -i "$INIINST,$FIMINST d" $ARQUIVO;
+    fi
     TAG1="(new CLink(SPACE, 'h";
     LINHA=`cat $ARQUIVO | sed -ne "/$TAG1/{=;q;}"`;
     sed -i "s/$TAG1/#$TAG1/g" $ARQUIVO
     TAG1="(new CLink('', ''))->setAttribute('onclick','zbxeSearch(\"doc\");')";
-    sed -i "$LINHA i\\$TAG1" $ARQUIVO;
+    sed -i "$LINHA i\\$TAG_INICIO\n$TAG1\n$TAG_FINAL" $ARQUIVO;
 
     #Comentando o target
     TAG1="->setAttribute('target', '_blank')";
@@ -767,14 +772,14 @@ confirmaApache;
 ####### Download de arquivos ---------------------------------------------------
 
 ####### Instalacao -------------------------------------------------------------
-instalaGit;  
-primeiroAcesso;
-instalaMenus;
+#instalaGit;  
+#primeiroAcesso;
+#instalaMenus;
 customLogo;
-instalaLiteral;
-corTituloMapa;
-configuraApache;
-instalaPortletNS;
+#instalaLiteral;
+#corTituloMapa;
+#configuraApache;
+#instalaPortletNS;
  
 echo "Installed - [ $VERSAO_INST ]";
 echo "You need to check your apache server and restart!";

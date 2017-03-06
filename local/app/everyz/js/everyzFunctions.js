@@ -35,7 +35,7 @@ if (titleBar[0].children.length > 1) {
     if (btnMin.length > 0) {
         filterDIV.style = 'display: none;'
     }
-}
+} 
 
 function zbxeSearch(mode) {
     inputSearch = document.getElementById("search");

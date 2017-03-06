@@ -1,5 +1,4 @@
 <?php
-
 /*
  * * Purpose: Miscelaneous functions
  * * Adail Horst - http://spinola.net.br/blog
@@ -1337,6 +1336,11 @@ function zbxeCustomMenu() {
         $return->addItem(new CLink($logoZE, 'http://www.everyz.org'));
     }
     return $return;
+}
+
+function zbxeEveryZGlobal() {
+    echo "\n" . '<script src="local/app/everyz/js/everyzFunctions.js"></script>';
+    echo "\n" . '<link href="local/app/everyz/css/everyz.css" rel="stylesheet" type="text/css" id="skinSheet">';
 }
 
 // End Functions ===============================================================
