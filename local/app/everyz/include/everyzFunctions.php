@@ -1132,7 +1132,10 @@ function zbxeUpdateTranslation($json, $resultOK, $debug = false) {
  * @param boolean $debug     If true the function will show debug messages instead run sql commands
  */
 function zbxeUpdateConfigImages($json, $resultOK, $debug = false) {
-    if (isset($json["images"])) {
+    if (CWebUser::getType() > USER_TYPE_ZABBIX_ADMIN) {
+        $extraCheck = true;
+    }
+    if (isset($json["images"]) && $extraCheck) {
         $report['images'] = ['source' => count($json["images"]), 'insert' => 0, 'update' => 0];
         foreach ($json["images"] as $row) {
             $imageIDs = updateImage($row);
