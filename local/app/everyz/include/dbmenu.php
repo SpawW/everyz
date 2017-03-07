@@ -23,7 +23,7 @@ require_once 'local/app/everyz/include/everyzFunctions.php';
 if ($VG_BANCO_OK) {
     $ZBXE_MENU = array(
         'label' => _('Extras'),
-        'user_type' => USER_TYPE_ZABBIX_ADMIN,
+        'user_type' => zbxeMenuUserType(),
         'node_perm' => PERM_READ,
         'default_page_id' => 0,
         'pages' => array('')

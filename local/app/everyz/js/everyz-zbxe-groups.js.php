@@ -24,8 +24,8 @@
  
 <?php
 // Load Scripts
-$scripts = ['jquery.js', 'jquery-ui.custom.js', 'jquery.cookie.js', 'ui.dynatree.css', 'jquery.dynatree.js'];
-zbxeJSLoad($scripts);
+//$scripts = ['jquery/jquery.js', 'jquery/jquery-ui.custom.js', 'jquery/jquery.cookie.js', 'jquery/ui.dynatree.css', 'jquery/jquery.dynatree.js'];
+//zbxeJSLoad($scripts);
 
 /**
  * Explode any single-dimensional array into a full blown tree structure,

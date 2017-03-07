@@ -29,8 +29,24 @@ $VG_IMAGE = true;
 require_once dirname(__FILE__) . '/include/config.inc.php';
 require_once dirname(__FILE__) . '/local/app/everyz/include/everyzFunctions.php';
 $VG_IMAGE = false;
-header("Content-type: image/png");
 $imageid = zbxeConfigValue("company_logo_" . (getRequest2("mode") == "login" ? "login" : "site"));
 $query = "SELECT image FROM images WHERE imageid = " . $imageid;
 zbxeErrorLog($VG_DEBUG, 'Logotipo do EverZ [' . $query . ']');
+if ($imageid == '') {
+    zbxeErrorLog(true, 'EveryZ - Reset image configuration need');
+    $path = realpath(dirname(__FILE__)) . "/local/app/everyz/init";
+    $json = json_decode(file_get_contents("$path/everyz_config.json"), true);
+    zbxeUpdateConfigImages($json, true, false);
+    $imageid = zbxeConfigValue("company_logo_" . (getRequest2("mode") == "login" ? "login" : "site"));
+    $query = "SELECT image FROM images WHERE imageid = " . $imageid;
+    exit;
+}
+if (getRequest2('p_log') == "S") {
+    var_dump($query);
+    var_dump($imageid);
+    exit;
+}
+
+header("Content-type: image/png");
 echo zbx_unescape_image(zbxeFieldValue($query, 'image'));
+

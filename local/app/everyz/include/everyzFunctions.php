@@ -1,4 +1,5 @@
 <?php
+
 /*
  * * Purpose: Miscelaneous functions
  * * Adail Horst - http://spinola.net.br/blog
@@ -1137,21 +1138,22 @@ function zbxeUpdateConfigImages($json, $resultOK, $debug = false) {
             $imageIDs = updateImage($row);
             $imageID = $imageIDs['imageids'][0];
             $report['images']['update'] ++;
-            if ($imageID !== $row['imageid']) {
-                $newImageIDs[$row['imageid']] = $imageID;
-                //zbxeConfigImageIDs();
-            }
+            $newImageIDs[$row['imageid']] = $imageID;
+            //if ($imageID !== $row['imageid']) {
+            //zbxeConfigImageIDs();
+            //}
         }
+//        var_dump($newImageIDs);
         // Updating config image references
         if (isset($json["imageReferences"])) {
-            //var_dump(['new_image_id',$newImageIDs]);
-            //var_dump(['old_references',$json["imageReferences"]]);
+            //var_dump(['new_image_id', $newImageIDs]);
+            //var_dump(['old_references', $json["imageReferences"]]);
             foreach ($json["imageReferences"] as $row) {
                 //var_dump($row['imageid']);
-                if ($newImageIDs[$row['imageid']] !== $row['imageid']) {
-                    zbxeUpdateConfigValue($row['tx_option'], $newImageIDs[$row['imageid']]);
-                    //var_dump(['Configuracao a atualizar', $newImageIDs[$row['imageid']], $row]);
-                }
+                //if ($newImageIDs[$row['imageid']] !== $row['imageid']) {
+                //var_dump(['Imagem atualizada [' . $newImageIDs[$row['imageid']] . ' / ' . $row['imageid'] . ']']);
+                zbxeUpdateConfigValue($row['tx_option'], $newImageIDs[$row['imageid']]);
+                //}
             }
         }
         if ($debug) {
@@ -1341,6 +1343,10 @@ function zbxeCustomMenu() {
 function zbxeEveryZGlobal() {
     echo "\n" . '<script src="local/app/everyz/js/everyzFunctions.js"></script>';
     echo "\n" . '<link href="local/app/everyz/css/everyz.css" rel="stylesheet" type="text/css" id="skinSheet">';
+}
+
+function zbxeMenuUserType() {
+    return zbxeConfigValue("everyz_userlevel", 0, USER_TYPE_SUPER_ADMIN);
 }
 
 // End Functions ===============================================================

@@ -30,6 +30,7 @@ $baseProfile = "everyz.";
 
 $page['title'] = _('EveryZ');
 $page['file'] = 'everyz.php';
+$filter = $fields = [];
 
 switch (getRequest('format')) {
     case PAGE_TYPE_CSV:
@@ -42,16 +43,14 @@ switch (getRequest('format')) {
         break;
     default:
         $page['type'] = detect_page_type(PAGE_TYPE_HTML);
-        $page['scripts'] = array('class.calendar.js', 'multiselect.js', 'gtlc.js');
-        require_once dirname(__FILE__) . '/include/page_header.php';
         ?>
         <link href="local/app/everyz/css/everyz.css" rel="stylesheet" type="text/css" id="skinSheet">
         <?php
         break;
 }
 
-$filter = $fields = [];
-
+$page['scripts'] = array('class.calendar.js', 'multiselect.js', 'gtlc.js');
+require_once dirname(__FILE__) . '/include/page_header.php';
 
 addFilterParameter("action", T_ZBX_STR, "dashboard");
 
