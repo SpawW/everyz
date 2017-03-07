@@ -6,8 +6,8 @@
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com"; 
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="Beta_20170306_3";
-VERSAO_EZ="1.0-beta29";
+VERSAO_INST="Beta_20170307_1";
+VERSAO_EZ="1.0-beta30";
 UPDATEBD="S";
 BRANCH="master";
 NOME_PLUGIN="EVERYZ";
@@ -474,8 +474,8 @@ customLogo() {
         sed -i "$INIINST,$FIMINST d" $ARQUIVO;
     fi
     TXT_CUSTOM1="zbxeEveryZGlobal();";
-    TAG1="exit;";
-    NOVO="\n$TAG_INICIO\n$TXT_CUSTOM1\n$TAG_FINAL\n$TAG1";
+    TAG1="echo '<\/body><\/html>';";
+    NOVO="\n$TAG_INICIO\n\t$TXT_CUSTOM1\n$TAG_FINAL\n\t$TAG1";
     sed -i "s/$TAG1/$NOVO/" $ARQUIVO
 
     registra "Configurando suporte a logotipo personalizado...";
