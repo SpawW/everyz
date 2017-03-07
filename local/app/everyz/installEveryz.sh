@@ -448,6 +448,23 @@ instalaMenus() {
 
 customLogo() {
     registra "Configurando suporte aos scripts e estilos do EveryZ...";
+
+    # Especialmente para o  dashboard do Zabbix
+    ARQUIVO="app/views/monitoring.dashboard.view.php";
+    TAG_INICIO="<!--$NOME_PLUGIN-dashsearch-->";
+    TAG_FINAL="<!--$NOME_PLUGIN-dashsearch-FIM-->";
+    INIINST=`cat $ARQUIVO | sed -ne "/$TAG_INICIO/{=;q;}"`;
+    if [ ! -z $INIINST ]; then
+        FIMINST=`cat $ARQUIVO | sed -ne "/$TAG_FINAL/{=;q;}"`;
+        sed -i "$INIINST,$FIMINST d" $ARQUIVO;
+    fi
+    TXT_CUSTOM1="<link href=\"local\/app\/everyz\/css\/everyz.css\" rel=\"stylesheet\" type=\"text\/css\" id=\"skinSheet\">";
+    TXT_CUSTOM1="$TXT_CUSTOM1\n<script src=\"local\/app\/everyz\/js\/everyzFunctions.js\" type=\"text\/javascript\"><\/script>";
+    TAG1="?>";
+    NOVO="$TAG1\n$TAG_INICIO\n$TXT_CUSTOM1\n$TAG_FINAL";
+    sed -i "s/$TAG1/$NOVO/" $ARQUIVO
+
+    # Todas as demais páginas...
     ARQUIVO="include/page_footer.php";
     TAG_INICIO="##$NOME_PLUGIN-footer";
     TAG_FINAL="$TAG_INICIO-FIM";
@@ -460,7 +477,6 @@ customLogo() {
     TAG1="exit;";
     NOVO="\n$TAG_INICIO\n$TXT_CUSTOM1\n$TAG_FINAL\n$TAG1";
     sed -i "s/$TAG1/$NOVO/" $ARQUIVO
-#aqui
 
     registra "Configurando suporte a logotipo personalizado...";
     ARQUIVO="app/views/layout.htmlpage.menu.php";
@@ -772,14 +788,14 @@ confirmaApache;
 ####### Download de arquivos ---------------------------------------------------
 
 ####### Instalacao -------------------------------------------------------------
-#instalaGit;  
-#primeiroAcesso;
-#instalaMenus;
+instalaGit;  
+primeiroAcesso;
+instalaMenus;
 customLogo;
-#instalaLiteral;
-#corTituloMapa;
-#configuraApache;
-#instalaPortletNS;
+instalaLiteral;
+corTituloMapa;
+configuraApache;
+instalaPortletNS;
  
 echo "Installed - [ $VERSAO_INST ]";
 echo "You need to check your apache server and restart!";
