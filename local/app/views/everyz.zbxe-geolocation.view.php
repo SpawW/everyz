@@ -166,10 +166,15 @@ foreach ($hostData as $key => $host) {
                     foreach ($jsonArray['circle'] as $value) {
                         $hostData[$cont]['circle'][] = ['size' => $value['size'], 'color' => (!strpos($value['color'], "#") ? "#" : "") . $value['color']];
                     }
+                $defaultColor = "blue";
+                $defaultWidth = 4;
                 // Tratamento dos Lines
                 if (isset($jsonArray['line']))
                     foreach ($jsonArray['line'] as $value) {
-                        $hostData[$cont]['line'][] = ['lat' => cleanPosition($value['lat']), 'lon' => cleanPosition($value['lon']), 'popup' => optArrayValue($value, 'popup')];
+                        $hostData[$cont]['line'][] = ['lat' => cleanPosition($value['lat']), 'lon' => cleanPosition($value['lon'])
+                            , 'popup' => optArrayValue($value, 'popup')
+                            , 'color' => "#" . optArrayValue($value, 'color', $defaultColor), 'width' => optArrayValue($value, 'width', $defaultWidth)
+                        ];
                     }
                 // Tratamento dos Links
                 if (isset($jsonArray['link']))
@@ -177,7 +182,9 @@ foreach ($hostData as $key => $host) {
                         $targetHost = hostIndex($value['hostid'], $hostData);
                         if ($targetHost > -1) {
                             $hostData[$cont]['line'][] = ['lat' => cleanPosition($hostData[$targetHost]['location_lat'])
-                                , 'lon' => cleanPosition($hostData[$targetHost]['location_lon']), 'popup' => optArrayValue($value, 'popup')];
+                                , 'lon' => cleanPosition($hostData[$targetHost]['location_lon']), 'popup' => optArrayValue($value, 'popup')
+                                , 'color' => "#" . optArrayValue($value, 'color', $defaultColor), 'width' => optArrayValue($value, 'width', $defaultWidth)
+                            ];
                         }
                     }
             }
@@ -200,9 +207,9 @@ $hostData = $tmp;
 
 /* * ***************************************************************************
  * Display
-<script src="local/app/everyz/js/leaflet.js"></script>
+  <script src="local/app/everyz/js/leaflet.js"></script>
  * ************************************************************************** */
-zbxeJSLoad(['leaflet.js','everyzD3Functions.js']);
+zbxeJSLoad(['leaflet.js', 'everyzD3Functions.js']);
 ?>
 <link rel="stylesheet" href="local/app/everyz/css/leaflet.css" />
 <?php

@@ -44,13 +44,13 @@
             var mbToken = '<?php echo zbxeConfigValue('geo_token') ?>';
             console.log("Tamanho do Token MapBox: " + mbToken.length);
             if (mbToken.length <= 1) {
-    window.alert("Alert! \n Please check EveryZ - Customization. Token is required for ZabGeo!");
-<?php //error("Alert! Please check EveryZ - Customization. Token is required for ZabGeo!");               ?>
+    //window.alert("Alert! \n Please check EveryZ - Customization. Token is required for ZabGeo!");
+<?php //error("Alert! Please check EveryZ - Customization. Token is required for ZabGeo!");                                    ?>
     }
     var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
             '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
             'Imagery &copy <a href="http://mapbox.com">Mapbox</a>',
-            mbUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' + mbToken;
+            mbUrl = (mbToken == "" ? 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' : 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' + mbToken);
             //Display Copyright 
             L.tileLayer(mbUrl, {
             maxZoom: 18,
@@ -82,6 +82,9 @@ echo $mapBackgroud[$filter["map"]]; //"streets"
 
             function addAlert (lat, lon, radiusSize, fillColor = '#303', borderColor = '', opacity = 0.2, title = ''){
             L.circle([lat, lon], {color: borderColor, fillColor: fillColor, fillOpacity: opacity, radius: radiusSize}).addTo(ZabGeoalert).bindPopup(title);
+            }
+            function addLine(from, to, fillColor = 'blue', weight = 6, opacity = 0.9) {
+            ZabGeomap.addLayer(new L.Polyline([new L.LatLng(from[0], from[1]), new L.LatLng(to[0], to[1])], {            color: fillColor, weight: weight, opacity: opacity            }));
             }
 
             //
@@ -146,18 +149,23 @@ foreach ($hostData as $host) {
         }
         // Add lines
         if (isset($host["line"])) {
-            $lineCount = 1;
             foreach ($host["line"] as $lines) {
-                $linesPackage .= ($linesPackage == "" ? "" : ", ")
-                        . "\n"
-                        . '{"type": "Feature", "geometry": { "type": "LineString", "coordinates": [['
-                        . $host["location_lon"] . ", " . $host["location_lat"]
-                        . '],[' . $lines['lon'] . ', ' . $lines['lat'] . ']]} ' . (
-                        $lines['popup'] == "" ? '' : ', "properties": { "popupContent": "' . $lines['popup'] . '"}' ) . ',"id": '
-                        . $lineCount . '}';
-                $lineCount++;
-                //echo "\n console.log('$lines[4]')";
+                echo "\n addLine([" . $host["location_lat"] . "," . $host["location_lon"] . "], ["
+                . $lines['lat'] . "," . $lines['lon'] . "],'" . $lines['color'] . "'," . $lines['width'] . ");";
             }
+            /*
+              $lineCount = 1;
+              foreach ($host["line"] as $lines) {
+              $linesPackage .= ($linesPackage == "" ? "" : ", ")
+              . "\n"
+              . '{"type": "Feature", "geometry": { "type": "LineString", "coordinates": [['
+              . $host["location_lon"] . ", " . $host["location_lat"]
+              . '],[' . $lines['lon'] . ', ' . $lines['lat'] . ']]} ' . (
+              $lines['popup'] == "" ? '' : ', "properties": { "popupContent": "' . $lines['popup'] . '"}' ) . ',"id": '
+              . $lineCount . '}';
+              $lineCount++;
+              //echo "\n console.log('$lines[4]')";
+              } */
         }
         // Add Multiline
         if (isset($host["multiline"])) {
@@ -270,6 +278,8 @@ foreach ($hostData as $host) {
             //style: myStyle,
             onEachFeature: onEachFeature
             }).addTo(ZabGeolines);
+
+
 
 </script>
 

@@ -78,6 +78,8 @@ checkAccessHost('hostids');
         vLat = document.getElementById('line_lat').value;
         vLon = document.getElementById('line_lon').value;
         vPopUp = document.getElementById('line_popup').value;
+        vWidth = document.getElementById('line_width').value;
+        vColor = document.getElementById('line_color').value;
         // Validation
         if (!validPosition(vLat)) {
             alert('Invalid latitude!');
@@ -90,7 +92,7 @@ checkAccessHost('hostids');
         if (!json.hasOwnProperty("line")) {
             json.line = [];
         }
-        json["line"].push({"lat": vLat, "lon": vLon, "popup": vPopUp});
+        json["line"].push({"lat": vLat, "lon": vLon, "width": vWidth, "color": vColor, "popup": vPopUp});
         txJson.value = formatJSON();
     }
 
@@ -102,6 +104,8 @@ checkAccessHost('hostids');
     function addLink() {
         var hostIDs = document.getElementsByName('hostids[]');
         vPopUp = document.getElementById('link_popup').value;
+        vWidth = document.getElementById('link_width').value;
+        vColor = document.getElementById('link_color').value;
         if (hostIDs.length === 0) {
             alert('Please select at least one host!');
             return false;
@@ -111,7 +115,7 @@ checkAccessHost('hostids');
             json.link = [];
         }
         for (i = 0; i < hostIDs.length; i++) {
-            json["link"].push({"hostid": hostIDs[i].value, "popup": vPopUp});
+            json["link"].push({"hostid": hostIDs[i].value, "width": vWidth, "color": vColor, "popup": vPopUp});
         }
         txJson.value = formatJSON();
     }
@@ -169,7 +173,8 @@ checkAccessHost('hostids');
 commonModuleHeader($moduleName, $moduleTitle, true);
 
 insert_show_color_picker_javascript();
-
+$defaultColor = '000099';
+$defaultWidth = 4;
 //$subt = (new CTableInfo());
 
 $leftCol = new CFormList();
@@ -195,17 +200,25 @@ $hostSelect = (new CMultiSelect([
 $addButton->onClick('javascript:addLink();');
 
 //$leftCol->addRow(_('Link'), $subTable);
-$leftCol->addRow(_('Link'), [$hostSelect]);
-$leftCol->addRow(_('Link description'), [(new CTextBox('link_popup', 'Link Description')), SPACE, $addButton]);
+$subTable = (new CTableInfo())->setHeader(['Popup Description', 'Color', 'Width', '']);
+$subTable->addRow([
+    (new CTextBox('link_popup', 'Link Description'))
+    , (new CColor('link_color', $defaultColor, false))
+    , (new CNumericBox('link_width', $defaultWidth))->setWidth(ZBX_TEXTAREA_NUMERIC_STANDARD_WIDTH)
+    , $addButton]);
+$leftCol->addRow(_('Host to link'), [$hostSelect]);
+$leftCol->addRow(_('Link Configuration'), $subTable);
 
 // Right side ==================================================================
 // Line
-$subTable = (new CTableInfo())->setHeader(['Latitude', 'Longitude', 'Popup Description', '']);
+$subTable = (new CTableInfo())->setHeader(['Latitude', 'Longitude', 'Popup Description', 'Color', 'Width', '']);
 $addButton->onClick('javascript:addLine();');
 $subTable->addRow([
     (new CTextBox('line_lat', -15.77972))->setWidth(ZBX_TEXTAREA_NUMERIC_STANDARD_WIDTH)
     , (new CTextBox('line_lon', -47.92972))->setWidth(ZBX_TEXTAREA_NUMERIC_STANDARD_WIDTH)
     , (new CTextBox('line_popup', 'Link Description'))
+    , (new CColor('line_color', $defaultColor, false))
+    , (new CNumericBox('line_width', $defaultWidth))->setWidth(ZBX_TEXTAREA_NUMERIC_STANDARD_WIDTH)
     , $addButton
 ]);
 $leftCol->addRow(_('Line'), $subTable);

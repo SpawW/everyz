@@ -1296,8 +1296,8 @@ function isJson($string) {
     return (json_last_error() == JSON_ERROR_NONE ? $return : false);
 }
 
-function optArrayValue($array, $value) {
-    return (isset($array[$value]) ? $array[$value] : "");
+function optArrayValue($array, $value, $default = "") {
+    return (isset($array[$value]) ? $array[$value] : $default);
 }
 
 function zbxeFullScreen() {
