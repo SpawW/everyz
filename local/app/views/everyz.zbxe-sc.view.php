@@ -297,7 +297,7 @@ switch ($filter["format"]) {
 }
 
 // Building the report ---------------------------------------------------------
-if (isset($cont)) {
+if (isset($cont) && count($report) > 0) {
     $linha = array('', '');
     $linhasDesc = " " . _zeT("rows");
     $cont2 = count($report[0]) - 2;

@@ -1374,7 +1374,7 @@ try {
         }
     }
     // Verificar se as imagens existem
-    if (zbxeFieldValue("select COUNT(*) as total from images where name like 'zbxe_%' ", "total") !== "8") {
+    if (intval(zbxeFieldValue("select COUNT(*) as total from images where name like 'zbxe_%' ", "total"), 0) < 9) {
         //var_dump(zbxeFieldValue("select COUNT(*) as total from images where name like 'zbxe_%' ", "total"));
         $path = str_replace('/include', "", realpath(dirname(__FILE__))) . "/init";
         $json = json_decode(file_get_contents("$path/everyz_config.json"), true);
