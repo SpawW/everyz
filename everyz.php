@@ -72,7 +72,7 @@ if (hasRequest('zbxe_reset_all') && getRequest2('zbxe_reset_all') == "EveryZ Res
         DBexecute(zbxeStandardDML("DELETE FROM `profiles` where idx like 'everyz%' "));
         $path = str_replace("local/app/views", "local/app/everyz/init", dirname(__FILE__));
         if (!file_exists($path . '/everyz.initdb.php')) {
-            $path = dirname(__FILE__) . 'local/app/everyz/init';
+            $path = dirname(__FILE__) . '/local/app/everyz/init';
         }
         require_once $path . '/everyz.initdb.php';
 
