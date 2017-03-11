@@ -468,6 +468,8 @@ function addFilterActions() {
     $filter["filter_set"] = getRequest2("filter_set", "");
     $fields['fullscreen'] = array(T_ZBX_INT, O_OPT, P_SYS, IN('0,1'), null);
     $filter["fullscreen"] = getRequest2("fullscreen", "1");
+    $fields['hidetitle'] = array(T_ZBX_INT, O_OPT, P_SYS, IN('0,1'), null);
+    $filter["hidetitle"] = getRequest2("hidetitle", "1");
 }
 
 /**
@@ -949,18 +951,22 @@ function getRealPOST() {
  * @param string  $allowFullScreen  Add a button to full screen view
  */
 function commonModuleHeader($module_id, $title, $allowFullScreen = false, $method = 'POST', $customControls = null) {
-    global $dashboard, $form, $table;
-    $dashboard = (new CWidget())->setTitle(EZ_TITLE . _zeT($title));
-    $table = (new CTableInfo())->addClass(ZBX_STYLE_OVERFLOW_ELLIPSIS);
-    if ($allowFullScreen) {
-        $dashboard->setControls(($customControls == null ? (new CList())->addItem(get_icon('fullscreen', ['fullscreen' => getRequest('fullscreen')])) : $customControls));
-        global $toggle_all;
-        $toggle_all = (new CColHeader(
-                (new CDiv())
-                        ->addClass(ZBX_STYLE_TREEVIEW)
-                        ->addClass('app-list-toggle-all')
-                        ->addItem(new CSpan())
-                ))->addStyle('width: 18px');
+    global $dashboard, $form, $table, $toggle_all;
+    if (getRequest2('hidetitle') == 1) {
+        $dashboard = (new CWidget());
+        $table = (new CTableInfo())->addClass(ZBX_STYLE_OVERFLOW_ELLIPSIS);
+    } else {
+        $dashboard = (new CWidget())->setTitle(EZ_TITLE . _zeT($title));
+        $table = (new CTableInfo())->addClass(ZBX_STYLE_OVERFLOW_ELLIPSIS);
+        if ($allowFullScreen) {
+            $dashboard->setControls(($customControls == null ? (new CList())->addItem(get_icon('fullscreen', ['fullscreen' => getRequest('fullscreen')])) : $customControls));
+            $toggle_all = (new CColHeader(
+                    (new CDiv())
+                            ->addClass(ZBX_STYLE_TREEVIEW)
+                            ->addClass('app-list-toggle-all')
+                            ->addItem(new CSpan())
+                    ))->addStyle('width: 18px');
+        }
     }
     $form = (new CForm($method, 'everyz.php'))->setName($module_id);
     $form->addItem(new CInput('hidden', 'action', $module_id));

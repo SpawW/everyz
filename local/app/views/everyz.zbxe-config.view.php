@@ -139,10 +139,12 @@ $table = (new CTable());
 $table->addRow(
         (new CFormList())
                 ->addRow(_('Token'), (new CTextBox('cnf_geo_token'
-                        , zbxeConfigValue('geo_token')))->setWidth(ZBX_TEXTAREA_BIG_WIDTH))
+                        , zbxeConfigValue('geo_token')))->setWidth(ZBX_TEXTAREA_BIG_WIDTH)
+                        ->setAttribute('placeholder', _zeT('For use extra tiles, please inform a valid API key.') )
+                )
                 ->addRow(_zeT('Default POI'), [$cmbDefaultPoi,
                     (new CImg('imgstore.php?iconid=' . $idGeoDefaultPOI
-                    , 'cnf_geo_default_poi', 32, 32))->setId("img_geo_default_poi")])
+                    , 'cnf_geo_default_poi', 16, 16))->setId("img_geo_default_poi")])
 );
 $dashboardGrid[1][0] = newWidget('geo', _zeT("ZabGeo", ''), $table);
 
@@ -150,8 +152,9 @@ $dashboardGrid[1][0] = newWidget('geo', _zeT("ZabGeo", ''), $table);
 $table = (new CTable());
 $table->addRow(
         (new CFormList())
-                ->addRow(_('Reset'), [(new CTextBox('zbxe_reset_all'
-                    , _zeT('Type here:') . ' "EveryZ ReseT"'))->setWidth(ZBX_TEXTAREA_BIG_WIDTH)]
+                ->addRow(_('Reset'), [(new CTextBox('zbxe_reset_all', ''))->setWidth(ZBX_TEXTAREA_BIG_WIDTH)
+                    ->setAttribute('placeholder', _zeT('Type here:') . ' "EveryZ ReseT"')
+                        ]
                 )
 );
 $dashboardGrid[1][10] = newWidget('reset', _zeT("Reset configuration", ''), $table);

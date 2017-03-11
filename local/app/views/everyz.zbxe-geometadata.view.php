@@ -233,7 +233,7 @@ $subTable2->addRow([(new CTableInfo())
 $leftCol->addRow($subTable2);
 
 $table->addRow([$leftCol]);
-$table->setAttribute('style', 'width: 50%;');
+$table->setAttribute('style', 'width: 800px;');
 
 /* * ***************************************************************************
  * Display Footer 

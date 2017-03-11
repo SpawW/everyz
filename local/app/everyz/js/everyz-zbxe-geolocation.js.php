@@ -93,8 +93,10 @@ echo $mapBackgroud[$filter["map"]]; //"streets"
 <?php
 
 function showTitle($host) {
-    return "'<a href=\'hosts.php?form=update&hostid=" . $host["id"] . "\'>" . $host["name"]
+    return "'<a onclick=\'javascript:PopUp(\"everyz.php?action=zbxe-geometadata&fullscreen=1&hidetitle=1&hostid=" . $host["id"] . "\");\'>" . $host["name"]
             . "</a>(" . $host["location_lat"] . "," . $host["location_lon"] . ")','"
+//    return "'<a href=\'hosts.php?form=update&hostid=" . $host["id"] . "\'>" . $host["name"]
+//            . "</a>(" . $host["location_lat"] . "," . $host["location_lon"] . ")','"
     ;
 }
 

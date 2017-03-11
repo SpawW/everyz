@@ -17,36 +17,43 @@
  * * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  * */
 
-var filterButton = document.getElementById('filter-mode');
 var titleBar = document.getElementsByClassName("header-title");
 var filterDIV = document.getElementById('filter-space');
-var btnMax = document.getElementsByClassName("btn-max");
-if (titleBar[0].children[0].tagName.toLowerCase() == 'div') {
-    ZBX_VER = "3.2";
-    if (titleBar[0].children[1] !== undefined) {
-        titleUL = titleBar[0].children[1].children[0];
+var filterButton = document.getElementById('filter-mode');
+
+if (titleBar[0] == undefined) {
+    filterDIV.style = 'display: none;';
+    filterButton.style = 'display: none;';
+} else {
+    var filterButton = document.getElementById('filter-mode');
+    var btnMax = document.getElementsByClassName("btn-max");
+    if (titleBar[0].children[0].tagName.toLowerCase() == 'div') {
+        ZBX_VER = "3.2";
+        if (titleBar[0].children[1] !== undefined) {
+            titleUL = titleBar[0].children[1].children[0];
+            if (titleUL.tagName.toLowerCase() !== 'ul') {
+                tmp = titleUL.getElementsByTagName("UL");
+                titleUL = tmp[0];
+            }
+        }
+    } else {
+        ZBX_VER = "3.0";
+        titleUL = titleBar[0].children[1];
         if (titleUL.tagName.toLowerCase() !== 'ul') {
             tmp = titleUL.getElementsByTagName("UL");
             titleUL = tmp[0];
         }
     }
-} else {
-    ZBX_VER = "3.0";
-    titleUL = titleBar[0].children[1];
-    if (titleUL.tagName.toLowerCase() !== 'ul') {
-        tmp = titleUL.getElementsByTagName("UL");
-        titleUL = tmp[0];
-    }
-}
-if (titleBar[0].children.length > 1) {
-    if (filterButton !== null) {
-        var newItem = document.createElement("LI");
-        newItem.appendChild(filterButton);
-        titleUL.appendChild(newItem);
-    }
-    btnMin = document.getElementsByClassName("btn-min");
-    if (btnMin.length > 0) {
-        filterDIV.style = 'display: none;'
+    if (titleBar[0].children.length > 1) {
+        if (filterButton !== null) {
+            var newItem = document.createElement("LI");
+            newItem.appendChild(filterButton);
+            titleUL.appendChild(newItem);
+        }
+        var btnMin = document.getElementsByClassName("btn-min");
+        if (btnMin.length > 0) {
+            filterDIV.style = 'display: none;';
+        }
     }
 }
 
