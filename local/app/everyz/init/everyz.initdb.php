@@ -18,6 +18,20 @@
  * * along with this program; if not, write to the Free Software
  * * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  * */
+$dmlPreferences = "CREATE TABLE zbxe_preferences (
+      `userid` int NOT NULL,
+      `tx_option` varchar(60) NOT NULL,
+      `tx_value` varchar(255) NOT NULL,
+      `st_ativo` int NOT NULL,
+      `module_id` varchar(20)
+    )";
+$dmlTranslation = "CREATE TABLE zbxe_translation (
+      `lang` varchar(255) NOT NULL,
+      `tx_original` varchar(255) NOT NULL,
+      `tx_new` varchar(255) NOT NULL,
+      `module_id` varchar(20)
+    ) ";
+
 if (php_sapi_name() === "cli") {
     // In cli-mode
     $path = str_replace('/local/app/everyz/init', "", dirname(__FILE__));
@@ -45,7 +59,6 @@ try {
     if (!$VG_BANCO_OK) {
         // se tabelas na versão anterior do zabbix extras existirem, remover....
         $oldZE = DBfetch(DBselect('select tx_value from zbxe_preferences WHERE tx_option = ' . quotestr("logo_company")));
-
         if (!intval($oldZE) > 0) {
             zbxeErrorLog(true, 'EveryZ - Dropping old tables');
             DBexecute(zbxeStandardDML("DROP TABLE `zbxe_preferences` "));
@@ -54,19 +67,6 @@ try {
         }
         $resultOK = true;
         zbxeErrorLog($VG_DEBUG, 'EveryZ - Creating tables');
-        $dmlPreferences = "CREATE TABLE zbxe_preferences (
-      `userid` int NOT NULL,
-      `tx_option` varchar(60) NOT NULL,
-      `tx_value` varchar(255) NOT NULL,
-      `st_ativo` int NOT NULL,
-      `module_id` varchar(20)
-    )";
-        $dmlTranslation = "CREATE TABLE zbxe_translation (
-      `lang` varchar(255) NOT NULL,
-      `tx_original` varchar(255) NOT NULL,
-      `tx_new` varchar(255) NOT NULL,
-      `module_id` varchar(20)
-    ) ";
         DBexecute(zbxeStandardDML($dmlPreferences));
         DBexecute(zbxeStandardDML($dmlTranslation));
     }
@@ -78,7 +78,17 @@ try {
  * Update data
  * *************************************************************************** */
 try {
-    if (zbxeFieldValue("select COUNT(*) as total from zbxe_preferences", "total") < 2) {
+    $result = DBselect("select COUNT(*) as total from zbxe_preferences");
+    while ($row = DBfetch($result)) {
+        $count = intval($row['total'], 0);
+    }
+    //aqui
+    if ($count < 2) {
+        if ($count == 0) {
+            zbxeErrorLog($VG_DEBUG, 'EveryZ - Creating tables');
+            DBexecute(zbxeStandardDML($dmlPreferences));
+            DBexecute(zbxeStandardDML($dmlTranslation));
+        }
         $debug = true;
         $resultOK = true;
 #        DBstart();
@@ -93,7 +103,6 @@ try {
 #       DBend($resultOK);
     }
 } catch (Exception $e) {
-    if (zbxeFieldValue("select COUNT(*) as total from zbxe_preferences", "total") < 2)
-        error($e->getMessage());
+    error($e->getMessage());
 }
 

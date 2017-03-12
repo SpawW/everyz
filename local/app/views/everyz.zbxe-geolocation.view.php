@@ -42,7 +42,7 @@ addFilterParameter("centerLat", T_ZBX_STR, "-12.70894", false, false);
 addFilterParameter("centerLong", T_ZBX_STR, "-47.19727", false, false);
 addFilterParameter("zoomLevel", T_ZBX_INT, 5);
 addFilterParameter("map", T_ZBX_STR, "1", false, false);
-addFilterParameter("layers", T_ZBX_INT);
+addFilterParameter("layers", T_ZBX_INT, 0);
 
 check_fields($fields);
 
@@ -83,6 +83,7 @@ if (hasRequest('filter_rst')) { // Clean the filter parameters
 
     $filter['filter_rst'] = NULL;
 } else { // Put the date in required format
+    $filter['layers'] = intval($filter['layers'], 0);
     //var_dump($filter["groupids"]);
     //var_dump(selectHostsByGroup($filter["groupids"],['location_lat', 'location_lon', 'location']));
 }
@@ -232,10 +233,13 @@ if ($filter['zoomLevel'] == "") {
 }
 $tmpColumn->addRow(_('Host Groups'), multiSelectHostGroups(selectedHostGroups($filter['groupids'])))
         ->addRow(_zeT('Automatic icon mapping'), [zbxeComboIconMap('iconmapid', $filter['iconmapid'])])
-        ->addRow(_zeT('Default tile'), [newComboFilterArray(
-                    [ "Grayscale", "Streets", "Dark", "Outdoors", "Satellite", "Emerald"]
-                    , "map", $filter['map'], false, false)])
 ;
+if (zbxeConfigValue("geo_token", 0, '') !== "") {
+    $tmpColumn->addRow(_zeT('Default tile'), [newComboFilterArray(
+                ["Grayscale", "Streets", "Dark", "Outdoors", "Satellite", "Emerald"]
+                , "map", $filter['map'], false, false)]);
+}
+
 $tmpColumn->addItem(new CInput('hidden', 'action', $filter["action"]));
 $widget->addColumn($tmpColumn);
 // Left collumn
@@ -249,7 +253,7 @@ $tmpColumn->addRow(_('Center'), [
             _zeT('Longitude '), SPACE, (new CTextBox('centerLong', $filter['centerLong']))->setWidth(ZBX_TEXTAREA_TINY_WIDTH)])
         ->addRow(_zeT('Default layers'), [
             (new CRadioButtonList('layers', (int) $filter['layers']))->setModern(true)
-            ->addValue(_('none'), 1)->addValue(_('Lines'), 2)->addValue(_('Circles'), 3)->addValue(_('All'), 99)
+            ->addValue(_zeT('none'), 1)->addValue(_zeT('Lines'), 2)->addValue(_zeT('Circles'), 3)->addValue(_zeT('All'), 99)
         ])
         ->addRow(_zeT('Default zoom level'), [$radioZoom])
 

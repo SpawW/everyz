@@ -29,6 +29,7 @@ $PATH = realpath(dirname(__FILE__));
  * Update data
  * ************************************************************************** */
 try {
+    zbxeErrorLog(true, 'EveryZ - upgrade process');
     /*     * *******************************************************************
      * DML Updates
      * ********************************************************************** */
@@ -68,7 +69,7 @@ try {
                 $json = json_decode(file_get_contents("$PATH/everyz_lang.$i.json"), true);
                 zbxeUpdateTranslation($json, $resultOK, $debug);
             }
-            zbxeUpdateConfigValue("everyz_version", $i, true);
+            zbxeUpdateConfigValue("everyz_version", $i, 0);
         }
     }
     //$ezCurrent = EVERYZBUILD;
@@ -77,7 +78,11 @@ try {
         show_messages(true, _s(_zeT('EveryZ - Configuration update to %1$s version!'), EVERYZBUILD));
     }
 } catch (Exception $e) {
-    if (zbxeFieldValue("select COUNT(*) as total from zbxe_preferences", "total") < 2)
+    try {
+        if (zbxeFieldValue("select COUNT(*) as total from zbxe_preferences", "total") < 2)
+            error($e->getMessage());
+    } catch (Exception $e) {
         error($e->getMessage());
+    }
 }
 

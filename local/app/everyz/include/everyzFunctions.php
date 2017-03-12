@@ -118,8 +118,7 @@ function zbxeConfigValue($param, $id = 0, $default = "") {
 function zbxeUpdateConfigValue($param, $value, $id = 0) {
     $currentValue = zbxeConfigValue($param, $id);
     if ($currentValue == "") {
-        if (zbxeFieldValue("select count(*) as total from zbxe_preferences WHERE tx_option = "
-                        . quotestr($param), "total") == 0) {
+        if (zbxeFieldValue("select count(*) as total from zbxe_preferences WHERE tx_option = " . quotestr($param), "total") == 0) {
             $query = zbxeInsert("zbxe_preferences", ['userid', 'tx_option', 'tx_value', 'st_ativo'], [$id, $param, $value, '1']);
         }
     }
@@ -1138,7 +1137,8 @@ function zbxeUpdateTranslation($json, $resultOK, $debug = false) {
  * @param boolean $debug     If true the function will show debug messages instead run sql commands
  */
 function zbxeUpdateConfigImages($json, $resultOK, $debug = false) {
-    $extraCheck = (CWebUser::getType() > USER_TYPE_ZABBIX_ADMIN);
+    // aqui
+    $extraCheck = (CWebUser::getType() > USER_TYPE_ZABBIX_ADMIN) && (zbxeConfigValue("zbxe_init_images", 0) == 0);
     if (isset($json["images"]) && $extraCheck) {
         $report['images'] = ['source' => count($json["images"]), 'insert' => 0, 'update' => 0];
         foreach ($json["images"] as $row) {
@@ -1150,7 +1150,7 @@ function zbxeUpdateConfigImages($json, $resultOK, $debug = false) {
             //zbxeConfigImageIDs();
             //}
         }
-//        var_dump($newImageIDs);
+        //        var_dump($newImageIDs);
         // Updating config image references
         if (isset($json["imageReferences"])) {
             //var_dump(['new_image_id', $newImageIDs]);
@@ -1163,10 +1163,9 @@ function zbxeUpdateConfigImages($json, $resultOK, $debug = false) {
                 //}
             }
         }
-        if ($debug) {
-            zbxeErrorLog(true, 'EveryZ - Images update: [from file: ' . $report['images']['source']
-                    . '| Updated: ' . $report['images']['update'] . ']');
-        }
+        zbxeUpdateConfigValue("zbxe_init_images", 1);
+        zbxeErrorLog(true, 'EveryZ - Images update: [from file: ' . $report['images']['source']
+                . '| Updated: ' . $report['images']['update'] . ']');
     }
 }
 
