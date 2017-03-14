@@ -22,8 +22,10 @@ var filterDIV = document.getElementById('filter-space');
 var filterButton = document.getElementById('filter-mode');
 
 if (titleBar[0] == undefined) {
-    filterDIV.style = 'display: none;';
-    filterButton.style = 'display: none;';
+    if (filterButton !== null) {
+        filterDIV.style = 'display: none;';
+        filterButton.style = 'display: none;';
+    }
 } else {
     var filterButton = document.getElementById('filter-mode');
     var btnMax = document.getElementsByClassName("btn-max");

@@ -17,7 +17,7 @@
     color: #FFFFFF;
     display: block;
 }
- 
+
 #listButton li a:hover {
     text-decoration: none;
     color: #000000;
@@ -31,4 +31,15 @@
 }
 #search {
     width: 100px;
+}
+
+.reportRowText {
+    text-align: left;
+    width: 100%;
+    border-color: blue;
+    border: 3px;
+}
+.reportRowLabel {
+    text-align: right;
+    width: 100%;
 }

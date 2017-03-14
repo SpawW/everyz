@@ -1,5 +1,4 @@
 <?php
-
 /*
  * * Purpose: Generate ZabGeo Metadata
  * * Adail Horst - http://spinola.net.br/blog
@@ -31,32 +30,79 @@ $moduleTitle = 'ZabGeo - Metadata';
 addFilterActions();
 // Specific fields
 addFilterParameter("format", T_ZBX_INT, 0, false, false, false);
-addFilterParameter("hostids", T_ZBX_INT, [], true, true);
+addFilterParameter("updateHost", T_ZBX_INT);
+addFilterParameter("sourceHostID", T_ZBX_INT, 0, false, false, false);
+addFilterParameter("jsonResult", T_ZBX_STR, "", false, false, false);
+addFilterParameter("hostids", T_ZBX_INT, [], false, false, false);
 // Field validation
 check_fields($fields);
-
+//resetProfile("hostids");
 /* * ***************************************************************************
  * Access Control
  * ************************************************************************** */
 checkAccessHost('hostids');
+checkAccessHost('sourceHostID');
 
 /* * ***************************************************************************
  * Module Functions
  * ************************************************************************** */
 
+function addTab($key, $desc) {
+    global $dataTab, $leftCol;
+    $dataTab->addTab($key, _zeT($desc), $leftCol);
+    $leftCol = new CFormList();
+}
+
+/* * ***************************************************************************
+ * Update Data
+ * ************************************************************************** */
+if (hasRequest('updateHost')) {
+    show_message(_zeT('New configuration stored on Host Inventory!'));
+    $host["hostid"] = $filter["sourceHostID"];
+    $host["inventory"]["notes"] = $filter["jsonResult"];
+    if (!API::Host()->update($host)) {
+        throw new Exception();
+    }
+}
+
 /* * ***************************************************************************
  * Get Data
  * ************************************************************************** */
+$inventoryFields = ["notes", "location_lat", "location_lon"];
+$hostData = API::Host()->get([
+    'output' => ['hostid', 'name'],
+    'selectInventory' => $inventoryFields,
+    'withInventory' => true,
+    'hostids' => $filter["sourceHostID"]
+        ]);
+$hostData = $hostData[0];
+
 
 /* * ***************************************************************************
  * Display
  * ************************************************************************** */
 ?>
 <script language="JavaScript">
+    function validateHostJSON() {
+        try {
+            json = JSON.parse(<?php echo json_encode(($hostData['inventory']['notes'] == "" ? "{}" : $hostData['inventory']['notes'])); ?>);
+            txJson = document.getElementById('jsonResult');
+            txJson.value = formatJSON();
+        }
+        catch (e) {
+            alert('Invalid json');
+            json = JSON.parse('{}');
+            return false;
+        }
+    }
+
+    window.name = "everyz_popup"; //we set it to empty string
+
     jq2 = jQuery.noConflict();
     var json, txJson = '';
     jq2(function ($) {
-        json = JSON.parse('{}');
+        validateHostJSON();
+        //json = JSON.parse('{}');
         txJson = document.getElementById('jsonResult');
         txJson.value = formatJSON();
     });
@@ -169,8 +215,10 @@ checkAccessHost('hostids');
 </script>
 
 <?php
-
 commonModuleHeader($moduleName, $moduleTitle, true);
+
+// Tab
+$dataTab = new CTabView();
 
 insert_show_color_picker_javascript();
 $defaultColor = '000099';
@@ -178,16 +226,17 @@ $defaultWidth = 4;
 //$subt = (new CTableInfo());
 
 $leftCol = new CFormList();
-$rightCol = new CFormList();
-$addButton = (new CButton('btnAddCircle', _('Add')))->onClick('javascript:addCircle();');
 
+$addButton = (new CButton('btnAddCircle', _('Add')))->onClick('javascript:addCircle();');
 
 $subTable = (new CTableInfo())->setHeader([ _zeT('Color'), _zeT('Size'), '']);
 $subTable->addRow([ new CColor('circle_color', '6666FF', false)
     , (new CNumericBox('circle_size', 3000))->setWidth(ZBX_TEXTAREA_NUMERIC_STANDARD_WIDTH)
     , $addButton
 ]);
+
 $leftCol->addRow(_('Circle'), $subTable);
+addTab('circle', _zeT('Circle'));
 
 // Link
 $addButton->onClick('javascript:addLine();');
@@ -196,10 +245,8 @@ $hostSelect = (new CMultiSelect([
     'name' => 'hostids[]', 'objectName' => 'hosts', 'data' => $multiSelectHostData,
     'popup' => [ 'parameters' => 'srctbl=hosts&dstfrm=zbx_filter&dstfld1=hostids_&srcfld1=hostid' . '&real_hosts=1&multiselect=1'
     ]]))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH);
-
 $addButton->onClick('javascript:addLink();');
 
-//$leftCol->addRow(_('Link'), $subTable);
 $subTable = (new CTableInfo())->setHeader(['Popup Description', 'Color', 'Width', '']);
 $subTable->addRow([
     (new CTextBox('link_popup', 'Link Description'))
@@ -209,6 +256,7 @@ $subTable->addRow([
 $leftCol->addRow(_('Host to link'), [$hostSelect]);
 $leftCol->addRow(_('Link Configuration'), $subTable);
 
+//addTab('link', _zeT('Link'));
 // Right side ==================================================================
 // Line
 $subTable = (new CTableInfo())->setHeader(['Latitude', 'Longitude', 'Popup Description', 'Color', 'Width', '']);
@@ -222,22 +270,35 @@ $subTable->addRow([
     , $addButton
 ]);
 $leftCol->addRow(_('Line'), $subTable);
-// Multiline
+
+addTab('connection', _zeT('Connection'));
+
+// Result
 
 $subTable2 = (new CTableInfo())->setHeader([_zeT('New configuration'), '']);
-$subTable2->addRow([ (new CTextArea('jsonResult', ''))->setWidth(ZBX_TEXTAREA_BIG_WIDTH)], '');
+$subTable2->addRow([ (new CTextArea('jsonResult', $filter["jsonResult"]))->setWidth(ZBX_TEXTAREA_BIG_WIDTH)], '');
 $subTable2->addRow([(new CTableInfo())
             ->addRow(['', (new CButton('btnvalidate', _('Validate JSON')))->onClick('javascript:validateJSON();'), (new CButton('btnReset', _('Reset')))->onClick('javascript:resetJSON();')])
             ->setAttribute('style', 'width: 10%;')]);
 
-$leftCol->addRow($subTable2);
+$leftCol = new CFormList();
+$leftCol->addRow(_zeT('Source Host'), (new CSpan(bold($hostData['name'] . " - ("
+                . $hostData['inventory']['location_lat'] . " / " . $hostData['inventory']['location_lon'] . ")"))));
+$leftCol->addRow(_('Current Metadata'), (new CSpan(bold($hostData['inventory']['notes']))));
+$leftCol->addItem(new CInput('hidden', 'fullscreen', $filter['fullscreen']));
+$leftCol->addItem(new CInput('hidden', 'hidetitle', $filter['hidetitle']));
+$leftCol->addItem(new CInput('hidden', 'sourceHostID', $filter['sourceHostID']));
+$leftCol->addItem(new CInput('hidden', 'updateHost', 1));
 
+$leftCol->addRow($subTable2);
 $table->addRow([$leftCol]);
-$table->setAttribute('style', 'width: 800px;');
+$table->setFooter(makeFormFooter(new CSubmit('update', _('Update'))));
+
 
 /* * ***************************************************************************
  * Display Footer 
  * ************************************************************************** */
-$form->addItem([ $table]);
+
+$form->addItem([$dataTab, $table]);
 $dashboard->addItem($form)->show();
 

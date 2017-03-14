@@ -23,7 +23,7 @@
 define("ZE_VER", "3.0");
 define("EZ_TITLE", 'EveryZ - ');
 define("ZE_COPY", ", ZE " . ZE_VER);
-define("EVERYZBUILD", 7);
+define("EVERYZBUILD", 8);
 
 global $VG_DEBUG;
 global $zeMessages, $zeLocale, $baseName, $requiredMissing, $zbxeLoadedJS;
@@ -400,6 +400,9 @@ function checkAccessTrigger($p_triggerid) {
 function checkAccessHost($p_hostid) {
     global $filter;
     $hostids = (isset($_REQUEST[$p_hostid]) ? $_REQUEST[$p_hostid] : $filter[$p_hostid]);
+    if (!is_array($hostids)) {
+        $hostids = [$hostids];
+    }
     if (getRequest($p_hostid) && !API::Host()->isReadable($hostids)) {
         access_deny();
     } else {
@@ -466,9 +469,9 @@ function addFilterActions() {
     $fields["filter_set"] = array(T_ZBX_STR, O_OPT, P_UNSET_EMPTY, NULL, null);
     $filter["filter_set"] = getRequest2("filter_set", "");
     $fields['fullscreen'] = array(T_ZBX_INT, O_OPT, P_SYS, IN('0,1'), null);
-    $filter["fullscreen"] = getRequest2("fullscreen", "1");
+    $filter["fullscreen"] = getRequest2("fullscreen", "0");
     $fields['hidetitle'] = array(T_ZBX_INT, O_OPT, P_SYS, IN('0,1'), null);
-    $filter["hidetitle"] = getRequest2("hidetitle", "1");
+    $filter["hidetitle"] = getRequest2("hidetitle", "0");
 }
 
 /**

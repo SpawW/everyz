@@ -238,6 +238,10 @@ if (zbxeConfigValue("geo_token", 0, '') !== "") {
     $tmpColumn->addRow(_zeT('Default tile'), [newComboFilterArray(
                 ["Grayscale", "Streets", "Dark", "Outdoors", "Satellite", "Emerald"]
                 , "map", $filter['map'], false, false)]);
+} else {
+    $tmpColumn->addRow(_zeT('Default tile'), [newComboFilterArray(
+                ["OpenStreet_Base", "OpenStreet_Grayscale", "OpenTopo","Stamen_Terrain","CartoDB_DarkMatter","Esri_WorldStreetMap"]
+                , "map", $filter['map'], false, false)]);
 }
 
 $tmpColumn->addItem(new CInput('hidden', 'action', $filter["action"]));
