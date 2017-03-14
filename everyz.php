@@ -84,7 +84,7 @@ if (hasRequest('zbxe_reset_all') && getRequest2('zbxe_reset_all') == "EveryZ Res
 
 
 $res = DBselect('SELECT userid, tx_option, tx_value from zbxe_preferences zpre '
-        . ' WHERE userid in (0,' . CWebUser::$data['userid'] . ') and st_ativo = 1 '
+        . ' WHERE userid in (0,' . CWebUser::$data['userid'] . ')  '//and st_ativo = 1
         . ' and tx_value like ' . quotestr($action . '|%')
         . ' order by userid, tx_option');
 while ($row = DBfetch($res)) {

@@ -40,8 +40,9 @@ check_fields($fields);
 /* * ***************************************************************************
  * Access Control
  * ************************************************************************** */
+zbxeCheckUserLevel(USER_TYPE_ZABBIX_ADMIN);
 checkAccessHost('hostids');
-checkAccessHost('sourceHostID');
+checkAccessHost('sourceHostID',true);
 
 /* * ***************************************************************************
  * Module Functions

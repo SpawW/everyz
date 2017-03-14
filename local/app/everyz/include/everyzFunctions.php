@@ -395,19 +395,23 @@ function checkAccessTrigger($p_triggerid) {
  * Check if current user can access (read) host data.
  * @author Adail Horst <the.spaww@gmail.com>
  * 
- * @param string    $p_hostid   ID of host
+ * @param string    $p_hostid       ID of host
+ * @param boolean   $writeaccess    Verifica se tem acesso de GRAVACAO nos hosts
  */
-function checkAccessHost($p_hostid) {
+function checkAccessHost($p_hostid, $writeaccess = false) {
     global $filter;
     $hostids = (isset($_REQUEST[$p_hostid]) ? $_REQUEST[$p_hostid] : $filter[$p_hostid]);
     if (!is_array($hostids)) {
         $hostids = [$hostids];
     }
-    if (getRequest($p_hostid) && !API::Host()->isReadable($hostids)) {
-        access_deny();
-    } else {
-        if (count($hostids) > 0 && $hostids[0] == 0) {
-            $hostids = array();
+    if (getRequest($p_hostid)) {
+        $canAccess = (API::Host()->isReadable($hostids) && (!$writeaccess || API::Host()->isWritable($hostids)));
+        if ($canAccess) {
+            if (count($hostids) > 0 && $hostids[0] == 0) {
+                $hostids = array();
+            }
+        } else {
+            access_deny();
         }
     }
     return $hostids;
@@ -883,6 +887,15 @@ function zbxeJSONKey($name, $value) {
     return "\"" . $name . "\": " . $value;
 }
 
+/**
+ * zbxeComboIconMap
+ *
+ * Return a combo with all icon mappings as options
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param string    $p_name        Name of HTML object
+ * @param integer   $default       Value for selected option
+ */
 function zbxeComboIconMap($p_name = 'iconmapid', $p_default = 0) {
     // icon maps
     $data = [];
@@ -899,6 +912,14 @@ function zbxeComboIconMap($p_name = 'iconmapid', $p_default = 0) {
     return $cmbIconMap;
 }
 
+/**
+ * zbxeInventoryField
+ *
+ * Return the API name of a host inventory Field
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param integer  $inventoryId        ID of inventory Field
+ */
 function zbxeInventoryField($inventoryId) {
     $inventoryFields = ["", "type", "type_full", "name", "alias", "os", "os_full"
         , "os_short", "serialno_a", "serialno_b", "tag", "asset_tag"
@@ -1259,6 +1280,14 @@ function getImageName($imageid) {
     return zbxeFieldValue("select name from images WHERE imageid = " . quotestr($imageid), "name");
 }
 
+/**
+ * updateImage
+ *
+ * Adiciona ou atualiza uma imagem no repositório de imagens do Zabbix
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param string    $image        Array with image information
+ */
 function updateImage($image) {
     $imageid = getImageId($image['name']);
     if (intval($imageid) > 0) {
@@ -1277,6 +1306,13 @@ function updateImage($image) {
     return $result;
 }
 
+/**
+ * zbxeStartDefinitions
+ *
+ * Inicializa as CONSTANTES compatíveis com o banco de dados utilizado pelo Zabbix
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ */
 function zbxeStartDefinitions() {
     global $DB;
     if (isset($DB) && !defined("ZE_DBFQ")) {
@@ -1290,6 +1326,13 @@ function zbxeStartDefinitions() {
     }
 }
 
+/**
+ * zbxeConfigImageIDs
+ *
+ * Retorna os IDs de imagens utilizadas na configuração do EveryZ. Metodo utilizado para a exportação de dados.
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ */
 function zbxeConfigImageIDs() {
     return 'tx_option in (' . quotestr("company_logo_login") . ',' . quotestr("company_logo_site") . ',' . quotestr("geo_default_poi") . ')'
             . " OR tx_option like " . quotestr('zbxe_default_image_%') . " OR tx_option like " . quotestr('%_poi')
@@ -1297,23 +1340,55 @@ function zbxeConfigImageIDs() {
     ;
 }
 
-// Original: http://stackoverflow.com/questions/6041741/fastest-way-to-check-if-a-string-is-json-in-php
-// With changes by Adail Horst
+/**
+ * isJson
+ *
+ * Verifica se determinado texto é um array json válido 
+ * Original: http://stackoverflow.com/questions/6041741/fastest-way-to-check-if-a-string-is-json-in-php
+ * With changes by Adail Horst
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param string    $string String with JSON
+ */
 function isJson($string) {
     $return = json_decode($string, true);
     return (json_last_error() == JSON_ERROR_NONE ? $return : false);
 }
 
-function optArrayValue($array, $value, $default = "") {
-    return (isset($array[$value]) ? $array[$value] : $default);
+/**
+ * optArrayValue
+ *
+ * Busca em um array associativo a existência e valor de determinada chave. 
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param array     $array      Array with keys and values
+ * @param string    $key        Key for search
+ * @param array     $default    Default value (is used if $key does not exists on $array
+ */
+function optArrayValue($array, $key, $default = "") {
+    return (isset($array[$key]) ? $array[$key] : $default);
 }
 
+/**
+ * zbxeFullScreen
+ *
+ * Adiciona referência ao script padrão de funções do EveryZ. Isso ocorre somente se a opção de otimização de espaço em tela estiver ativa.
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ */
 function zbxeFullScreen() {
     if (zbxeConfigValue('custom_full_screen') == "1") {
         zbxeJSLoad(['everyzFunctions.js']);
     }
 }
 
+/**
+ * zbxeResetConfiguration
+ *
+ * Reinicia as configurações do EveryZ que são baseadas nas tabelas de controle zbxe_*
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ */
 function zbxeResetConfiguration() {
     try {
         DBexecute(zbxeStandardDML("DROP TABLE `zbxe_preferences` "));
@@ -1329,12 +1404,27 @@ function zbxeResetConfiguration() {
     require_once $path . '/everyz.initdb.php';
 }
 
+/**
+ * zbxeErrorLog
+ *
+ * Adiciona o logotipo dinâmico no Zabbix. 
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param boolean $show     True - Add a log line on error_log, False - do noting
+ */
 function zbxeErrorLog($show, $message) {
     if ($show == true) {
         error_log($message, 0);
     }
 }
 
+/**
+ * zbxeCustomMenu
+ *
+ * Adiciona o logotipo dinâmico no Zabbix. 
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ */
 function zbxeCustomMenu() {
     $logoSize = zbxeConfigValue("company_logo_width", 0, 120) . "px";
     $logoCompany = new CDiv(SPACE, '');
@@ -1349,13 +1439,40 @@ function zbxeCustomMenu() {
     return $return;
 }
 
+/**
+ * zbxeEveryZGlobal
+ *
+ * Adiciona referências HTML para os scripts padrões do EveryZ e os estilos adicionais
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ */
 function zbxeEveryZGlobal() {
     echo "\n" . '<script src="local/app/everyz/js/everyzFunctions.js"></script>';
     echo "\n" . '<link href="local/app/everyz/css/everyz.css" rel="stylesheet" type="text/css" id="skinSheet">';
 }
 
+/**
+ * zbxeMenuUserType
+ *
+ * Retorna o tipo mínimo de usuário para utilizar o EveryZ
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ */
 function zbxeMenuUserType() {
     return zbxeConfigValue("everyz_userlevel", 0, USER_TYPE_SUPER_ADMIN);
+}
+
+/**
+ * zbxeCheckUserLevel
+ *
+ * Verifica se o tipo do usuário atende ao requisito mínimo do módulo
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param integer $minimum     Minimum level to access the module
+ */
+function zbxeCheckUserLevel($minimum = USER_TYPE_SUPER_ADMIN) {
+    if (CWebUser::getType() < $minimum)
+        access_deny();
 }
 
 // End Functions ===============================================================
