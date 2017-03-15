@@ -82,18 +82,23 @@ if (hasRequest('zbxe_reset_all') && getRequest2('zbxe_reset_all') == "EveryZ Res
     }
 }
 
-
 $res = DBselect('SELECT userid, tx_option, tx_value from zbxe_preferences zpre '
-        . ' WHERE userid in (0,' . CWebUser::$data['userid'] . ')  '//and st_ativo = 1
+        . ' WHERE userid in (0,' . CWebUser::$data['userid'] . ') '// and st_ativo < 2
         . ' and tx_value like ' . quotestr($action . '|%')
         . ' order by userid, tx_option');
 while ($row = DBfetch($res)) {
     $tmp = explode("|", $row['tx_value']);
     $module = $tmp[0];
 }
+/* * ***************************************************************************
+ * Access Control
+ * ************************************************************************** */
+
 if ($module == "dashboard") {
+    zbxeCheckUserLevel(zbxeMenuUserType());
     include_once dirname(__FILE__) . "/local/app/views/everyz.dashboard.view.php";
 } else {
+    zbxeCheckUserLevel((count($tmp) > 2 ? (int) $tmp[2] : 3));
     $file = dirname(__FILE__) . "/local/app/views/everyz." . $module . ".view.php";
     if (file_exists($file)) {
         include_once $file;

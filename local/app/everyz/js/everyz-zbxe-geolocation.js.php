@@ -70,64 +70,63 @@ echo $mapBackgroud[$filter["map"]]; //"streets"
             baseMaps["Satellite"] = satellite;
             baseMaps["Emerald"] = emerald;
     } else {
-    addMapTile("OpenStreet_Base", 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>', 19);
-            addMapTile("OpenStreet_Grayscale", 'http://{s}.tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png', '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>', 18);
-            addMapTile("OpenTopo", 'http://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', 'Map data: &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)', 17);
-            addMapTile("Stamen_Terrain", 'http://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}.{ext}', 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>', 18);
-            baseMaps["Stamen_Terrain"]["options"]["subdomains"] = ["a", "b", "c", "d"];
-            baseMaps["Stamen_Terrain"]["options"]["ext"] = 'png';
-            addMapTile("CartoDB_DarkMatter", 'http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>', 19);
-            addMapTile("Esri_WorldStreetMap", 'http://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012', 19);
-            defaultMap = "<?php
+        addMapTile("OpenStreet_Base", 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>', 19);
+        addMapTile("OpenStreet_Grayscale", 'http://{s}.tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png', '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>', 18);
+        addMapTile("OpenTopo", 'http://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', 'Map data: &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)', 17);
+        addMapTile("Stamen_Terrain", 'http://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}.{ext}', 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>', 18);
+        baseMaps["Stamen_Terrain"]["options"]["subdomains"] = ["a", "b", "c", "d"];
+        baseMaps["Stamen_Terrain"]["options"]["ext"] = 'png';
+        addMapTile("CartoDB_DarkMatter", 'http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>', 19);
+        addMapTile("Esri_WorldStreetMap", 'http://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012', 19);
+        defaultMap = "<?php
 $mapBackgroud = ["OpenStreet_Base", "OpenStreet_Grayscale", "OpenTopo", "Stamen_Terrain", "CartoDB_DarkMatter", "Esri_WorldStreetMap"];
 echo $mapBackgroud[$filter["map"]]; //"streets"             
 ?>";
-            L.tileLayer(baseMaps[defaultMap]["_url"], baseMaps[defaultMap]["options"]).addTo(ZabGeomap);
+        L.tileLayer(baseMaps[defaultMap]["_url"], baseMaps[defaultMap]["options"]).addTo(ZabGeomap);
     }
     // Cria dinamicamente a referencia para o icone do host 
     function zbxImage(p_iconid, width = 32, height = 32) {
-    return L.icon({
-    iconUrl: 'imgstore.php?iconid=' + p_iconid,
-            iconSize: [width, height],
-            iconAnchor: [Math.round(width / 2), height],
-            popupAnchor: [2, - 38],
-    });
+        return L.icon({
+            iconUrl: 'imgstore.php?iconid=' + p_iconid,
+                iconSize: [width, height],
+                iconAnchor: [Math.round(width / 2), height],
+                popupAnchor: [2, - 38],
+        });
     }
-    function addCircle (lat, lon, radiusSize, fillColor = '#303', borderColor = '', opacity = 0.2){
-    L.circle([lat, lon], {color: borderColor, fillColor: fillColor, fillOpacity: opacity, radius: radiusSize}).addTo(ZabGeocircle).bindPopup(radiusSize + 'm');
+    function addCircle (lat, lon, radiusSize, fillColor = '#303', borderColor = '', opacity = <?php echo (float) zbxeConfigValue("geo_circle_opacity", 0, 0.3); ?>){
+        L.circle([lat, lon], {color: borderColor, fillColor: fillColor, fillOpacity: opacity, radius: radiusSize}).addTo(ZabGeocircle).bindPopup(radiusSize + 'm');
     }
     function addHost(lat, lon, hostid, name, description) {
-    L.marker([lat, lon], {icon: zbxImage(hostid)}).addTo(ZabGeomap).bindPopup(name);
+        L.marker([lat, lon], {icon: zbxImage(hostid)}).addTo(ZabGeomap).bindPopup(name);
     }
     function addErrorHost(lat, lon, hostid, name, description) {
         L.marker([lat, lon], {icon: zbxImage(hostid, 40, 40)}).addTo(ZabGeomap).bindPopup(name);
     }
 
     function addAlert (lat, lon, radiusSize, fillColor = '#303', borderColor = '', opacity = 0.2, title = ''){
-    L.circle([lat, lon], {color: borderColor, fillColor: fillColor, fillOpacity: opacity, radius: radiusSize}).addTo(ZabGeoalert).bindPopup(title);
+        L.circle([lat, lon], {color: borderColor, fillColor: fillColor, fillOpacity: opacity, radius: radiusSize}).addTo(ZabGeoalert).bindPopup(title);
     }
-    function addLine(from, to, fillColor = 'blue', weight = 6, opacity = 1) {
-    ZabGeomap.addLayer(new L.Polyline([new L.LatLng(from[0], from[1]), new L.LatLng(to[0], to[1])], {            color: fillColor, weight: weight, opacity: opacity}));
+    function addLine(from, to, fillColor = 'blue', weight = 6, opacity = <?php echo (float) zbxeConfigValue("geo_link_opacity", 0, 1); ?>) {
+        ZabGeomap.addLayer(new L.Polyline([new L.LatLng(from[0], from[1]), new L.LatLng(to[0], to[1])], { color: fillColor, weight: weight, opacity: opacity}));
     }
     function editHostMetadata(hostid){
-    PopUp("everyz.php?action=zbxe-geometadata&fullscreen=1&hidetitle=1&sourceHostID=" + hostid);
+        PopUp("everyz.php?action=zbxe-geometadata&fullscreen=1&hidetitle=1&sourceHostID=" + hostid);
     }
     function hostLatest(hostid){
-    PopUp("latest.php?fullscreen=0&hostids[]=" + hostid + "&application=&select=&show_without_data=1&fullscreen=1&filter_set=Filter");
+        PopUp("latest.php?fullscreen=0&hostids[]=" + hostid + "&application=&select=&show_without_data=1&fullscreen=1&filter_set=Filter");
     }
     function hostIncidents(hostid){
-    PopUp("tr_status.php?fullscreen=1&groupid=0&hostid=" + hostid + "&show_triggers=1&ack_status=1&show_events=1&show_severity=0&filter_set=Filter");
+        PopUp("tr_status.php?fullscreen=1&groupid=0&hostid=" + hostid + "&show_triggers=1&ack_status=1&show_events=1&show_severity=0&filter_set=Filter");
     }
 
 <?php
 
 function showTitle($host) {
-    $imgMetadata = "<img class=\"everyzEditIMG\" title=\"" . _zeT("Edit host metadata") . "\" src=\"local/app/everyz/images/zbxe-geometadata.png\" onclick=\'javascript:editHostMetadata(" . $host["id"] . ");\'/>";
+    $imgMetadata = ((CWebUser::getType() > USER_TYPE_ZABBIX_USER) ?"<img class=\"everyzEditIMG\" title=\"" . _zeT("Edit host metadata") . "\" src=\"local/app/everyz/images/zbxe-geometadata.png\" onclick=\'javascript:editHostMetadata(" . $host["id"] . ");\'/>":"");
     $imgLatest = "<img class=\"everyzEditIMG\" title=\"" . _("Latest Data") . "\" src=\"local/app/everyz/images/zbxe-latest.png\" onclick=\'javascript:hostLatest(" . $host["id"] . ");\'/>";
     $imgIncident = "<img class=\"everyzEditIMG\" title=\"" . _("Problems") . "\" src=\"local/app/everyz/images/zbxe-incident.png\" onclick=\'javascript:hostIncidents(" . $host["id"] . ");\'/>";
 
-    return "'" . "Host: " . bold($host["name"]) . "<br>" . $imgMetadata . SPACE . $imgLatest . SPACE .$imgIncident
-    ;
+    return "'" . "Host: " . bold($host["name"]) . "<br>" . $imgMetadata . SPACE . $imgLatest . SPACE .$imgIncident;
 }
 
 function bigSeverity($host) {

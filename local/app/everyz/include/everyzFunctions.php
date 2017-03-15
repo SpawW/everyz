@@ -828,7 +828,7 @@ function zeDBConditionInt($fieldName, array $values, $notIn = false, $sort = tru
 }
 
 function buttonOptions($name, $value, $options, $values = []) {
-    $radioOptions = (new CRadioButtonList($name, (int) $value));
+    $radioOptions = (new CRadioButtonList($name, (is_int($value) ? (int) $value : (float) $value)));
     for ($i = 0; $i < count($options); $i++) {
         $radioOptions->addValue($options[$i], (count($values) > 0 ? $values[$i] : $i));
     }
@@ -1473,6 +1473,10 @@ function zbxeMenuUserType() {
 function zbxeCheckUserLevel($minimum = USER_TYPE_SUPER_ADMIN) {
     if (CWebUser::getType() < $minimum)
         access_deny();
+}
+
+function zbxeButtonUserLevel($name, $value) {
+    return buttonOptions($name, $value, [_('User'), _zeT('Admin'), _zeT('Super Admin')], [USER_TYPE_ZABBIX_USER, USER_TYPE_ZABBIX_ADMIN, USER_TYPE_SUPER_ADMIN]);
 }
 
 // End Functions ===============================================================

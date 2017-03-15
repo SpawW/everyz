@@ -130,7 +130,7 @@ $table->addRow(
                         , 'company_logo_img', zbxeConfigValue('company_logo_width'), 25))->setId("img_company_logo_site"))
                 ->addRow(_zeT('Login Logo'), $cmbLogoLogin)
                 ->addRow((new CImg('imgstore.php?iconid=' . $idLogoLogin, 'company_logo_img', 120, 25))->setId("img_company_logo_login"))
-                ->addRow(_zeT('EveryZ Logo'), buttonOptions("cnf_show_everyz_logo", zbxeConfigValue("show_everyz_logo", 0, 1), [_('Hide'), _('Show')]))
+                ->addRow(_zeT('EveryZ Logo'), buttonOptions("cnf_show_everyz_logo", (int) zbxeConfigValue("show_everyz_logo", 0, 1), [_('Hide'), _('Show')]))
 );
 $dashboardGrid[0][1] = newWidget('company', _zeT("Company"), $table);
 
@@ -140,12 +140,17 @@ $table->addRow(
         (new CFormList())
                 ->addRow(_('Token'), (new CTextBox('cnf_geo_token'
                         , zbxeConfigValue('geo_token')))->setWidth(ZBX_TEXTAREA_BIG_WIDTH)
-                        ->setAttribute('placeholder', _zeT('For use extra tiles, please inform a valid API key.') )
+                        ->setAttribute('placeholder', _zeT('For use extra tiles, please inform a valid API key.'))
                 )
                 ->addRow(_zeT('Default POI'), [$cmbDefaultPoi,
                     (new CImg('imgstore.php?iconid=' . $idGeoDefaultPOI
                     , 'cnf_geo_default_poi', 16, 16))->setId("img_geo_default_poi")])
+                ->addRow(_zeT('Opacity of links'), buttonOptions("cnf_geo_link_opacity", (float) zbxeConfigValue("geo_link_opacity", 0, 0.9)
+                                , ['100%', '90%', '80%', '70%', '60%', '50%', '40%', '30%'], [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3]))
+                ->addRow(_zeT('Opacity of circles'), buttonOptions("cnf_geo_circle_opacity", (float) zbxeConfigValue("geo_circle_opacity", 0, 0.3)
+                                , ['100%', '90%', '80%', '70%', '60%', '50%', '40%', '30%'], [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3]))
 );
+//var_dump("aqui".zbxeConfigValue("geo_link_opacity", 0, 1));
 $dashboardGrid[1][0] = newWidget('geo', _zeT("ZabGeo", ''), $table);
 
 // Options for reset data ==========================================================
@@ -161,9 +166,9 @@ $dashboardGrid[1][10] = newWidget('reset', _zeT("Reset configuration", ''), $tab
 // Options for reset data ==========================================================
 $table = (new CTable());
 $table->addRow(
-        (new CFormList())
-                ->addRow(_zeT('Minimum User Level'), buttonOptions("cnf_everyz_userlevel", zbxeConfigValue("everyz_userlevel", 0, USER_TYPE_SUPER_ADMIN)
-                                , [_('User'), _zeT('Admin'), _zeT('Super Admin')], [USER_TYPE_ZABBIX_USER, USER_TYPE_ZABBIX_ADMIN, USER_TYPE_SUPER_ADMIN]))
+        (new CFormList())->addRow(_zeT('Minimum User Level'), zbxeButtonUserLevel("cnf_everyz_userlevel", (int) zbxeConfigValue("everyz_userlevel", 0, USER_TYPE_SUPER_ADMIN)))
+//                ->addRow(_zeT('Minimum User Level'), buttonOptions("cnf_everyz_userlevel", (int) zbxeConfigValue("everyz_userlevel", 0, USER_TYPE_SUPER_ADMIN)
+//                                , [_('User'), _zeT('Admin'), _zeT('Super Admin')], [USER_TYPE_ZABBIX_USER, USER_TYPE_ZABBIX_ADMIN, USER_TYPE_SUPER_ADMIN]))
 );
 $dashboardGrid[1][1] = newWidget('general', _zeT("General", ''), $table);
 

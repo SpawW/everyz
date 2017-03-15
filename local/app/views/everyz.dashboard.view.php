@@ -24,8 +24,12 @@ $dashboard = (new CWidget())->setTitle(_('EveryZ Dashboard'));
 $loadScripts = [];
 
 function newWidget($p_id, $p_title, $p_content, $p_expanded = true, $p_icon = []) {
-    global $loadScripts;
+    global $loadScripts, $userLevel;
     $tmp = explode("|", $p_title);
+    if ($userLevel < (count($tmp) > 5 ? (int) $tmp[5] : 3)) {
+        //var_dump("<br>Modulo: ".$tmp[3]." nivel requerido: ". $tmp[5] . " nivel do usuario: ".$userLevel);
+        return false;
+    }
     if (isset($tmp[4]) && $tmp[4] == 2) {
         $loadScripts[] = $tmp[2];
         return (new CUiWidget($p_id, (new CDiv(''))->setName('body-' . $tmp[2])->setId('body-' . $tmp[2])))->setHeader(_zeT($tmp[3]), [$p_icon], true);
@@ -37,6 +41,7 @@ function newWidget($p_id, $p_title, $p_content, $p_expanded = true, $p_icon = []
 }
 
 function linkList($p_filter) {
+    global $userLevel;
     $table = (new CTableInfo());
     $res = DBselect('SELECT userid, tx_option, tx_value from zbxe_preferences zpre '
             . ' WHERE userid in (0,' . CWebUser::$data['userid'] . ') and st_ativo = 1 '
@@ -46,10 +51,12 @@ function linkList($p_filter) {
         $tmp = explode("|", $row['tx_value']);
         $name = $tmp[1];
         $tag = $tmp[0];
-        $table->addRow([
-            [(new CImg('local/app/everyz/images/' . $tag . '.png', 'no image'))->setAttribute('style', 'vertical-align:middle;')
-                , (new CLink("&nbsp;" . _zeT($name), 'everyz.php?action=' . $tag))
-        ]]);
+        if ($userLevel >= (count($tmp) > 2 ? (int) $tmp[2] : 3)) {
+            $table->addRow([
+                [(new CImg('local/app/everyz/images/' . $tag . '.png', 'no image'))->setAttribute('style', 'vertical-align:middle;')
+                    , (new CLink("&nbsp;" . _zeT($name), 'everyz.php?action=' . $tag))
+            ]]);
+        }
     }
     return $table;
 }
@@ -57,8 +64,11 @@ function linkList($p_filter) {
 //Todo: Descobrir o maior número de linha
 //Todo: separar os widgets em linhas
 // Quantidade de linhas
-$totRows = zbxeFieldValue("SELECT max(tx_value) as ultimo FROM zbxe_preferences WHERE tx_option LIKE 'widget_%' and tx_value like '%|%|%' ", 'ultimo');
+//$totRows = zbxeFieldValue("SELECT max(tx_value) as ultimo FROM zbxe_preferences WHERE tx_option LIKE 'widget_%' and tx_value like '%|%|%' ", 'ultimo');
+$totRows = zbxeFieldValue("SELECT max(tx_value) as ultimo FROM zbxe_preferences WHERE tx_option LIKE 'widget_%' "
+        . ' and tx_option not like ' . quotestr("%link%"), 'ultimo');
 $totRows = explode("|", $totRows)[0];
+$userLevel = CWebUser::getType();
 
 for ($rowNum = 0; $rowNum <= $totRows; $rowNum++) {
 // Recuperando a lista de widgets
@@ -73,9 +83,12 @@ for ($rowNum = 0; $rowNum <= $totRows; $rowNum++) {
     $dashboardGrid = [];
     $cont = 0;
     while ($row = DBfetch($res)) {
-        //var_dump($row['tx_option']);
-        $dashboardGrid[$cont][0] = newWidget($row['tx_option'], $row['tx_value'], linkList($row['tx_option'] . '_link_%'));
-        $cont++;
+        //var_dump($row['tx_value']);
+        $tmp = newWidget($row['tx_option'], $row['tx_value'], linkList($row['tx_option'] . '_link_%'));
+        if ($tmp !== false) {
+            $dashboardGrid[$cont][0] = $tmp;
+            $cont++;
+        }
     }
     $dashboardRow = [];
     for ($row = 0; $row < count($dashboardGrid); $row++) {

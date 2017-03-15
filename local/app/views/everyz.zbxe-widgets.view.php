@@ -25,6 +25,8 @@
 $moduleName = "zbxe-widgets";
 $baseProfile .= $moduleName;
 
+$descUserLevel = ['', 'Zabbix User', 'Zabbix Admin', 'Zabbix Super Admin'];
+
 // Common fields
 addFilterParameter("format", T_ZBX_INT);
 addFilterActions();
@@ -36,7 +38,8 @@ addFilterParameter("title", T_ZBX_STR, '', false, false, false);
 addFilterParameter("row", T_ZBX_INT, 1, false, false, false);
 addFilterParameter("order", T_ZBX_INT, 1, false, false, false);
 addFilterParameter("status", T_ZBX_INT, 0, false, false, false);
-addFilterParameter("widgettype", T_ZBX_STR, 0, false, false, false);
+addFilterParameter("widgettype", T_ZBX_INT, 0, false, false, false);
+addFilterParameter("userlevel", T_ZBX_INT, 0, false, false, false);
 addFilterParameter("dml", T_ZBX_STR, '', false, true, false);
 addFilterParameter("widget", T_ZBX_STR, "", false, true, false);
 addFilterParameter("item", T_ZBX_STR, "", false, true, false);
@@ -53,6 +56,10 @@ check_fields($fields);
  * Module Functions
  * ************************************************************************** */
 
+function cleanParam($text) {
+    return str_replace("|", "", $text);
+}
+
 // Definitions -----------------------------------------------------------------
 // Module Functions 
 function getWidgetItemData() {
@@ -68,7 +75,8 @@ function getWidgetItemData() {
         $report[$cont]['name'] = $tmp[0];
         $report[$cont]['title'] = $tmp[1];
         $report[$cont]['itemid'] = $row["tx_option"];
-        $report[$cont]['status'] = $row["st_ativo"];
+        $report[$cont]['status'] = (int) $row["st_ativo"];
+        $report[$cont]['userlevel'] = (count($tmp) > 2 ? (int) $tmp[2] : 3);
         $cont++;
     }
     return $report;
@@ -119,7 +127,9 @@ if (hasRequest('dml')) {
             case "widget.edit":
             case "widget.add":
                 $name = str_replace("|", "", $filter['name']);
-                $title = $filter['row'] . "|" . $filter['order'] . "|" . $name . "|" . str_replace("|", "", $filter['title']) . "|" . str_replace("|", "", $filter['widgettype']);
+                $title = $filter['row'] . "|" . $filter['order'] . "|" . $name
+                        . "|" . cleanParam($filter['title']) . "|" . cleanParam($filter['widgettype'])
+                        . "|" . cleanParam($filter['userlevel']);
                 if ($filter["mode"] == "widget.add") {
                     $last = explode("_", zbxeFieldValue('select MAX(tx_option) as ultimo from zbxe_preferences zp where zp.tx_option like '
                                     . quotestr("widget_%"), "ultimo"));
@@ -138,8 +148,13 @@ if (hasRequest('dml')) {
             case "widget.item.edit":
             case "widget.item.add":
                 $name = str_replace("|", "", $filter['name']);
-                $title = $name . "|" . str_replace("|", "", $filter['title']);
+                $packageName = "custommodule";
+                $title = $name . "|" . cleanParam($filter['title'])
+                        //. "|" . cleanParam($filter['widgettype']) 
+                        . "|" . cleanParam($filter['userlevel'])
+                ;
                 if ($filter["mode"] == "widget.item.add") {
+                    echo "oix<br>";
                     $last = explode("_", zbxeFieldValue('select MAX(tx_option) as ultimo from zbxe_preferences zp where zp.tx_option like ' .
                                     quotestr($filter["widget"] . '_link_%'), "ultimo"));
                     if (count($last) > 2) {
@@ -149,7 +164,7 @@ if (hasRequest('dml')) {
                     }
                     $name = $filter["widget"] . '_link_' . $last; //. "_" . $name;
 // Insert
-                    $sql = "insert into zbxe_preferences values (0," . quotestr($name) . "," . quotestr($title) . "," . $filter['status'] . ")";
+                    $sql = "insert into zbxe_preferences values (0," . quotestr($name) . "," . quotestr($title) . "," . $filter['status'] . "," . quotestr($packageName) . ")";
                 } else {
 // Update
                     $sql = "update zbxe_preferences set tx_value = " . quotestr($title) . ", st_ativo = " . $filter['status'] . " where tx_option = " . quotestr($filter["item"]);
@@ -166,6 +181,7 @@ if (hasRequest('dml')) {
                     break;
                 }
                 $sql = 'delete from zbxe_preferences where tx_option like ' . quotestr(trim($filter["widget"] . "%"));
+
                 show_messages(prepareQuery($sql), _zeT('Widget item ' . ($filter["mode"] == "widget.add" ? "added" : "deleted")));
                 $filter['mode'] = '';
                 $filter['item'] = '';
@@ -177,6 +193,7 @@ if (hasRequest('dml')) {
                     break;
                 }
                 $sql = 'delete from zbxe_preferences where tx_option = ' . quotestr(trim($filter["item"]));
+
                 show_messages(prepareQuery($sql), _zeT('Widget item ' . ($filter["mode"] == "widget.add" ? "added" : "deleted")));
                 $filter['mode'] = 'widget.items';
                 $filter['item'] = '';
@@ -195,17 +212,19 @@ if (strpos($filter['mode'], "edit") > 0 || strpos($filter['mode'], "add") > 0) {
 } else {
     $createButton = (new CList())->addItem(new CSubmit('form', _zeT('Create ' . (strpos($filter['mode'], "item") > 0 ? 'item' : 'widget'))));
 }
-if (in_array($filter['mode'], ["widget.edit", "widget.items", "widget.item.edit", "widget.item.add"])) { // Recover widget data
+if (in_array($filter['mode'], ["widget.edit", "widget.items", "widget.item.edit", "widget.item.add"])) {
     $query = 'SELECT tx_value, tx_option, st_ativo from zbxe_preferences where tx_option = ' . quotestr($filter['widget']) . ' order by tx_value';
     $result = DBselect($query);
     while ($row = DBfetch($result)) {
         $tmp = explode("|", $row['tx_value']);
-        $data['name'] = $tmp[2];
-        $data['title'] = $tmp[3];
         $data['row'] = $tmp[0];
         $data['order'] = $tmp[1];
-        $data['widgettype'] = (count($tmp) > 4 ? $tmp[4] : 0);
+        $data['name'] = $tmp[2];
+        $data['title'] = $tmp[3];
+        $data['widgettype'] = (count($tmp) > 4 ? (int) $tmp[4] : 0);
         $data['status'] = $row['st_ativo'];
+        $data['userlevel'] = (count($tmp) > 5 ? (int) $tmp[5] : 0);
+        ;
     }
     $extraTitle = " - [" . $data['title'] . "]";
 } else {
@@ -246,8 +265,8 @@ if ($filter['mode'] !== "") {
     switch ($filter['mode']) {
         case "widget.add":
         case "widget.edit":
-            if ($filter['mode'] == "widget.add") { // Recover widget data aqui2
-                $data = ["name" => "", "title" => "", "row" => "1", "order" => "1", "status" => "1", 'widgettype' => 0];
+            if ($filter['mode'] == "widget.add") { // Recover widget data 
+                $data = ["name" => "", "title" => "", "row" => "1", "order" => "1", "status" => "1", 'widgettype' => 0, 'userlevel' => 3];
             }
             $formWidget = (new CFormList())
                     ->addRow(_('Name')
@@ -261,7 +280,9 @@ if ($filter['mode'] !== "") {
                         , '&nbsp;', _('Order'), '&nbsp;', (new CNumericBox('order', $data['order'], 2))->setWidth(ZBX_TEXTAREA_NUMERIC_STANDARD_WIDTH)])
                     ->addRow(bold('Type of widget'), [(new CRadioButtonList('widgettype', (int) $data['widgettype']))->setModern(true)
                         ->addValue(_zeT('Links'), 0)->addValue(_zeT('jQuery'), 1)->addValue(_zeT('Custom DIV'), 2)])
-                    ->addRow(bold(_zeT('Visibility')), buttonOptions("status", $data["status"], [_('Hide'), _('Show')]))
+                    ->addRow(bold(_zeT('Visibility')), buttonOptions("status", (int) $data["status"], [_('Hide'), _('Show')]))
+                    ->addRow(_zeT('Minimum User Level'), zbxeButtonUserLevel("userlevel", (int) $data["userlevel"]))
+                    // Hidden
                     ->addItem(new CInput('hidden', 'action', $filter["action"]))
                     ->addItem(new CInput('hidden', 'mode', $filter['mode']))
                     ->addItem(new CInput('hidden', 'widget', $filter["widget"]))
@@ -281,8 +302,8 @@ if ($filter['mode'] !== "") {
             break;
         case "widget.item.add":
         case "widget.item.edit":
-            if ($filter['mode'] == "widget.item.add") { // Recover widget data aqui2
-                $data = [["name" => "", "title" => "", "row" => "1", "order" => "1", "status" => "1"]];
+            if ($filter['mode'] == "widget.item.add") { // Recover widget data 
+                $data = [["name" => "", "title" => "", "row" => "1", "order" => "1", "status" => "1", "userlevel" => 2]];
             } else {
                 $data = getWidgetItemData();
             }
@@ -293,7 +314,10 @@ if ($filter['mode'] !== "") {
                     ->addRow(_('Title')
                             , (new CTextBox('title', $data[0]["title"], false, 64))->setWidth(ZBX_TEXTAREA_STANDARD_WIDTH)
                     )
-                    ->addRow(bold(_zeT('Visibility')), buttonOptions("status", $data[0]["status"], [_('Hide'), _('Show')]))
+                    //->addRow(bold(_zeT('Visibility')), buttonOptions("status", $data[0]["status"], [_('Hide'), _('Show')]))
+                    ->addRow(_zeT('Visibility') . $data[0]["status"], buttonOptions("status", (int) $data[0]["status"], [_('Hide'), _('Show'), _('Block')]))
+                    ->addRow(_zeT('Minimum User Level'), zbxeButtonUserLevel("userlevel", (int) $data[0]["userlevel"]))
+                    //
                     ->addItem(new CInput('hidden', 'action', $filter["action"]))
                     ->addItem(new CInput('hidden', 'mode', $filter['mode']))
                     ->addItem(new CInput('hidden', 'widget', $filter["widget"]))
@@ -322,13 +346,14 @@ if ($filter['mode'] !== "") {
             if ($report[0]["name"] == "") {
                 $table->setNoDataMessage(_zeT('Please add some item to this widget.'));
             } else {
-                $table->setHeader(array(_("Name"), _zeT("Title"), _("Actions")));
+                $table->setHeader(array(_("Name"), _zeT("Title"), _('User type'), _("Actions")));
                 $linha = array();
                 for ($i = 0; $i < $cont; $i++) {
                     $linha[0] = new CCol($report[$i]['name'], 1);
                     $linha[1] = new CCol($report[$i]['title'], 1);
+                    $linha[2] = new CCol($descUserLevel[$report[$i]['userlevel']], 1); // aqui
                     $baseAction = '?action=' . $moduleName . '&widget=' . $filter["widget"] . '&item=' . $report[$i]['itemid'];
-                    $linha[2] = array(
+                    $linha[3] = array(
                         (new CRedirectButton(_('Edit'), $baseAction . "&mode=widget.item.edit"
                         , null))->setId('edit')
                         , "&nbsp;"
@@ -357,7 +382,8 @@ if ($filter['mode'] !== "") {
         $name = $row['tx_option'];
         $title = $tmp[3];
         $widgettype = (isset($tmp[4]) ? $tmp[4] : 0);
-        $report[count($report)] = [$name, $title, $widgettype];
+        $userlevel = (isset($tmp[5]) ? $tmp[5] : 3);
+        $report[count($report)] = [$name, $title, $widgettype, $userlevel];
         $cont++;
     }
 
@@ -369,7 +395,7 @@ if ($filter['mode'] !== "") {
         case 0;
             $locale = localeconv();
             $currency = (strlen($locale['currency_symbol']) > 1 ? $locale['currency_symbol'] : '$');
-            $table->setHeader(array(_("Name"), _("Title"), _("Actions")));
+            $table->setHeader(array(_("Name"), _("Title"), _('User Type'), _("Actions")));
             break;
     }
 
@@ -381,12 +407,12 @@ if ($filter['mode'] !== "") {
                 case 0;
                     $linha[0] = new CCol($report[$i][0], 1);
                     $linha[1] = new CCol($report[$i][1], 1);
+                    $linha[2] = new CCol($descUserLevel[$report[$i][3]], 1);
                     $baseAction = '?action=' . $moduleName . '&widget=' . $report[$i][0];
-                    $linha[2] = array(
+                    $linha[3] = array(
                         (new CRedirectButton(_('Edit'), $baseAction . "&mode=widget.edit"
                         , null))->setId('edit')
                         , "&nbsp;"
-                        // Aqui disable button
                         , (new CRedirectButton(_('Items'), $baseAction . "&mode=widget.items", null))->setId('items')->setEnabled(intval($report[$i][2]) <= 1)
                         , "&nbsp;"
                         , (new CRedirectButton(_('Delete'), $baseAction . "&dml=Y&mode=widget.delete", _('Delete record?')))->setId('delete')
