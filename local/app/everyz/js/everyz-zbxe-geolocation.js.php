@@ -108,9 +108,11 @@ echo $mapBackgroud[$filter["map"]]; //"streets"
     function addAlert (lat, lon, radiusSize, fillColor = '#303', borderColor = '', opacity = 0.2, title = ''){
         L.circle([lat, lon], {color: borderColor, fillColor: fillColor, fillOpacity: opacity, radius: radiusSize}).addTo(ZabGeoalert).bindPopup(title);
     }
-    function addLine(from, to, fillColor = 'blue', weight = 6, opacity = <?php echo (float) zbxeConfigValue("geo_link_opacity", 0, 1); ?>) {
+    function addLine(from, to, fillColor = '#000088', weight = 6, opacity = <?php echo (float) zbxeConfigValue("geo_link_opacity", 0, 1); ?>) {
         if (showLines == 1) {
-            ZabGeomap.addLayer(new L.Polyline([new L.LatLng(from[0], from[1]), new L.LatLng(to[0], to[1])], { color: fillColor, weight: weight, opacity: opacity}));
+            tmp = new L.polyline([new L.LatLng(from[0], from[1]), new L.LatLng(to[0], to[1])], { color: fillColor, weight: weight, opacity: opacity});
+            ZabGeomap.addLayer(tmp);
+//            tmp.showExtremities('arrowM'); nao esta funcionando ainda
         }
     }
     

@@ -51,5 +51,5 @@
 A.everyzGEOLink {color:black;}
 A.everyzGEOLink:link {text-decoration: none; color: black;}
 A.everyzGEOLink:visited {text-decoration: none; color: black;}
-A.everyzGEOLink:hover {text-decoration: underline; color: black;}
+A.everyzGEOLink:hover {text-decoration: underline; color: black; }
 A.everyzGEOLink:active {text-decoration: none; color: black'';}

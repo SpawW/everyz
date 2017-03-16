@@ -167,7 +167,7 @@ foreach ($hostData as $key => $host) {
                     foreach ($jsonArray['circle'] as $value) {
                         $hostData[$cont]['circle'][] = ['size' => $value['size'], 'color' => (!strpos($value['color'], "#") ? "#" : "") . $value['color']];
                     }
-                $defaultColor = "blue";
+                $defaultColor = "000088";
                 $defaultWidth = 4;
                 // Tratamento dos Lines
                 if (isset($jsonArray['line']))
@@ -210,7 +210,7 @@ $hostData = $tmp;
  * Display
   <script src="local/app/everyz/js/leaflet.js"></script>
  * ************************************************************************** */
-zbxeJSLoad(['leaflet.js', 'everyzD3Functions.js']);
+zbxeJSLoad(['leaflet.js', 'everyzD3Functions.js', 'leaflet/leaflet.lineextremities.js']);
 ?>
 <link rel="stylesheet" href="local/app/everyz/css/leaflet.css" />
 <?php
