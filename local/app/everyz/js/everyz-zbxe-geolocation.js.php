@@ -94,7 +94,9 @@ echo $mapBackgroud[$filter["map"]]; //"streets"
         });
     }
     function addCircle (lat, lon, radiusSize, fillColor = '#303', borderColor = '', opacity = <?php echo (float) zbxeConfigValue("geo_circle_opacity", 0, 0.3); ?>){
-        L.circle([lat, lon], {color: borderColor, fillColor: fillColor, fillOpacity: opacity, radius: radiusSize}).addTo(ZabGeocircle).bindPopup(radiusSize + 'm');
+        if (showCircles == 1) {
+            L.circle([lat, lon], {color: borderColor, fillColor: fillColor, fillOpacity: opacity, radius: radiusSize}).addTo(ZabGeocircle).bindPopup(radiusSize + 'm');
+        }
     }
     function addHost(lat, lon, hostid, name, description) {
         L.marker([lat, lon], {icon: zbxImage(hostid)}).addTo(ZabGeomap).bindPopup(name);
@@ -107,8 +109,11 @@ echo $mapBackgroud[$filter["map"]]; //"streets"
         L.circle([lat, lon], {color: borderColor, fillColor: fillColor, fillOpacity: opacity, radius: radiusSize}).addTo(ZabGeoalert).bindPopup(title);
     }
     function addLine(from, to, fillColor = 'blue', weight = 6, opacity = <?php echo (float) zbxeConfigValue("geo_link_opacity", 0, 1); ?>) {
-        ZabGeomap.addLayer(new L.Polyline([new L.LatLng(from[0], from[1]), new L.LatLng(to[0], to[1])], { color: fillColor, weight: weight, opacity: opacity}));
+        if (showLines == 1) {
+            ZabGeomap.addLayer(new L.Polyline([new L.LatLng(from[0], from[1]), new L.LatLng(to[0], to[1])], { color: fillColor, weight: weight, opacity: opacity}));
+        }
     }
+    
     function editHostMetadata(hostid){
         PopUp("everyz.php?action=zbxe-geometadata&fullscreen=1&hidetitle=1&sourceHostID=" + hostid);
     }
@@ -146,7 +151,7 @@ function showEvents($host) {
         $eventList = "";
         foreach ($host["events"] as $key => $value) {
             $eventList .= "<li style=\'background: #" . getSeverityColor($value["priority"], [$config])
-                    . "; list-style:square;\'><a href=\'tr_events.php?triggerid="
+                    . "; list-style:square;\'><a class=\'everyzGEOLink\' href=\'tr_events.php?triggerid="
                     . $value["triggerid"] . "&eventid=" . $value["eventid"] . "\'> " . $value["description"] . "</a></li>";
         }
         return "<hr width=\'99%\' color=\'gray\'><ul>" . $eventList . "</ul>";
@@ -175,7 +180,6 @@ foreach ($hostData as $host) {
         if (isset($host["circle"])) {
             foreach ($host["circle"] as $circles) {
                 echo "addCircle(" . $host["location_lat"] . "," . $host["location_lon"] . "," . $circles['size'] . ",'" . $circles['color'] . "');";
-//                echo "addCircle(" . $host["location_lat"] . "," . $host["location_lon"] . "," . $circles[1] . ",'" . $circles[2] . "');";
             }
         }
         // Add lines
@@ -235,33 +239,33 @@ foreach ($hostData as $host) {
             function addTileLayer(name) {
             return L.tileLayer(mbUrl, {id: 'mapbox.' + name, attribution: mbAttr});
             }
-    // Mapas disponíveis =======================================================
-    var overlayMaps = {
-    "Circles": ZabGeocircle,
+        // Mapas disponíveis =======================================================
+        var overlayMaps = {
+            "Circles": ZabGeocircle,
             "Lines": ZabGeolines,
             "Alert": ZabGeoalert,
-    };
-            // Tiles for another maps
+        };
+        // Tiles for another maps
 
-            layerControl = L.control.layers(baseMaps).addTo(ZabGeomap).setPosition('topleft');
-            //If filter Circle Actived show Circles 
-            if (showCircles == 1) {
-    ZabGeomap.addLayer(ZabGeocircle);
+        layerControl = L.control.layers(baseMaps).addTo(ZabGeomap).setPosition('topleft');
+        //If filter Circle Actived show Circles 
+    if (showCircles == 1) {
+        ZabGeomap.addLayer(ZabGeocircle);
+        layerControl.addOverlay(ZabGeocircle, "Circle");
     }
 
     //If filter Lines Actived show Lines 
     if (showLines == 1) {
-    ZabGeomap.addLayer(ZabGeolines);
+        ZabGeomap.addLayer(ZabGeolines);
+        layerControl.addOverlay(ZabGeolines, "Lines");
     }
 
     //Active layer Alert
     ZabGeomap.addLayer(ZabGeoalert);
-            layerControl.addOverlay(ZabGeocircle, "Circle");
-            layerControl.addOverlay(ZabGeolines, "Lines");
-            //Add lines between hosts
-            var lineHosts = {
-            "type": "FeatureCollection",
-                    "features": [
+        //Add lines between hosts
+        var lineHosts = {
+        "type": "FeatureCollection",
+                "features": [
 <?php echo $linesPackage; ?>
                     ]
             };
