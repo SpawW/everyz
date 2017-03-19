@@ -41,8 +41,8 @@ addFilterParameter("iconmapid", T_ZBX_INT);
 addFilterParameter("centerLat", T_ZBX_STR, "-12.70894", false, false);
 addFilterParameter("centerLong", T_ZBX_STR, "-47.19727", false, false);
 addFilterParameter("zoomLevel", T_ZBX_INT, 5);
-addFilterParameter("map", T_ZBX_STR, "1", false, false);
-addFilterParameter("layers", T_ZBX_INT, 0);
+addFilterParameter("map", T_ZBX_STR, "0");
+addFilterParameter("layers", T_ZBX_INT, 99);
 
 check_fields($fields);
 
@@ -80,12 +80,14 @@ if (hasRequest('filter_rst')) { // Clean the filter parameters
     resetProfile('centerLat', true);
     resetProfile('centerLon', true);
     resetProfile('zoomLevel', true);
-
+    resetProfile('layers', true);
+    resetProfile('map', true);
     $filter['filter_rst'] = NULL;
+    $filter['layers'] = intval($filter['layers'], 99);
+    $filter['map'] = intval($filter['map'], 0);
 } else { // Put the date in required format
-    $filter['layers'] = intval($filter['layers'], 0);
-    //var_dump($filter["groupids"]);
-    //var_dump(selectHostsByGroup($filter["groupids"],['location_lat', 'location_lon', 'location']));
+    $filter['layers'] = intval($filter['layers'], 99);
+    $filter['map'] = intval($filter['map'], 0);
 }
 
 // Buscar o mapeamento de ícones ====================================================================
@@ -183,7 +185,7 @@ foreach ($hostData as $key => $host) {
                         $targetHost = hostIndex($value['hostid'], $hostData);
                         if ($targetHost > -1) {
                             $hostData[$cont]['line'][] = ['lat' => cleanPosition($hostData[$targetHost]['location_lat'])
-                                , 'lon' => cleanPosition($hostData[$targetHost]['location_lon']), 'popup' => optArrayValue($value, 'popup')
+                                , 'lon' => cleanPosition($hostData[$targetHost]['location_lon']), 'popup' => optArrayValue($value, 'popup', 'test')
                                 , 'color' => "#" . optArrayValue($value, 'color', $defaultColor), 'width' => optArrayValue($value, 'width', $defaultWidth)
                             ];
                         }
@@ -220,7 +222,10 @@ $widget = newFilterWidget($moduleName);
 // Left collumn
 $tmpColumn = new CFormList();
 if ($filter['map'] == "") {
-    $filter['map'] = 1;
+    $filter['map'] = 0;
+}
+if ($filter['layers'] == "") {
+    $filter['layers'] = 99;
 }
 if ($filter['centerLat'] == "") {
     $filter['centerLat'] = -12.70894;
@@ -240,7 +245,7 @@ if (zbxeConfigValue("geo_token", 0, '') !== "") {
                 , "map", $filter['map'], false, false)]);
 } else {
     $tmpColumn->addRow(_zeT('Default tile'), [newComboFilterArray(
-                ["OpenStreet_Base", "OpenStreet_Grayscale", "OpenTopo","Stamen_Terrain","CartoDB_DarkMatter","Esri_WorldStreetMap"]
+                ["OpenStreet_Base", "OpenStreet_Grayscale", "OpenTopo", "Stamen_Terrain", "CartoDB_DarkMatter", "Esri_WorldStreetMap"]
                 , "map", $filter['map'], false, false)]);
 }
 
@@ -252,6 +257,7 @@ $radioZoom = new CComboBox('zoomLevel', (int) $filter['zoomLevel']);
 for ($i = 1; $i < 18; $i++) {
     $radioZoom->additem($i, $i);
 }
+
 $tmpColumn->addRow(_('Center'), [
             _zeT('Latitude'), SPACE, (new CTextBox('centerLat', $filter['centerLat']))->setWidth(ZBX_TEXTAREA_TINY_WIDTH), SPACE,
             _zeT('Longitude '), SPACE, (new CTextBox('centerLong', $filter['centerLong']))->setWidth(ZBX_TEXTAREA_TINY_WIDTH)])
@@ -278,12 +284,16 @@ if (hasRequest('filter_set')) {
     zbxeNeedFilter(_zeT('Specify some filter condition to see the geolocation.'));
 }
 
-$table->addRow((new CDiv())
-                ->setAttribute('id', "mapid")
-                ->setAttribute('style', "width:100%; height: 700px;")
-);
-$form->addItem([ $table]);
+if (hasRequest("filter_set")) {
+    $table->addRow((new CDiv())
+                    ->setAttribute('id', "mapid")
+                    ->setAttribute('style', "width:100%; height: 100%;")
+    );
+}
+$form->addItem([$table]);
 $dashboard->addItem($form)->show();
 
-require_once 'local/app/everyz/js/everyz-zbxe-geolocation.js.php';
+if (hasRequest("filter_set")) {
+    require_once 'local/app/everyz/js/everyz-zbxe-geolocation.js.php';
+}
 
