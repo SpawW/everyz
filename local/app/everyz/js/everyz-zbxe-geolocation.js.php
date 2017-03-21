@@ -28,14 +28,22 @@
             var showLines = <?php echo ( in_array($filter["layers"], [2, 99]) ? 1 : 0); ?>; //(0=disable/1=enable)
 
             vDiv = document.getElementById("mapid");
-            vDiv.style.height = screen.availHeight - 110;
-            if (location.search.split('hidetitle=1')[1] !== undefined) {
-                vDiv.style.width = screen.availWidth - 10;
-                document.getElementsByTagName("body")[0].style.overflow = "hidden";
-                document.getElementsByClassName("article")[0].style.padding = "0px 0px 0px 0px";
+            if (location.search.split('fullscreen=1')[1] !== undefined) {
+                vDiv.style.height = window.innerHeight - 10;
+                if (location.search.split('hidetitle=1')[1] !== undefined) {
+                    vDiv.style.width = window.innerWidth - 10;
+                    document.getElementsByTagName("body")[0].style.overflow = "hidden";
+                    document.getElementsByClassName("article")[0].style.padding = "0px 0px 0px 0px";
+                } else {
+                    vDiv.style.width = window.innerWidth - 50;
+                    vDiv.style.height = window.innerHeight - 70;
+                }
             } else {
-                vDiv.style.width = screen.availWidth - 50;
+                vDiv.style.height = window.innerHeight - 140;
+                vDiv.style.width = window.innerWidth - 50;
             }
+            /*window.innerWidth*/
+            
             //Define area for Map (setup this data in database ZabbixExtras)
             var ZabGeomap = L.map('mapid').setView([setViewLat, setViewLong], setViewZoom);
             //Create layerGroup Circle
@@ -96,7 +104,7 @@ echo $mapBackgroud[$filter["map"]]; //"streets"
             image: "zbxe-logo.php",
             link: "http://www.everyz.org/",
             text: '<div id="everyzTopMenuLogo"></div>',
-            height: "27",
+            height: "25",
             width: "<?php echo zbxeConfigValue("company_logo_width", 0, 120);?>"
         }).addTo(ZabGeomap).setPosition('topright');
     }

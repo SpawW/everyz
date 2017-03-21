@@ -56,9 +56,9 @@ A.everyzGEOLink:active {text-decoration: none; color: black'';}
 
 #everyzTopMenuLogo {
     float: left; 
-    margin: -4px 0px 0 0; 
+    margin: -5px 0px 0 0; 
     background: url("../images/zbxe-logo.png") no-repeat; 
-    height: 25px; 
+    height: 24px; 
     width: 30px; 
     cursor: pointer;
 }

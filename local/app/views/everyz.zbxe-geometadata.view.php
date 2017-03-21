@@ -84,6 +84,24 @@ $hostData = $hostData[0];
  * ************************************************************************** */
 ?>
 <script language="JavaScript">
+    msgLinkSelfLink = <?php echo quotestr(_zeT("It's not possible link host to yourself!"));?>; 
+    msgLinkSelectHost = <?php echo quotestr(_zeT('Please select at least one host!'));?>; 
+
+    msgLineInvalidLat = <?php echo quotestr(_zeT('Invalid latitude!'));?>; 
+    msgLineInvalidLon = <?php echo quotestr(_zeT('Invalid longitude!'));?>; 
+    
+    
+    msgValidJSONTop = <?php echo quotestr(_zeT('JSON code is VALID and have:'));?>; 
+    msgValidJSONBotton = <?php echo quotestr(_zeT("Total of elements:"));?>; 
+    msgValidJSONNoElements = <?php echo quotestr(_zeT('Dont found any element!'));?>; 
+
+    msgInvalidColor = <?php echo quotestr(_zeT('Invalid color!'));?>; 
+    msgInvalidSize = <?php echo quotestr(_zeT('Invalid size!'));?>; 
+    msgInvalidWidth = <?php echo quotestr(_zeT('Invalid width!'));?>; 
+
+    msgValidateInvalidJson = <?php echo quotestr(_zeT('Invalid json!'));?>; 
+    
+    currentHost = <?php echo $filter["sourceHostID"];?>;
     function validateHostJSON() {
         try {
             json = JSON.parse(<?php echo json_encode(($hostData['inventory']['notes'] == "" ? "{}" : $hostData['inventory']['notes'])); ?>);
@@ -91,19 +109,18 @@ $hostData = $hostData[0];
             txJson.value = formatJSON();
         }
         catch (e) {
-            alert('Invalid json');
+            alert(msgValidateInvalidJson);
             json = JSON.parse('{}');
             return false;
         }
     }
 
-    window.name = "everyz_popup"; //we set it to empty string
+    window.name = "everyz_popup"; 
 
     jq2 = jQuery.noConflict();
     var json, txJson = '';
     jq2(function ($) {
         validateHostJSON();
-        //json = JSON.parse('{}');
         txJson = document.getElementById('jsonResult');
         txJson.value = formatJSON();
     });
@@ -111,29 +128,54 @@ $hostData = $hostData[0];
     function formatJSON() {
         return JSON.stringify(json, null, 2).replace(/\\"/g, "\"").replace(/"\[/g, "[").replace(/\]"/g, "]");
     }
-
+    
+    function validColor(color) {
+        if (!/(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test('#'+color)) {
+            alert(msgInvalidColor); return false;
+        }
+        return true;
+    }
+    function validNumberRange(size, min, max, msg) {
+        if (size < min || size > max) {
+            alert(msg); return false;
+        }
+        return true;
+    }
+    function validPosition(pos) {
+        var lngVal = /^-?((1?[0-7]?|[0-9]?)[0-9]|180)\.[0-9]{1,6}$/;
+        return lngVal.test(pos);
+    }
+    
     function addCircle() {
-        vSize = document.getElementById('circle_size').value;
-        vColor = document.getElementById('circle_color').value;
+        var vColor = document.getElementById('circle_color').value;
+        var vSize = parseInt(document.getElementById('circle_size').value);
+        if (!validColor(vColor)) { return false; }
+        if (!validNumberRange(vSize,1,100000,msgInvalidSize)) { return false; }
+        
         if (!json.hasOwnProperty("circle")) {
             json.circle = [];
         }
+        
         json["circle"].push({"size": vSize, "color": vColor});
         txJson.value = formatJSON();
     }
+    
     function addLine() {
         vLat = document.getElementById('line_lat').value;
         vLon = document.getElementById('line_lon').value;
         vPopUp = document.getElementById('line_popup').value;
-        vWidth = document.getElementById('line_width').value;
+        vWidth = parseInt(document.getElementById('line_width').value);
         vColor = document.getElementById('line_color').value;
+        if (!validColor(vColor)) { return false; }
+        if (!validNumberRange(vWidth,1,10,msgInvalidWidth)) { return false; }
+        
         // Validation
         if (!validPosition(vLat)) {
-            alert('Invalid latitude!');
+            alert(msgLineInvalidLat);
             return false;
         }
         if (!validPosition(vLon)) {
-            alert('Invalid longitude!');
+            alert(msgLineInvalidLon);
             return false;
         }
         if (!json.hasOwnProperty("line")) {
@@ -143,19 +185,25 @@ $hostData = $hostData[0];
         txJson.value = formatJSON();
     }
 
-    function validPosition(pos) {
-        var lngVal = /^-?((1?[0-7]?|[0-9]?)[0-9]|180)\.[0-9]{1,6}$/;
-        return lngVal.test(pos);
-    }
-
     function addLink() {
         var hostIDs = document.getElementsByName('hostids[]');
         vPopUp = document.getElementById('link_popup').value;
         vWidth = document.getElementById('link_width').value;
         vColor = document.getElementById('link_color').value;
+        if (!validColor(vColor)) { return false; }
+        if (!validNumberRange(vWidth,1,10,msgInvalidWidth)) { return false; }
+                
         if (hostIDs.length === 0) {
-            alert('Please select at least one host!');
+            alert(msgLinkSelectHost);
             return false;
+        } else {            
+            for (i = 0; i < hostIDs.length; i++) {
+                //alert("["+hostIDs[i].value + "][" + currentHost + "]"+msgSelfLink);
+                if (hostIDs[i].value == currentHost) {
+                    alert(msgLinkSelfLink);
+                    return false;
+                }
+            }
         }
 
         if (!json.hasOwnProperty("link")) {
@@ -187,16 +235,16 @@ $hostData = $hostData[0];
                 vCont += json.link.length;
             }
             if (vCont > 0) {
-                vReport += "\nTotal of elements: " + vCont;
-                alert('JSON code is VALID and have: ' + vReport);
+                vReport += "\n" + msgValidJSONBotton + " " + vCont;
+                alert(msgValidJSONTop + vReport);
             } else {
-                alert('Dont found any element!');
+                alert(msgValidJSONNoElements);
             }
             //alert('VALID json!');
             return true;
         }
         catch (e) {
-            alert('Invalid json');
+            alert(msgValidateInvalidJson);
             return false;
         }
     }
@@ -208,7 +256,7 @@ $hostData = $hostData[0];
             return true;
         }
         catch (e) {
-            alert('Invalid json');
+            alert(msgValidateInvalidJson);
             return false;
         }
     }
@@ -250,7 +298,7 @@ $addButton->onClick('javascript:addLink();');
 
 $subTable = (new CTableInfo())->setHeader(['Popup Description', 'Color', 'Width', '']);
 $subTable->addRow([
-    (new CTextBox('link_popup', 'Link Description'))
+    (new CTextBox('link_popup', ''))
     , (new CColor('link_color', $defaultColor, false))
     , (new CNumericBox('link_width', $defaultWidth))->setWidth(ZBX_TEXTAREA_NUMERIC_STANDARD_WIDTH)
     , $addButton]);
@@ -265,7 +313,7 @@ $addButton->onClick('javascript:addLine();');
 $subTable->addRow([
     (new CTextBox('line_lat', -15.77972))->setWidth(ZBX_TEXTAREA_NUMERIC_STANDARD_WIDTH)
     , (new CTextBox('line_lon', -47.92972))->setWidth(ZBX_TEXTAREA_NUMERIC_STANDARD_WIDTH)
-    , (new CTextBox('line_popup', 'Link Description'))
+    , (new CTextBox('line_popup', ''))
     , (new CColor('line_color', $defaultColor, false))
     , (new CNumericBox('line_width', $defaultWidth))->setWidth(ZBX_TEXTAREA_NUMERIC_STANDARD_WIDTH)
     , $addButton
