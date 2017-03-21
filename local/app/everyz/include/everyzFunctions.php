@@ -446,7 +446,7 @@ function getRequest2($p_name, $p_default = "") {
 function checkRequiredField($p_name, $p_message = "") {
     global $requiredMissing;
     $value = getRequest2($p_name);
-    $requiredMissing = ($requiredMissing == true ? true : false);
+    //$requiredMissing = ($requiredMissing == true ? true : false);
     //var_dump($value);
     if (is_array($value) && $value == array(0)) {
         $requiredMissing = true;

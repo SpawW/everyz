@@ -108,6 +108,7 @@ if ($withIconMapping) {
 
 $eventData = selectEventsByGroup($filter["groupids"], 1);
 $hostData = selectHostsByGroup($filter["groupids"], $inventoryFields);
+
 $cont = 0;
 $imagesArray = [];
 
@@ -212,9 +213,10 @@ $hostData = $tmp;
  * Display
   <script src="local/app/everyz/js/leaflet.js"></script>
  * ************************************************************************** */
-zbxeJSLoad(['leaflet.js', 'everyzD3Functions.js', 'leaflet/leaflet.lineextremities.js']);
+zbxeJSLoad(['leaflet.js', 'everyzD3Functions.js', 'leaflet/leaflet.lineextremities.js', 'leaflet/leaflet-control-credits.js', 'leaflet/leaflet-control-credits-src.js']);
 ?>
 <link rel="stylesheet" href="local/app/everyz/css/leaflet.css" />
+<link rel="stylesheet" href="local/app/everyz/css/leaflet-control-credits.css" />
 <?php
 commonModuleHeader($moduleName, $moduleTitle, true);
 $widget = newFilterWidget($moduleName);
@@ -276,15 +278,12 @@ if (hasRequest('filter_set')) {
     // Sample Check if all required fields have values
     checkRequiredField("centerLat", _zeT("You need to entered center Latitude data!"));
     checkRequiredField("centerLong", _zeT("You need to entered center Longitude data!"));
-    if ($requiredMissing) {
-        error("Check data required!");
-        //checkRequiredField("centerLat", _zeT("You need to entered center Latitude data!"));  
-    }
+    checkRequiredField("groupids", _zeT("You need to select one or more host groups!"));
 } else {
     zbxeNeedFilter(_zeT('Specify some filter condition to see the geolocation.'));
 }
 
-if (hasRequest("filter_set")) {
+if (hasRequest("filter_set") && !$requiredMissing) {
     $table->addRow((new CDiv())
                     ->setAttribute('id', "mapid")
                     ->setAttribute('style', "width:100%; height: 100%;")
@@ -293,7 +292,7 @@ if (hasRequest("filter_set")) {
 $form->addItem([$table]);
 $dashboard->addItem($form)->show();
 
-if (hasRequest("filter_set")) {
+if (hasRequest("filter_set") && !$requiredMissing) {
     require_once 'local/app/everyz/js/everyz-zbxe-geolocation.js.php';
 }
 

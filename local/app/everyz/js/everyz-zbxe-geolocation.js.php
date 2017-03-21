@@ -28,11 +28,13 @@
             var showLines = <?php echo ( in_array($filter["layers"], [2, 99]) ? 1 : 0); ?>; //(0=disable/1=enable)
 
             vDiv = document.getElementById("mapid");
-            vDiv.style.width = screen.availWidth - 10;
             vDiv.style.height = screen.availHeight - 110;
             if (location.search.split('hidetitle=1')[1] !== undefined) {
+                vDiv.style.width = screen.availWidth - 10;
                 document.getElementsByTagName("body")[0].style.overflow = "hidden";
                 document.getElementsByClassName("article")[0].style.padding = "0px 0px 0px 0px";
+            } else {
+                vDiv.style.width = screen.availWidth - 50;
             }
             //Define area for Map (setup this data in database ZabbixExtras)
             var ZabGeomap = L.map('mapid').setView([setViewLat, setViewLong], setViewZoom);
@@ -74,33 +76,43 @@ echo $mapBackgroud[$filter["map"]]; //"streets"
             baseMaps["Satellite"] = satellite;
             baseMaps["Emerald"] = emerald;
     } else {
-    addMapTile("OpenStreet_Base", 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>', 19);
-            addMapTile("OpenStreet_Grayscale", 'http://{s}.tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png', '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>', 18);
-            addMapTile("OpenTopo", 'http://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', 'Map data: &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)', 17);
-            addMapTile("Stamen_Terrain", 'http://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}.{ext}', 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>', 18);
-            baseMaps["Stamen_Terrain"]["options"]["subdomains"] = ["a", "b", "c", "d"];
-            baseMaps["Stamen_Terrain"]["options"]["ext"] = 'png';
-            addMapTile("CartoDB_DarkMatter", 'http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>', 19);
-            addMapTile("Esri_WorldStreetMap", 'http://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012', 19);
-            defaultMap = "<?php
+        addMapTile("OpenStreet_Base", 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>', 19);
+        addMapTile("OpenStreet_Grayscale", 'http://{s}.tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png', '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>', 18);
+        addMapTile("OpenTopo", 'http://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', 'Map data: &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)', 17);
+        addMapTile("Stamen_Terrain", 'http://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}.{ext}', 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>', 18);
+        baseMaps["Stamen_Terrain"]["options"]["subdomains"] = ["a", "b", "c", "d"];
+        baseMaps["Stamen_Terrain"]["options"]["ext"] = 'png';
+        addMapTile("CartoDB_DarkMatter", 'http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>', 19);
+        addMapTile("Esri_WorldStreetMap", 'http://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012', 19);
+        defaultMap = "<?php
 $mapBackgroud = ["OpenStreet_Base", "OpenStreet_Grayscale", "OpenTopo", "Stamen_Terrain", "CartoDB_DarkMatter", "Esri_WorldStreetMap"];
 echo $mapBackgroud[$filter["map"]]; //"streets"             
 ?>";
             L.tileLayer(baseMaps[defaultMap]["_url"], baseMaps[defaultMap]["options"]).addTo(ZabGeomap);
     }
+    // Adiciona o logotipo
+    if (location.search.split('hidetitle=1')[1] !== undefined) {
+        var credctrl = L.controlCredits({
+            image: "zbxe-logo.php",
+            link: "http://www.everyz.org/",
+            text: '<div id="everyzTopMenuLogo"></div>',
+            height: "27",
+            width: "<?php echo zbxeConfigValue("company_logo_width", 0, 120);?>"
+        }).addTo(ZabGeomap).setPosition('topright');
+    }
     // Cria dinamicamente a referencia para o icone do host 
     function zbxImage(p_iconid, width = 32, height = 32) {
-    return L.icon({
-    iconUrl: 'imgstore.php?iconid=' + p_iconid,
-            iconSize: [width, height],
-            iconAnchor: [Math.round(width / 2), height],
-            popupAnchor: [2, - 38],
-    });
+        return L.icon({
+        iconUrl: 'imgstore.php?iconid=' + p_iconid,
+                iconSize: [width, height],
+                iconAnchor: [Math.round(width / 2), height],
+                popupAnchor: [2, - 38],
+        });
     }
     function addCircle (lat, lon, radiusSize, fillColor = '#303', borderColor = '', opacity = <?php echo (float) zbxeConfigValue("geo_circle_opacity", 0, 0.3); ?>){
-    if (showCircles == 1) {
-    L.circle([lat, lon], {color: borderColor, fillColor: fillColor, fillOpacity: opacity, radius: radiusSize}).addTo(ZabGeocircle).bindPopup(radiusSize + 'm');
-    }
+        if (showCircles == 1) {
+            L.circle([lat, lon], {color: borderColor, fillColor: fillColor, fillOpacity: opacity, radius: radiusSize}).addTo(ZabGeocircle).bindPopup(radiusSize + 'm');
+        }
     }
     function dynamicPopUp(element) {
         //marker.bindPopup("Popup content");
@@ -112,14 +124,15 @@ echo $mapBackgroud[$filter["map"]]; //"streets"
         });
     }
     function addHost(lat, lon, hostid, name, description) {
-    marker = L.marker([lat, lon], {icon: zbxImage(hostid)}).addTo(ZabGeomap).bindPopup(name);
+        //marker = 
+        L.marker([lat, lon], {icon: zbxImage(hostid)}).addTo(ZabGeomap).bindPopup(name);
     }
     function addErrorHost(lat, lon, hostid, name, description) {
-    L.marker([lat, lon], {icon: zbxImage(hostid, 40, 40)}).addTo(ZabGeomap).bindPopup(name);
+        L.marker([lat, lon], {icon: zbxImage(hostid, 40, 40)}).addTo(ZabGeomap).bindPopup(name);
     }
 
     function addAlert (lat, lon, radiusSize, fillColor = '#303', borderColor = '', opacity = 0.2, title = ''){
-    L.circle([lat, lon], {color: borderColor, fillColor: fillColor, fillOpacity: opacity, radius: radiusSize}).addTo(ZabGeoalert).bindPopup(title);
+        L.circle([lat, lon], {color: borderColor, fillColor: fillColor, fillOpacity: opacity, radius: radiusSize}).addTo(ZabGeoalert).bindPopup(title);
     }
     function addLine(from, to, popup = "", fillColor = '#000088', weight = 6, opacity = <?php echo (float) zbxeConfigValue("geo_link_opacity", 0, 1); ?>) {
         if (showLines == 1) {
@@ -134,13 +147,13 @@ echo $mapBackgroud[$filter["map"]]; //"streets"
     }
 
     function editHostMetadata(hostid){
-    PopUp("everyz.php?action=zbxe-geometadata&fullscreen=1&hidetitle=1&sourceHostID=" + hostid);
+        PopUp("everyz.php?action=zbxe-geometadata&fullscreen=1&hidetitle=1&sourceHostID=" + hostid);
     }
     function hostLatest(hostid){
-    PopUp("latest.php?fullscreen=0&hostids[]=" + hostid + "&application=&select=&show_without_data=1&fullscreen=1&filter_set=Filter");
+        PopUp("latest.php?fullscreen=0&hostids[]=" + hostid + "&application=&select=&show_without_data=1&fullscreen=1&filter_set=Filter");
     }
     function hostIncidents(hostid){
-    PopUp("tr_status.php?fullscreen=1&groupid=0&hostid=" + hostid + "&show_triggers=1&ack_status=1&show_events=1&show_severity=0&filter_set=Filter");
+        PopUp("tr_status.php?fullscreen=1&groupid=0&hostid=" + hostid + "&show_triggers=1&ack_status=1&show_events=1&show_severity=0&filter_set=Filter");
     }
 
 <?php
@@ -171,7 +184,11 @@ function showEvents($host) {
         foreach ($host["events"] as $key => $value) {
             $eventList .= "<li style=\'background: #" . getSeverityColor($value["priority"], [$config])
                     . "; list-style:square;\'><a class=\'everyzGEOLink\' href=\'tr_events.php?triggerid="
-                    . $value["triggerid"] . "&eventid=" . $value["eventid"] . "\'> " . $value["description"] . "</a></li>";
+                    . $value["triggerid"] . "&eventid=" . $value["eventid"] . "\'"
+                    . (strlen($value["description"]) > 30 ? " title=\'".$value["description"]."\' " : "" )
+                    . "> " 
+                    . (strlen($value["description"]) > 30 ? substr($value["description"],0,30)."..." : $value["description"] ) 
+                    . "</a></li>";
         }
         return "<hr width=\'99%\' color=\'gray\'><ul>" . $eventList . "</ul>";
     } else {
@@ -245,69 +262,69 @@ foreach ($hostData as $host) {
     //Capture point in map using double click 
 
     var popup = L.popup();
-            function onMapClick(e) {
-            popup
-                    .setLatLng(e.latlng)
-                    .setContent("You selected here: " + e.latlng.toString())
-                    .openOn(ZabGeomap);
-            }
+    function onMapClick(e) {
+        popup
+            .setLatLng(e.latlng)
+            .setContent("You selected here: " + e.latlng.toString())
+            .openOn(ZabGeomap);
+    }
 
     ZabGeomap.on('contextmenu', onMapClick);
-            //Add Scale in maps
-            L.control.scale().addTo(ZabGeomap);
-            function addTileLayer(name) {
-            return L.tileLayer(mbUrl, {id: 'mapbox.' + name, attribution: mbAttr});
-            }
+    //Add Scale in maps
+    L.control.scale().addTo(ZabGeomap);
+    function addTileLayer(name) {
+        return L.tileLayer(mbUrl, {id: 'mapbox.' + name, attribution: mbAttr});
+    }
     // Mapas disponíveis =======================================================
     var overlayMaps = {
-    "Circles": ZabGeocircle,
-            "Lines": ZabGeolines,
-            "Alert": ZabGeoalert,
+        "Circles": ZabGeocircle,
+        "Lines": ZabGeolines,
+        "Alert": ZabGeoalert,
     };
-            // Tiles for another maps
+    // Tiles for another maps
 
-            layerControl = L.control.layers(baseMaps).addTo(ZabGeomap).setPosition('topleft');
-            //If filter Circle Actived show Circles 
-            if (showCircles == 1) {
-    ZabGeomap.addLayer(ZabGeocircle);
-            layerControl.addOverlay(ZabGeocircle, "Circle");
+    layerControl = L.control.layers(baseMaps).addTo(ZabGeomap).setPosition('topleft');
+    //If filter Circle Actived show Circles 
+    if (showCircles == 1) {
+        ZabGeomap.addLayer(ZabGeocircle);
+        layerControl.addOverlay(ZabGeocircle, "Circle");
     }
 
     //If filter Lines Actived show Lines 
     if (showLines == 1) {
-    ZabGeomap.addLayer(ZabGeolines);
-            layerControl.addOverlay(ZabGeolines, "Lines");
+        ZabGeomap.addLayer(ZabGeolines);
+        layerControl.addOverlay(ZabGeolines, "Lines");
     }
 
     //Active layer Alert
     ZabGeomap.addLayer(ZabGeoalert);
             //Add lines between hosts
-            var lineHosts = {
-            "type": "FeatureCollection",
-                    "features": [
+    var lineHosts = {
+        "type": "FeatureCollection",
+            "features": [
 <?php echo $linesPackage; ?>
-                    ]
-            };
-            var myStyle = {
-            "color": "#ff7800",
-                    "weight": 2,
-                    "opacity": 0.5
-            };
-            function onEachFeature(feature, layer) {
-            var popupContent = "";
-                    if (feature.properties && feature.properties.popupContent) {
+            ]
+    };
+    var myStyle = {
+        "color": "#ff7800",
+            "weight": 2,
+            "opacity": 0.5
+    };
+    function onEachFeature(feature, layer) {
+        var popupContent = "";
+        if (feature.properties && feature.properties.popupContent) {
             popupContent += feature.properties.popupContent;
-            }
-            layer.bindPopup(popupContent);
-            }
+        }
+        layer.bindPopup(popupContent);
+    }
 
 
     L.geoJSON(lineHosts, {
-    //style: myStyle,
-    onEachFeature: onEachFeature
+        //style: myStyle,
+        onEachFeature: onEachFeature
     }).addTo(ZabGeolines);
 
-
+    
 
 </script>
 
