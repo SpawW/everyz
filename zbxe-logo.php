@@ -25,18 +25,19 @@
  * * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  * */
 
-$VG_IMAGE = true;
 require_once dirname(__FILE__) . '/include/config.inc.php';
 require_once dirname(__FILE__) . '/local/app/everyz/include/everyzFunctions.php';
-$VG_IMAGE = false;
 $imageid = zbxeConfigValue("company_logo_" . (getRequest2("mode") == "login" ? "login" : "site"));
 $query = "SELECT image FROM images WHERE imageid = " . $imageid;
 zbxeErrorLog($VG_DEBUG, 'Logotipo do EverZ [' . $query . ']');
-if ($imageid == '') {
-    zbxeErrorLog(true, 'EveryZ - Reset image configuration need');
+if (zbxeFieldValue('select count(*) as total from images where imageid = ' . $imageid, 'total') < 1) {
+//    var_dump(zbxeFieldValue('select count(*) as total from images where imageid = ' . $imageid, 'total'). "<br>xaqui [$imageid]<br>");
+    zbxeErrorLog(true, 'EveryZ - Reset image configuration need!');
     $path = realpath(dirname(__FILE__)) . "/local/app/everyz/init";
     $json = json_decode(file_get_contents("$path/everyz_config.json"), true);
+    zbxeUpdateConfigValue("zbxe_init_images", 0);
     zbxeUpdateConfigImages($json, true, false);
+
     $imageid = zbxeConfigValue("company_logo_" . (getRequest2("mode") == "login" ? "login" : "site"));
     $query = "SELECT image FROM images WHERE imageid = " . $imageid;
     exit;

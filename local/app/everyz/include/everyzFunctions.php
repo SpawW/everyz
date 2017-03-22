@@ -25,7 +25,6 @@ define("EZ_TITLE", 'EveryZ - ');
 define("ZE_COPY", ", ZE " . ZE_VER);
 define("EVERYZBUILD", 8);
 if (file_exists("lockEverys.php")) {
-    zbxeErrorLog(true, "OIIII");
     $VG_INSTALL = true;
 } else {
     $VG_INSTALL = false;
@@ -1167,9 +1166,9 @@ function zbxeUpdateTranslation($json, $resultOK, $debug = false) {
  * @param boolean $debug     If true the function will show debug messages instead run sql commands
  */
 function zbxeUpdateConfigImages($json, $resultOK, $debug = false) {
-    // aqui
-    $extraCheck = (CWebUser::getType() > USER_TYPE_ZABBIX_ADMIN) && (zbxeConfigValue("zbxe_init_images", 0) == 0);
+    $extraCheck = (CWebUser::getType() > USER_TYPE_ZABBIX_ADMIN) && (zbxeConfigValue("zbxe_init_images", 0) == 0) ;
     if (isset($json["images"]) && $extraCheck) {
+        zbxeUpdateConfigValue("zbxe_init_images", 1);
         $report['images'] = ['source' => count($json["images"]), 'insert' => 0, 'update' => 0];
         foreach ($json["images"] as $row) {
             $imageIDs = updateImage($row);
@@ -1193,7 +1192,6 @@ function zbxeUpdateConfigImages($json, $resultOK, $debug = false) {
                 //}
             }
         }
-        zbxeUpdateConfigValue("zbxe_init_images", 1);
         zbxeErrorLog(true, 'EveryZ - Images update: [from file: ' . $report['images']['source']
                 . '| Updated: ' . $report['images']['update'] . ']');
     }

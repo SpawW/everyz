@@ -6,8 +6,8 @@
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com"; 
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="Beta_20170322_1";
-VERSAO_EZ="1.0-beta50";
+VERSAO_INST="Beta_20170322_3";
+VERSAO_EZ="1.0-beta51";
 UPDATEBD="S";
 BRANCH="master";
 NOME_PLUGIN="EVERYZ";
