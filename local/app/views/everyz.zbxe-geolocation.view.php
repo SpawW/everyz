@@ -42,7 +42,7 @@ addFilterParameter("centerLat", T_ZBX_STR, "-12.70894", false, false);
 addFilterParameter("centerLong", T_ZBX_STR, "-47.19727", false, false);
 addFilterParameter("zoomLevel", T_ZBX_INT, 5);
 addFilterParameter("map", T_ZBX_STR, "0");
-addFilterParameter("layers", T_ZBX_INT, 99);
+addFilterParameter("layers", T_ZBX_STR, "99");
 
 check_fields($fields);
 
@@ -86,7 +86,7 @@ if (hasRequest('filter_rst')) { // Clean the filter parameters
     $filter['layers'] = intval($filter['layers'], 99);
     $filter['map'] = intval($filter['map'], 0);
 } else { // Put the date in required format
-    $filter['layers'] = intval($filter['layers'], 99);
+    $filter['layers'] = intval((int)$filter['layers'], 99);
     $filter['map'] = intval($filter['map'], 0);
 }
 
@@ -225,9 +225,6 @@ $widget = newFilterWidget($moduleName);
 $tmpColumn = new CFormList();
 if ($filter['map'] == "") {
     $filter['map'] = 0;
-}
-if ($filter['layers'] == "") {
-    $filter['layers'] = 99;
 }
 if ($filter['centerLat'] == "") {
     $filter['centerLat'] = -12.70894;
