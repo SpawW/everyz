@@ -6,8 +6,8 @@
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com"; 
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="Beta_20170321_3";
-VERSAO_EZ="1.0-beta49";
+VERSAO_INST="Beta_20170322_1";
+VERSAO_EZ="1.0-beta50";
 UPDATEBD="S";
 BRANCH="master";
 NOME_PLUGIN="EVERYZ";
@@ -117,7 +117,14 @@ fi
 # Tenta carregar o frontend do Zabbix para criar as tabelas e evitar mensagens de erro
 primeiroAcesso() {
     registra "Database install...";
+    ARQUIVO="local/app/everyz/include/lockEverys.php";
+    # Criar arquivo temporario bloqueando os updates automaticos pela web
+    cd $CAMINHO_FRONTEND;
+    echo "<?php define(\"EZ_STATUS\", 'U');" > $ARQUIVO;
     php $CAMINHO_FRONTEND/local/app/everyz/init/everyz.initdb.php | grep EveryZ  | wc -l
+    # Criar arquivo liberando os updates automaticos pela web
+    cd $CAMINHO_FRONTEND;
+    rm $ARQUIVO;
 }
 
 # Parametros de configuração ===================================================

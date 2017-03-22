@@ -24,6 +24,12 @@ define("ZE_VER", "3.0");
 define("EZ_TITLE", 'EveryZ - ');
 define("ZE_COPY", ", ZE " . ZE_VER);
 define("EVERYZBUILD", 8);
+if (file_exists("lockEverys.php")) {
+    zbxeErrorLog(true, "OIIII");
+    $VG_INSTALL = true;
+} else {
+    $VG_INSTALL = false;
+}
 
 global $VG_DEBUG;
 global $zeMessages, $zeLocale, $baseName, $requiredMissing, $zbxeLoadedJS;

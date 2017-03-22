@@ -18,6 +18,7 @@
  * * along with this program; if not, write to the Free Software
  * * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  * */
+
 /* * ***************************************************************************
  * Module Variables
  * ************************************************************************** */
@@ -86,8 +87,7 @@ $buttonSave = (new CList())->addItem((new CSubmit('btnUpdate', _('Update'))));
 $table = (new CTable());
 $table->addRow(
         (new CFormList())
-                ->addRow(_zeT('Title', $moduleName), newComboFilterArray([_("Show"), _zeT("Hide")], 'cnf_map_title_show', zbxeConfigValue('map_title_show'), false)
-                )
+                ->addRow(_zeT('Title', $moduleName), newComboFilterArray([_("Show"), _zeT("Hide")], 'cnf_map_title_show', zbxeConfigValue('map_title_show'), false))
                 ->addRow(_('Color'), new CColor('cnf_map_title_color', zbxeConfigValue('map_title_color'), false))
                 ->addRow(_zeT('White mark Color'), new CColor('cnf_map_wmark_color', zbxeConfigValue('map_wmark_color'), false))
 )
