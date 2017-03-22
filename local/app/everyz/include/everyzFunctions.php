@@ -1239,6 +1239,7 @@ function zbxeUpdateConfig($json, $resultOK, $debug = false) {
         }
     }
     // Import images
+    zbxeUpdateConfigValue("zbxe_init_images", 0);
     zbxeUpdateConfigImages($json, $resultOK, $debug);
 }
 
