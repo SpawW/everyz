@@ -291,5 +291,6 @@ $dashboard->addItem($form)->show();
 
 if (hasRequest("filter_set") && !$requiredMissing) {
     require_once 'local/app/everyz/js/everyz-zbxe-geolocation.js.php';
+    //zbxeJSLoad(['everyz-zbxe-geolocation.js.php']);
 }
 
