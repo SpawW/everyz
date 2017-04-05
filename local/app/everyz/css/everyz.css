@@ -48,6 +48,13 @@
     cursor: pointer;
 }
 
+.popU2pEgg {
+    width: 400px; 
+}
+.tdEgg {
+    vertical-align: top;
+}
+
 A.everyzGEOLink {color:black;}
 A.everyzGEOLink:link {text-decoration: none; color: black;}
 A.everyzGEOLink:visited {text-decoration: none; color: black;}

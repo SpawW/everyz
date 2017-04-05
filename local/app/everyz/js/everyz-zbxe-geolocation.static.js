@@ -31,13 +31,12 @@ function dynamicPopUp(element) {
     });
 }
 
-function addHost(lat, lon, hostid, name, description) {
-//marker = 
-    L.marker([lat, lon], {icon: zbxImage(hostid)}).addTo(ZabGeomap).bindPopup(name);
+function addHost(lat, lon, hostid, popUpContent) {
+    L.marker([lat, lon], {icon: zbxImage(hostid)}).addTo(ZabGeomap).bindPopup(popUpContent);
 }
 
-function addErrorHost(lat, lon, hostid, name, description) {
-    L.marker([lat, lon], {icon: zbxImage(hostid, 40, 40)}).addTo(ZabGeomap).bindPopup(name);
+function addErrorHost(lat, lon, hostid, popUpContent) {
+    L.marker([lat, lon], {icon: zbxImage(hostid, 42, 42)}).addTo(ZabGeomap).bindPopup(popUpContent);
 }
 
 function editHostMetadata(hostid) {
@@ -75,7 +74,7 @@ function zbxImage(p_iconid, width, height) {
     width = typeof width !== 'undefined' ? width : 32;
     height = typeof height !== 'undefined' ? height : 32;
     return L.icon({
-        iconUrl: 'imgstore.php?iconid=' + p_iconid,
+        iconUrl: (p_iconid === parseInt(p_iconid, 0) ? 'imgstore.php?iconid=' + p_iconid : "local/app/everyz/images/zpoi_" + p_iconid + ".png"),
         iconSize: [width, height],
         iconAnchor: [Math.round(width / 2), height],
         popupAnchor: [2, -38],
@@ -113,4 +112,23 @@ function addLine(from, to, popup, fillColor, weight, opacity) {
         ZabGeomap.addLayer(tmp);
         //            tmp.showExtremities('arrowM'); nao esta funcionando ainda
     }
+}
+
+function popupHost(hostid, hostname, events) {
+    hasEvent = events.length > 0;
+    return geoHostWord + ': <b>' + hostname
+            + '</b><br><img class="everyzEditIMG" title="' + geoTitleMetadata + '" src="local/app/everyz/images/zbxe-geometadata.png" onclick=\'javascript:editHostMetadata('
+            + hostid + ');\'/>&nbsp;<img class="everyzEditIMG" title="' + geoTitleLatest + '" src="local/app/everyz/images/zbxe-latest.png" onclick=\'javascript:hostLatest('
+            + hostid + ');\'/>&nbsp;<img class="everyzEditIMG" title="' + geoTitleTriggers + '" src="local/app/everyz/images/zbxe-'
+            + (hasEvent ? "incident" : "ok") + '.png" onclick=\'javascript:hostIncidents('
+            + hostid + ');\'/>' + events;
+}
+
+function easterEgg(type, name, extra) {
+    return '<div class="popUpEgg"><table><tr><td><img width="60px" height="60px" src="local/app/everyz/images/icon_' + type + '.png"/></td>'
+            + '<td class="tdEgg">'
+            + '<b>' + name + '</b>, very thank you!'
+            + extra
+            + '</td>'
+            + '</tr></table></div>';
 }

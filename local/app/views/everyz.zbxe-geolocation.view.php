@@ -40,6 +40,7 @@ addFilterParameter("iconmapid", T_ZBX_INT);
 
 addFilterParameter("centerLat", T_ZBX_STR, "-12.70894", false, false);
 addFilterParameter("centerLong", T_ZBX_STR, "-47.19727", false, false);
+addFilterParameter("showteam", T_ZBX_STR, "", false, false);
 addFilterParameter("zoomLevel", T_ZBX_INT, 5);
 addFilterParameter("map", T_ZBX_STR, "0");
 addFilterParameter("layers", T_ZBX_STR, "99");
@@ -86,7 +87,7 @@ if (hasRequest('filter_rst')) { // Clean the filter parameters
     $filter['layers'] = intval($filter['layers'], 99);
     $filter['map'] = intval($filter['map'], 0);
 } else { // Put the date in required format
-    $filter['layers'] = intval((int)$filter['layers'], 99);
+    $filter['layers'] = intval((int) $filter['layers'], 99);
     $filter['map'] = intval($filter['map'], 0);
 }
 
@@ -213,7 +214,9 @@ $hostData = $tmp;
  * Display
   <script src="local/app/everyz/js/leaflet.js"></script>
  * ************************************************************************** */
-zbxeJSLoad(['leaflet.js', 'everyzD3Functions.js', 'leaflet/leaflet.lineextremities.js', 'leaflet/leaflet-control-credits.js', 'leaflet/leaflet-control-credits-src.js']);
+zbxeJSLoad(['everyzD3Functions.js','everyz-zbxe-geolocation.static.js',
+    'leaflet.js', 'leaflet/leaflet.lineextremities.js', 'leaflet/leaflet-control-credits.js', 'leaflet/leaflet-control-credits-src.js']
+);
 ?>
 <link rel="stylesheet" href="local/app/everyz/css/leaflet.css" />
 <link rel="stylesheet" href="local/app/everyz/css/leaflet-control-credits.css" />

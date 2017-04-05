@@ -113,13 +113,13 @@ function totalUBM($vps, $gb) {
     $gb = round($gb / 1024 / 1024 / 1024, 6);
     $totalUBM = round(
             (
-            (
+            (  // Custo de aquisição
             ($vps * 100 / $refVPS) / 100 * $fatorVPS
-            ) // Processing custs
+            ) // Custo de armazenamento
             + (
             ($gb * 100 / $refGB) / 100 * $fatorGB
-            ) // Storage Custs
-            + ($fatorHost) // Administration custs
+            ) // Custo administrativo
+            + ($fatorHost) 
             ) / 10
             , 6)
     ;
