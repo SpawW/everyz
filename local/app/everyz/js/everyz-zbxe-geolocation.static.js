@@ -132,3 +132,21 @@ function easterEgg(type, name, extra) {
             + '</td>'
             + '</tr></table></div>';
 }
+
+function showEasterEgg() {
+    // Easter Egg com os tradutores e desenvolvedores do EveryZ --------------------
+    addHost(43.633175, -79.470457, "canada", easterEgg("translate", "Shary Ann", "<br>For your help translating to<br>french language!"));
+    addHost(56.952304, 24.111023, "riga", easterEgg("developer", "Zabbix", "<br>For create the Zabbix!"));
+    addHost(27.43419, -28.125, "everyz", easterEgg("developer", "EveryZ", "<br>For increase the Zabbix<br>native functionalities!"
+            + "<br><a href='http://www.everyz.org'>www.everyz.org</a>"));
+    addLine([27.43419, -28.125], [-3.736878, -38.5334797], '', '#770077', 4, 0.8);
+    addLine([27.43419, -28.125], [-15.791246, -47.8932317], '', '#FF6600', 4, 0.8);
+    addLine([27.43419, -28.125], [45.066836045, 7.63612707], '', '#006600', 4, 0.8);
+    addLine([27.43419, -28.125], [48.857482, 2.2935243], '', '#000077', 4, 0.8);
+    addLine([27.43419, -28.125], [56.952304, 24.111023], '', '#660000', 4, 0.8);
+    addLine([27.43419, -28.125], [43.633175, -79.470457], '', '#CC0066', 4, 0.8);
+    addHost(48.857482, 2.2935243, "france", easterEgg("translate", "Steve Destivelle", "<br>For your help translating to<br>french language!"));
+    addHost(-15.791246, -47.8932317, "adail", easterEgg("developer", "Adail Horst", "<br>For being crazy and decide to create me,<br> besides giving me a very charming name!  ;-)"));
+    addHost(-3.736878, -38.5334797, "ari", easterEgg("developer", "Aristoteles", "<br>For code together the Zab-Geo!"));
+    addHost(45.066836045, 7.63612707, "italy", easterEgg("translate", "Dimitri Bellini", "<br>For your help translating to<br>italian language!<br>http://quadrata.it/"));
+}

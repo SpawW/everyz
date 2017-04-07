@@ -69,3 +69,19 @@ A.everyzGEOLink:active {text-decoration: none; color: black'';}
     width: 30px; 
     cursor: pointer;
 }
+
+#everyzTopMenuInfo {
+    float: left; 
+    margin: -5px 0px 0 0; 
+    //background: url("../images/zbxe-logo.png") no-repeat; 
+    height: 60px; 
+    width: 300px; 
+    cursor: pointer;
+    border: 1px;
+    white-space: pre-wrap;      /* CSS3 */   
+    white-space: -moz-pre-wrap; /* Firefox */    
+    white-space: -pre-wrap;     /* Opera <7 */   
+    white-space: -o-pre-wrap;   /* Opera 7 */    
+    word-wrap: break-word;      /* IE */
+    text-align: left;
+}
