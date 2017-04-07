@@ -20,7 +20,6 @@
 ?>
 
 <script type="text/javascript">
-
     geoHostWord = "<?php echo _('Host'); ?>";
     geoTitleMetadata = "<?php echo _('Edit host metadata'); ?>";
     geoTitleLatest = "<?php echo _('Latest Data'); ?>";
@@ -28,7 +27,7 @@
 <?php
 $easterMode = hasRequest('showteam') || count($hostData) == 0;
 if ($easterMode) { // Clean the filter parameters
-    echo "var setViewLat = 27.43419;";
+    echo "var setViewLat = 24.43419;";
     echo "var setViewLong = -28.125;";
     echo "var setViewZoom = 3;";
     echo "var showCircles = 1;";
@@ -38,6 +37,7 @@ if ($easterMode) { // Clean the filter parameters
     . 'Você está vendo os créditos aos principais tradutores e desenvolvedores do EveryZ.<br>'
     . '<b>Clique aqui</b> e conheça um pouco mais sobre o EveryZ e como utiliza-lo melhor!'
     . "';";
+    echo "var eeCont = 0;";
 } else {
     echo "var setViewLat = " . $filter['centerLat'] . ";";
     echo "var setViewLong = " . $filter['centerLong'] . ";";
@@ -75,7 +75,7 @@ if ($easterMode) { // Clean the filter parameters
     var mbToken = '<?php echo zbxeConfigValue('geo_token') ?>';
     var baseMaps = {};
     function addMapTile(description, url, attribution, maxZoom) {
-        baseMaps[description] = L.tileLayer(url, {maxZoom: maxZoom, attribution: attribution});
+        baseMaps[description] = L.tileLayer(url, {maxZoom: maxZoom, attribution: '<a href="http://www.everyz.org">EveryZ</a> | '+attribution});
     }
     if (mbToken !== "") {
         var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
@@ -127,15 +127,6 @@ echo $mapBackgroud[$filter["map"]];
             height: "25",
             width: "<?php echo zbxeConfigValue("company_logo_width", 0, 120); ?>"
         }).addTo(ZabGeomap).setPosition('topright');
-        if (easterEggMode === 1) {
-            L.controlCredits({
-                image: "local/app/everyz/images/zpoi_whynotwork.png",
-                link: "http://www.everyz.org/documentation",
-                text: '<div id="everyzTopMenuInfo">' + easterEggInfo + '</div>',
-                height: "64",
-                width: "103"
-            }).addTo(ZabGeomap).setPosition('topright');
-        }
     }
 <?php
 
@@ -180,8 +171,8 @@ $linesPackage = "";
 
 if ($easterMode) { // Clean the filter parameters
     ?>
-        showEasterEgg();
-    <?php
+ showEasterEgg();
+<?php
 } else {
     // Traduções
     foreach ($hostData as $host) {
