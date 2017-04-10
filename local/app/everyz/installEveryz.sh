@@ -6,8 +6,8 @@
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com"; 
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="RC_20170407_2";
-VERSAO_EZ="1.0-RC4";
+VERSAO_INST="RC_20170410_1";
+VERSAO_EZ="1.0-RC5";
 UPDATEBD="S";
 BRANCH="master";
 NOME_PLUGIN="EVERYZ";
@@ -594,7 +594,9 @@ instalaLiteral() {
     sed -i "$NUMLINHA i##$TAG_INICIO\n##$TAG_FINAL" $ARQUIVO
     INIINST=`cat $ARQUIVO | sed -ne "/$TAG_INICIO/{=;q;}"`;
     FIMINST=`cat $ARQUIVO | sed -ne "/$TAG_FINAL/{=;q;}"`;
-    sed -i "$FIMINST i if(strpos(strtolower(\$options['units']),'literal') > -1){ \$sufixo=explode('-',\$options['units']); return round(\$options['value'], ZBX_UNITS_ROUNDOFF_UPPER_LIMIT).\" \".\$sufixo[1]; }" $ARQUIVO
+#    sed -i "$FIMINST i if(strpos(strtolower(\$options['units']),'literal-') > -1){ \$sufixo=explode('-',\$options['units']); $options['units'] = \" \" . $sufixo[1]; }" $ARQUIVO
+    sed -i "$FIMINST i if(strpos(strtolower(\$options['units']),'literal') > -1){ \$sufixo=explode('-',\$options['units']); return round(\$options['value']).\" \".\$sufixo[1]; }" $ARQUIVO
+#    sed -i "$FIMINST i if(strpos(strtolower(\$options['units']),'literal') > -1){ \$sufixo=explode('-',\$options['units']); return round(\$options['value'], ZBX_UNITS_ROUNDOFF_UPPER_LIMIT).\" \".\$sufixo[1]; }" $ARQUIVO
     FIMINST=$(($FIMINST+1));
 }
 
