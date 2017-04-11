@@ -76,8 +76,6 @@ if ($updated) {
  * ************************************************************************** */
 
 // -----------------------------------------------------------------------------
-//$form = (new CForm())->cleanItems()->setId('frmConfig');
-//$dashboard = (new CWidget())->setTitle(_zeT('Customization'));
 
 commonModuleHeader($moduleName, $moduleTitle, true);
 insert_show_color_picker_javascript();
@@ -87,9 +85,9 @@ $buttonSave = (new CList())->addItem((new CSubmit('btnUpdate', _('Update'))));
 $table = (new CTable());
 $table->addRow(
         (new CFormList())
-                ->addRow(_zeT('Title', $moduleName), newComboFilterArray([_("Show"), _zeT("Hide")], 'cnf_map_title_show', zbxeConfigValue('map_title_show'), false))
-                ->addRow(_('Color'), new CColor('cnf_map_title_color', zbxeConfigValue('map_title_color'), false))
-                ->addRow(_zeT('White mark Color'), new CColor('cnf_map_wmark_color', zbxeConfigValue('map_wmark_color'), false))
+                ->addRow(_zeT('Title', $moduleName), newComboFilterArray([_zeT("Hide"), _zeT("Show")], 'cnf_map_title_show', zbxeConfigValue('map_title_show'), false))
+                ->addRow(_zeT('Color'), new CColor('cnf_map_title_color', zbxeConfigValue('map_title_color'), false))
+                //->addRow(_zeT('White mark Color'), new CColor('cnf_map_wmark_color', zbxeConfigValue('map_wmark_color'), false))
 )
 ;
 $dashboardGrid[0][0] = newWidget('maps', _zeT("Map options"), $table);
@@ -130,7 +128,7 @@ $table->addRow(
                         , 'company_logo_img', zbxeConfigValue('company_logo_width'), 25))->setId("img_company_logo_site"))
                 ->addRow(_zeT('Login Logo'), $cmbLogoLogin)
                 ->addRow((new CImg('imgstore.php?iconid=' . $idLogoLogin, 'company_logo_img', 120, 25))->setId("img_company_logo_login"))
-                ->addRow(_zeT('EveryZ Logo'), buttonOptions("cnf_show_everyz_logo", (int) zbxeConfigValue("show_everyz_logo", 0, 1), [_('Hide'), _('Show')]))
+                ->addRow(_zeT('EveryZ Logo'), buttonOptions("cnf_show_everyz_logo", (int) zbxeConfigValue("show_everyz_logo", 0, 1), [_zeT('Hide'), _zeT('Show')]))
 );
 $dashboardGrid[0][1] = newWidget('company', _zeT("Company"), $table);
 
