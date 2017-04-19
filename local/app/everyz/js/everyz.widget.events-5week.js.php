@@ -119,7 +119,7 @@ zbxeJSLoad(['d3/d3.min.js', 'd3/d3pie.js', 'everyzD3Functions.js']);
 <script>
     container = "<?php echo $divName; ?>";
     data =<?php echo events5WeekData(); ?>;
-    newD3Pie(container, data, "{label}: {value} <?php echo strtolower(_("Events")); ?>", true, 350);
+    newD3Pie(container, data, "{label}: {value} <?php echo strtolower(_zeT("Events")); ?>", true, 350);
 </script>
 <?php
 

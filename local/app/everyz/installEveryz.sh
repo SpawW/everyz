@@ -1,13 +1,13 @@
 #!/bin/bash
 # Autor: Adail Horst
-# Email: the.spaww@gmail.com 
-# Objective: Install Eeryz / Zabbix Extras 
+# Email: everyz@everyz.org
+# Objective: Install Everyz / Zabbix Extras 
 
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com"; 
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="RC_20170411_1";
-VERSAO_EZ="1.0-RC6";
+VERSAO_INST="FINAL_20170419_1";
+VERSAO_EZ="1.0";
 UPDATEBD="S";
 BRANCH="master";
 NOME_PLUGIN="EVERYZ";
