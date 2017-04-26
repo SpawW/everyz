@@ -730,11 +730,11 @@ configuraApache() {
             apacheDirectoryConf "images";
             apacheDirectoryConf "css";
             if [ -f "/etc/init.d/apache2" ]; then
-                /etc/init.d/apache2 restart ;
+                /etc/init.d/apache2 reload ;
             elif [ -f "/etc/init.d/httpd" ]; then
-                /etc/init.d/httpd restart ;
+                /etc/init.d/httpd reload ;
             else
-                service httpd restart
+                service httpd reload
             fi
             registra "Reconfigurou o apache! $APACHEROOT/everyz.conf  ";
         fi
