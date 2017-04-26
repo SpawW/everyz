@@ -236,9 +236,11 @@ preReq() {
     fi
     # Verificando e instalando o dialog
     if [ `which dialog 2>&-  | wc -l` -eq 0 ]; then
-        registra "Installing dialog";
-        instalaPacote "dialog";
-        STATUSPR="Changed";
+        if [ $# -eq 0 ]; then
+            registra "Installing dialog";
+            instalaPacote "dialog";
+            STATUSPR="Changed";
+        fi
     fi
     # Verificando e instalando o unzip
     if [ `which unzip 2>&-  | wc -l` -eq 0 ]; then
