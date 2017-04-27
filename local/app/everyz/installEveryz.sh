@@ -2,11 +2,12 @@
 # Autor: Adail Horst
 # Email: everyz@everyz.org
 # Objective: Install Everyz / Zabbix Extras 
+# ZABBIX_VERSIONS: 3.0.* and 3.2.* - Tested with 3.0.8 and 3.2.4
 
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com"; 
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="FINAL_20170419_1";
+VERSAO_INST="FINAL_20170427_1";
 VERSAO_EZ="1.0";
 UPDATEBD="S";
 BRANCH="master";
@@ -777,7 +778,6 @@ instalaPortletNS() {
     TXT_CUSTOM="new CLink(\$status['items_count_not_supported']\, 'everyz.php?fullscreen=0&item=&action=zbxe-ns&format=0&inactiveHosts=1&filter_set=1')";
     sed -i "$INIINST i$TAG_INICIO\n$TXT_CUSTOM\n$TAG_FINAL" $ARQUIVO
 }
-
 
 ####### Parametros de instalacao -----------------------------------------------
 
