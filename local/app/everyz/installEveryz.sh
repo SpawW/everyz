@@ -7,7 +7,7 @@
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com"; 
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="FINAL_20170427_1";
+VERSAO_INST="1.0";
 VERSAO_EZ="1.0";
 UPDATEBD="S";
 BRANCH="master";
@@ -269,7 +269,7 @@ idioma() {
         OPCOES=$PAR_IDIOMA;
     else
         dialog \
-            --title "Zabbix Extras Installer [$VERSAO_INST]"        \
+            --title "EveryZ Installer [$VERSAO_INST]"        \
             --radiolist 'Informe o idioma (Enter the language for the installer) '  \
             0 0 0                                    \
             pt   'Portugues / Brasil'  on    \
