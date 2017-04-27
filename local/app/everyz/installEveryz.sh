@@ -2,7 +2,7 @@
 # Autor: Adail Horst
 # Email: everyz@everyz.org
 # Objective: Install Everyz / Zabbix Extras 
-# ZABBIX_VERSIONS: 3.0.* and 3.2.* - Tested with 3.0.8 and  3.2.4
+# ZABBIX_VERSIONS: 3.0.* and 3.2.* - Tested with 3.0.9 and 3.2.5
 
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com"; 
