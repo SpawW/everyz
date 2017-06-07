@@ -153,8 +153,7 @@ if (hasRequest('dml')) {
                         //. "|" . cleanParam($filter['widgettype']) 
                         . "|" . cleanParam($filter['userlevel'])
                 ;
-                if ($filter["mode"] == "widget.item.add") {
-                    echo "oix<br>";
+                if ($filter["mode"] == "widget.item.add") {                    
                     $last = explode("_", zbxeFieldValue('select MAX(tx_option) as ultimo from zbxe_preferences zp where zp.tx_option like ' .
                                     quotestr($filter["widget"] . '_link_%'), "ultimo"));
                     if (count($last) > 2) {
@@ -315,7 +314,7 @@ if ($filter['mode'] !== "") {
                             , (new CTextBox('title', $data[0]["title"], false, 64))->setWidth(ZBX_TEXTAREA_STANDARD_WIDTH)
                     )
                     //->addRow(bold(_zeT('Visibility')), buttonOptions("status", $data[0]["status"], [_('Hide'), _('Show')]))
-                    ->addRow(_zeT('Visibility') . $data[0]["status"], buttonOptions("status", (int) $data[0]["status"], [_('Hide'), _('Show'), _('Block')]))
+                    ->addRow(_zeT('Visibility'), buttonOptions("status", (int) $data[0]["status"], [_('Hide'), _('Show'), _('Block')]))
                     ->addRow(_zeT('Minimum User Level'), zbxeButtonUserLevel("userlevel", (int) $data[0]["userlevel"]))
                     //
                     ->addItem(new CInput('hidden', 'action', $filter["action"]))

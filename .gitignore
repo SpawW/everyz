@@ -8,6 +8,9 @@ nbproject/project.xml
 nbproject/configs/ubuntu.properties
 nbproject/configs/ununtu.properties
 local/**/*full.png
+local/views/everyz.priv.*.php
+local/everyz/js/everyz.priv.*.php
+local/everyz/js/everyz.priv.*.js
 # Arquivos a ignorar o comando de ignore
 !everyz.php
 !zbxe-logo.php
