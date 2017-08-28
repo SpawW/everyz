@@ -1,0 +1,87 @@
+/* 
+    Created on : 14/12/2016, 09:23:27
+    Author     : spaww
+*/
+
+#listButton li { 
+    list-style: none;
+    text-align: center;
+    background-color: #000000;
+    margin-right: 30px;
+    width: 150px;
+    line-height: 60px;
+}
+
+#listButton li a{
+    text-decoration: none;
+    color: #FFFFFF;
+    display: block;
+}
+
+#listButton li a:hover {
+    text-decoration: none;
+    color: #000000;
+    background-color: #33B5E5;
+}
+
+/* Styles for resize search input */
+
+#search:focus {
+    width: 198px;
+}
+#search {
+    width: 100px;
+}
+
+.reportRowText {
+    text-align: left;
+    width: 100%;
+    border-color: blue;
+    border: 3px;
+}
+.reportRowLabel {
+    text-align: right;
+    width: 100%;
+}
+
+.everyzEditIMG {
+    cursor: pointer;
+}
+
+.popU2pEgg {
+    width: 400px; 
+}
+.tdEgg {
+    vertical-align: top;
+}
+
+A.everyzGEOLink {color:black;}
+A.everyzGEOLink:link {text-decoration: none; color: black;}
+A.everyzGEOLink:visited {text-decoration: none; color: black;}
+A.everyzGEOLink:hover {text-decoration: underline; color: black; }
+A.everyzGEOLink:active {text-decoration: none; color: black'';}
+
+#everyzTopMenuLogo {
+    float: left; 
+    margin: -5px 0px 0 0; 
+    background: url("../images/zbxe-logo.png") no-repeat; 
+    height: 24px; 
+    width: 30px; 
+    cursor: pointer;
+}
+
+#everyzTopMenuInfo {
+    float: left; 
+    margin: -5px 0px 0 0; 
+    //background: url("../images/zbxe-logo.png") no-repeat; 
+    height: 60px; 
+    width: 300px; 
+    cursor: pointer;
+    border: 1px;
+    white-space: pre-wrap;      /* CSS3 */   
+    white-space: -moz-pre-wrap; /* Firefox */    
+    white-space: -pre-wrap;     /* Opera <7 */   
+    white-space: -o-pre-wrap;   /* Opera 7 */    
+    word-wrap: break-word;      /* IE */
+    text-align: left;
+}
