@@ -31,7 +31,6 @@ $moduleTitle = 'Automatic Dashboard - Server';
 $config = select_config();
 
 // Common fields
-//addFilterParameter("format", T_ZBX_INT);
 addFilterActions();
 
 // Specific fields
@@ -115,7 +114,6 @@ $allHosts = API::Host()->get([
     'groupids' => $filter["groupids"],
     'status' => 1
         ]);
-
 $reportData = [];
 $totalHosts = $gaugeKey1 = $gaugeKey2 = $gaugeKey3 = 0;
 
@@ -155,7 +153,6 @@ $leftColumn = new CFormList();
 $leftColumn->addRow(_('Host Groups'), multiSelectHostGroups(selectedHostGroups($filter['groupids'])));
 $radioCol = (new CRadioButtonList('colCount', (int) $filter['colCount']))->setModern(true);
 for ($i = 1; $i < 6; $i++) {
-    //Caption | value
     $radioCol->addValue($i, $i - 1);
 }
 $leftColumn->addRow(_('Columns'), [$radioCol])
@@ -179,7 +176,7 @@ $widget->addColumn($rightColumn);
 // Left collumn
 
 $dashboard->addItem($widget);
-if (hasRequest('filter_set')) { // Clean the filter parameters
+if (hasRequest('filter_set')) { 
     checkRequiredField("groupids", _zeT("You need to provide a least one host group in filter!"));
     if (!$requiredMissing) {
         $cont = 0;

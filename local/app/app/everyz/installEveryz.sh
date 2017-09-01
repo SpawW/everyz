@@ -7,7 +7,7 @@
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com"; 
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="1.0";
+VERSAO_INST="1.1";
 VERSAO_EZ="1.1";
 UPDATEBD="S";
 BRANCH="master";
@@ -805,6 +805,8 @@ instalaLiteral;
 corTituloMapa;
 configuraApache;
 instalaPortletNS;
+
+registra "Installed - [ $VERSAO_INST ]";
  
-echo "Installed - [ $VERSAO_INST ]";
-echo "You need to check your apache server and restart!";
+#echo "Installed - [ $VERSAO_INST ]";
+#echo "You need to check your apache server and restart!";
