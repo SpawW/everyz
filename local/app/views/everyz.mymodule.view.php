@@ -24,9 +24,9 @@
  * Module Variables
  * ************************************************************************** */
 // Configuration variables =====================================================
-$moduleName = "mymodule";
+$moduleName = "zbxe-bookmark";
 $baseProfile .= $moduleName;
-$moduleTitle = 'Meu modulo';
+$moduleTitle = 'Bookmark';
 // Common fields
 addFilterActions();
 // Specific fields

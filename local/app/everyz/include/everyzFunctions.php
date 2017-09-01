@@ -19,11 +19,13 @@
  * * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  * */
 
+        const CRYPT_SALT = '1822';
 // Define and global variables
 define("ZE_VER", "3.0");
 define("EZ_TITLE", 'EveryZ - ');
 define("ZE_COPY", ", ZE " . ZE_VER);
-define("EVERYZBUILD", 8);
+define("EVERYZVERSION", 1.1);
+define("EVERYZBUILD", 9);
 if (file_exists("lockEverys.php")) {
     $VG_INSTALL = true;
 } else {
@@ -371,7 +373,8 @@ function ezZabbixVersion() {
 function checkAccessGroup($p_groupid) {
     global $filter;
     $groupids = (isset($_REQUEST[$p_groupid]) ? $_REQUEST[$p_groupid] : $filter[$p_groupid]);
-    if (getRequest($p_groupid) && !API::HostGroup()->isReadable($groupids)) {
+    // var_dump (ezZabbixVersion() < 340); ezZabbixVersion() < 340 ? !API::HostGroup()->isReadable($groupids) : 
+    if (getRequest($p_groupid) && (!API::HostGroup()->get($groupids) )) {
         access_deny();
     }
     return $groupids;
@@ -388,7 +391,7 @@ function checkAccessGroup($p_groupid) {
 function checkAccessTrigger($p_triggerid) {
     global $filter;
     $triggerids = array(isset($_REQUEST[$p_triggerid]) ? $_REQUEST[$p_triggerid] : $filter[$p_triggerid]);
-    if (getRequest($p_triggerid) && !API::Trigger()->isReadable($triggerids)) {
+    if (getRequest($p_triggerid) && !API::Trigger()->get($triggerids)) {
         access_deny();
     }
     return $triggerids;
@@ -410,7 +413,8 @@ function checkAccessHost($p_hostid, $writeaccess = false) {
         $hostids = [$hostids];
     }
     if (getRequest($p_hostid)) {
-        $canAccess = (API::Host()->isReadable($hostids) && (!$writeaccess || API::Host()->isWritable($hostids)));
+        // && (!$writeaccess || API::Host()->isWritable($hostids) ) 
+        $canAccess = (API::Host()->get($hostids) );
         if ($canAccess) {
             if (count($hostids) > 0 && $hostids[0] == 0) {
                 $hostids = array();
@@ -432,7 +436,10 @@ function checkAccessHost($p_hostid, $writeaccess = false) {
  * @param boolean   $p_message  Default value
  */
 function getRequest2($p_name, $p_default = "") {
-    if (isset($_REQUEST[$p_name])) {
+    global $_REQUEST, $filter;
+    if (isset($filter[$p_name])) {
+        return $filter[$p_name];
+    } elseif (isset($_REQUEST[$p_name])) {
         return $_REQUEST[$p_name];
     } else {
         return $p_default;
@@ -481,6 +488,12 @@ function addFilterActions() {
     $filter["fullscreen"] = getRequest2("fullscreen", "0");
     $fields['hidetitle'] = array(T_ZBX_INT, O_OPT, P_SYS, IN('0,1'), null);
     $filter["hidetitle"] = getRequest2("hidetitle", "0");
+    $fields['format'] = array(T_ZBX_INT, O_OPT, P_SYS, IN('0,1'), null);
+    $filter["format"] = getRequest2("format", "0");
+    $fields["mode"] = array(T_ZBX_STR, O_OPT, P_UNSET_EMPTY, NULL, null);
+    $filter["mode"] = getRequest2("mode", "");
+    $fields["shorturl"] = array(T_ZBX_STR, O_OPT, P_UNSET_EMPTY, NULL, null);
+    $filter["shorturl"] = getRequest2("shorturl", "");
 }
 
 /**
@@ -512,19 +525,21 @@ function addFilterParameter($p_name, $p_type, $p_default = "", $p_array = false
 , $p_unset_empty = false, $p_use_profile = true) {
     global $baseProfile, $fields, $filter;
     $typeProfile = ($p_type == T_ZBX_INT ? PROFILE_TYPE_INT : PROFILE_TYPE_STR);
-    // Algum problema com o tipo negativo... validar
-    $fields[$p_name] = array($p_type, O_OPT, ($p_unset_empty ? P_UNSET_EMPTY : P_SYS), null, null);
+    if (!array_key_exists($p_name, $filter)) {
+        // Algum problema com o tipo negativo... validar
+        $fields[$p_name] = array($p_type, O_OPT, ($p_unset_empty ? P_UNSET_EMPTY : P_SYS), null, null);
 //    $fields[$p_name] = array($p_type, O_OPT, ($p_unset_empty ? P_UNSET_EMPTY : P_SYS), DB_ID, null);
-    if ($p_array) {
-        $p_default = (is_array($p_default) ? $p_default : array($p_default));
-        $filter[$p_name] = getRequest2($p_name, CProfile::getArray($baseProfile . "." . $p_name, $p_default));
-        if ($p_use_profile) {
-            CProfile::updateArray($baseProfile . "." . $p_name, $filter[$p_name], $typeProfile);
-        }
-    } else {
-        $filter[$p_name] = getRequest2($p_name, CProfile::get($baseProfile . "." . $p_name, $p_default));
-        if ($p_use_profile) {
-            CProfile::update($baseProfile . "." . $p_name, $filter[$p_name], $typeProfile);
+        if ($p_array) {
+            $p_default = (is_array($p_default) ? $p_default : array($p_default));
+            $filter[$p_name] = getRequest2($p_name, CProfile::getArray($baseProfile . "." . $p_name, $p_default));
+            if ($p_use_profile) {
+                CProfile::updateArray($baseProfile . "." . $p_name, $filter[$p_name], $typeProfile);
+            }
+        } else {
+            $filter[$p_name] = getRequest2($p_name, CProfile::get($baseProfile . "." . $p_name, $p_default));
+            if ($p_use_profile) {
+                CProfile::update($baseProfile . "." . $p_name, $filter[$p_name], $typeProfile);
+            }
         }
     }
 }
@@ -979,15 +994,22 @@ function getRealPOST() {
  * @param string  $allowFullScreen  Add a button to full screen view
  */
 function commonModuleHeader($module_id, $title, $allowFullScreen = false, $method = 'POST', $customControls = null) {
-    global $dashboard, $form, $table, $toggle_all;
+    global $dashboard, $form, $table, $toggle_all, $commonList, $filter;
     if (getRequest2('hidetitle') == 1) {
         $dashboard = (new CWidget());
         $table = (new CTableInfo())->addClass(ZBX_STYLE_OVERFLOW_ELLIPSIS);
     } else {
         $dashboard = (new CWidget())->setTitle(EZ_TITLE . _zeT($title));
         $table = (new CTableInfo())->addClass(ZBX_STYLE_OVERFLOW_ELLIPSIS);
+//        $commonList = (new CList())->addItem(get_icon('fullscreen', ['fullscreen' => getRequest('fullscreen')]));
+        $commonList = (new CForm('POST'))
+                ->cleanItems()
+                ->addItem(get_icon('fullscreen', ['fullscreen' => getRequest2('fullscreen')]))
+                ->addItem(new CInput('hidden', 'action', getRequest2("action")))
+                ->addItem(new CInput('hidden', 'mode', getRequest2("mode")))
+        ;
         if ($allowFullScreen) {
-            $dashboard->setControls(($customControls == null ? (new CList())->addItem(get_icon('fullscreen', ['fullscreen' => getRequest('fullscreen')])) : $customControls));
+            $dashboard->setControls(($customControls == null ? $commonList : $customControls));
             $toggle_all = (new CColHeader(
                     (new CDiv())
                             ->addClass(ZBX_STYLE_TREEVIEW)
@@ -1166,7 +1188,7 @@ function zbxeUpdateTranslation($json, $resultOK, $debug = false) {
  * @param boolean $debug     If true the function will show debug messages instead run sql commands
  */
 function zbxeUpdateConfigImages($json, $resultOK, $debug = false) {
-    $extraCheck = (CWebUser::getType() > USER_TYPE_ZABBIX_ADMIN) && (zbxeConfigValue("zbxe_init_images", 0) == 0) ;
+    $extraCheck = (CWebUser::getType() > USER_TYPE_ZABBIX_ADMIN) && (zbxeConfigValue("zbxe_init_images", 0) == 0);
     if (isset($json["images"]) && $extraCheck) {
         zbxeUpdateConfigValue("zbxe_init_images", 1);
         $report['images'] = ['source' => count($json["images"]), 'insert' => 0, 'update' => 0];
@@ -1518,3 +1540,90 @@ try {
     return FALSE;
 }
 
+/**
+ * zbxeColHeader
+ *
+ * Adiciona uma coluna de titulo com tamanho definido
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param string $text   Header text
+ * @param string $size   Size of collum header
+ */
+function zbxeColHeader($text, $size) {
+    return (new CColHeader(_zeT($text)))->addStyle('width: ' . $size . (is_int($size) ? '%' : ''));
+}
+
+// Origin: http://raymorgan.net/web-development/how-to-obfuscate-integer-ids/
+class IdObfuscator {
+
+    public static function encode($id) {
+        if (!is_numeric($id) or $id < 1) {
+            return FALSE;
+        }
+        $id = (int) $id;
+        if ($id > pow(2, 31)) {
+            return FALSE;
+        }
+        $segment1 = self::getHash($id, 16);
+        $segment2 = self::getHash($segment1, 8);
+        $dec = (int) base_convert($segment2, 16, 10);
+        $dec = ($dec > $id) ? $dec - $id : $dec + $id;
+        $segment2 = base_convert($dec, 10, 16);
+        $segment2 = str_pad($segment2, 8, '0', STR_PAD_LEFT);
+        $segment3 = self::getHash($segment1 . $segment2, 8);
+        $hex = $segment1 . $segment2 . $segment3;
+        $bin = pack('H*', $hex);
+        $oid = base64_encode($bin);
+        $oid = str_replace(array('+', '/', '='), array('$', ':', ''), $oid);
+        return $oid;
+    }
+
+    public static function decode($oid) {
+        if (!preg_match('/^[A-Z0-9\:\$]{21,23}$/i', $oid)) {
+            return 0;
+        }
+        $oid = str_replace(array('$', ':'), array('+', '/'), $oid);
+        $bin = base64_decode($oid);
+        $hex = unpack('H*', $bin);
+        $hex = $hex[1];
+        if (!preg_match('/^[0-9a-f]{32}$/', $hex)) {
+            return 0;
+        }
+        $segment1 = substr($hex, 0, 16);
+        $segment2 = substr($hex, 16, 8);
+        $segment3 = substr($hex, 24, 8);
+        $exp2 = self::getHash($segment1, 8);
+        $exp3 = self::getHash($segment1 . $segment2, 8);
+        if ($segment3 != $exp3) {
+            return 0;
+        }
+        $v1 = (int) base_convert($segment2, 16, 10);
+        $v2 = (int) base_convert($exp2, 16, 10);
+        $id = abs($v1 - $v2);
+        return $id;
+    }
+
+    private static function getHash($str, $len) {
+        return substr(sha1($str . CRYPT_SALT), 0, $len);
+    }
+
+}
+
+/**
+ * zbxeTranslateURL
+ *
+ * Transforma um shorturl nos parâmetros salvos pelo módulo de bookmark
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ */
+function zbxeTranslateURL() {
+    global $filter;
+    if (hasRequest("shorturl")) {
+        $hash = getRequest2("shorturl");
+        $url = zbxeFieldValue("select tx_url from zbxe_shorten where id_url = " . quotestr(IdObfuscator::decode($hash)), "tx_url");
+        parse_str(parse_url($url, PHP_URL_QUERY), $filter);
+        foreach ($filter as $key => $value) {
+            $_REQUEST[$key] = $value;            
+        }
+    } 
+}

@@ -2,13 +2,13 @@
 # Autor: Adail Horst
 # Email: everyz@everyz.org
 # Objective: Install Everyz / Zabbix Extras 
-# ZABBIX_VERSIONS: 3.0.* and 3.2.* - Tested with 3.0.9 and 3.2.5
+# ZABBIX_VERSIONS: 3.0.*, 3.2.* and 3.4.* - Tested with 3.0.9, 3.2.5 and 3.4.0
 
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com"; 
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="1.0";
-VERSAO_EZ="1.0";
+VERSAO_INST="1.1";
+VERSAO_EZ="1.1";
 UPDATEBD="S";
 BRANCH="master";
 NOME_PLUGIN="EVERYZ";
@@ -805,6 +805,8 @@ instalaLiteral;
 corTituloMapa;
 configuraApache;
 instalaPortletNS;
+
+registra "Installed - [ $VERSAO_INST ]";
  
-echo "Installed - [ $VERSAO_INST ]";
-echo "You need to check your apache server and restart!";
+#echo "Installed - [ $VERSAO_INST ]";
+#echo "You need to check your apache server and restart!";

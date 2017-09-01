@@ -21,7 +21,6 @@
 
 <script type="text/javascript">
 
-    alert('oi');
     var filterButton = document.getElementById('filter-mode');
     var titleBar = document.getElementsByClassName("header-title");
     var filterDIV = document.getElementById('filter-space');
