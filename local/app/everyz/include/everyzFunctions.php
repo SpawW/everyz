@@ -19,7 +19,7 @@
  * * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  * */
 
-        const CRYPT_SALT = '1822';
+const CRYPT_SALT = '1822';
 // Define and global variables
 define("ZE_VER", "3.0");
 define("EZ_TITLE", 'EveryZ - ');
@@ -1623,7 +1623,7 @@ function zbxeTranslateURL() {
         $url = zbxeFieldValue("select tx_url from zbxe_shorten where id_url = " . quotestr(IdObfuscator::decode($hash)), "tx_url");
         parse_str(parse_url($url, PHP_URL_QUERY), $filter);
         foreach ($filter as $key => $value) {
-            $_REQUEST[$key] = $value;            
+            $_REQUEST[$key] = $value;
         }
-    } 
+    }
 }
