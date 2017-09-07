@@ -24,7 +24,7 @@
 define("ZE_VER", "3.0");
 define("EZ_TITLE", 'EveryZ - ');
 define("ZE_COPY", ", ZE " . ZE_VER);
-define("EVERYZVERSION", 1.1);
+define("EVERYZVERSION", 1.11);
 define("EVERYZBUILD", 9);
 if (file_exists("lockEverys.php")) {
     $VG_INSTALL = true;
@@ -529,16 +529,18 @@ function addFilterParameter($p_name, $p_type, $p_default = "", $p_array = false
         // Algum problema com o tipo negativo... validar
         $fields[$p_name] = array($p_type, O_OPT, ($p_unset_empty ? P_UNSET_EMPTY : P_SYS), null, null);
 //    $fields[$p_name] = array($p_type, O_OPT, ($p_unset_empty ? P_UNSET_EMPTY : P_SYS), DB_ID, null);
-        if ($p_array) {
-            $p_default = (is_array($p_default) ? $p_default : array($p_default));
-            $filter[$p_name] = getRequest2($p_name, CProfile::getArray($baseProfile . "." . $p_name, $p_default));
-            if ($p_use_profile) {
-                CProfile::updateArray($baseProfile . "." . $p_name, $filter[$p_name], $typeProfile);
-            }
-        } else {
-            $filter[$p_name] = getRequest2($p_name, CProfile::get($baseProfile . "." . $p_name, $p_default));
-            if ($p_use_profile) {
-                CProfile::update($baseProfile . "." . $p_name, $filter[$p_name], $typeProfile);
+        if ($p_name !== 'action') {
+            if ($p_array) {
+                $p_default = (is_array($p_default) ? $p_default : array($p_default));
+                $filter[$p_name] = getRequest2($p_name, CProfile::getArray($baseProfile . "." . $p_name, $p_default));
+                if ($p_use_profile) {
+                    CProfile::updateArray($baseProfile . "." . $p_name, $filter[$p_name], $typeProfile);
+                }
+            } else {
+                $filter[$p_name] = getRequest2($p_name, CProfile::get($baseProfile . "." . $p_name, $p_default));
+                if ($p_use_profile) {
+                    CProfile::update($baseProfile . "." . $p_name, $filter[$p_name], $typeProfile);
+                }
             }
         }
     }
