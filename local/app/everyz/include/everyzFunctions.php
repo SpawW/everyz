@@ -19,7 +19,7 @@
  * * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  * */
 
-const CRYPT_SALT = '1822';
+        const CRYPT_SALT = '1822';
 // Define and global variables
 define("ZE_VER", "3.0");
 define("EZ_TITLE", 'EveryZ - ');
@@ -437,10 +437,10 @@ function checkAccessHost($p_hostid, $writeaccess = false) {
  */
 function getRequest2($p_name, $p_default = "") {
     global $_REQUEST, $filter;
-    if (isset($filter[$p_name])) {
-        return $filter[$p_name];
-    } elseif (isset($_REQUEST[$p_name])) {
+    if (isset($_REQUEST[$p_name])) {
         return $_REQUEST[$p_name];
+    } elseif (isset($filter[$p_name])) {
+        return $filter[$p_name];
     } else {
         return $p_default;
     }
