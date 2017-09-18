@@ -82,3 +82,10 @@ A working example using all options can be viewed bellow:
 PS: Unlike the Wizard method, the installer **will not install dependencies** using parameters as information. Check at the Topic 'Requirements' to verify what packages are needed.
 
 
+Changes
+---------------------------
+* 1.1.0 - 20170908
+   - Add support for Zabbix 3.4
+* 1.1.2 - 20170917
+   - Add support for Zabbix 4.0 alfa
+   - Fix issue #95
