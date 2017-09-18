@@ -87,5 +87,6 @@ Changes
 * 1.1.0 - 20170908
    - Add support for Zabbix 3.4
 * 1.1.2 - 20170917
-   - Add support for Zabbix 4.0 alfa
-   - Fix issue #95
+    - Add support for Zabbix 4.0 alfa
+    - Not Supported Itens - Add link to host edit
+    - Fix issue #95
