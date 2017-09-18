@@ -19,6 +19,7 @@
  * */
 
 
+
 // Global definitions ==========================================================
 require_once dirname(__FILE__) . '/include/config.inc.php';
 
@@ -52,14 +53,19 @@ switch (getRequest('format')) {
 $page['scripts'] = array('class.calendar.js', 'multiselect.js', 'gtlc.js');
 require_once dirname(__FILE__) . '/include/page_header.php';
 
-addFilterParameter("action", T_ZBX_STR, "dashboard");
+addFilterParameter("action", T_ZBX_STR, "dashboard", false, false, false);
+addFilterParameter("shorturl", T_ZBX_STR, '', false, false, false);
+
+zbxeTranslateURL();
 
 /* =============================================================================
  * Permissions
   ============================================================================== */
 
 $config = select_config();
+//var_dump([$action, $module, $filter["shorturl"]]);
 $action = getRequest2("action");
+//var_dump([$action, $module, $filter["shorturl"]]);
 $module = "dashboard";
 
 if (hasRequest('zbxe_reset_all') && getRequest2('zbxe_reset_all') == "EveryZ ReseT" && $action == "zbxe-config") {
@@ -83,7 +89,7 @@ if (hasRequest('zbxe_reset_all') && getRequest2('zbxe_reset_all') == "EveryZ Res
 }
 
 $res = DBselect('SELECT userid, tx_option, tx_value from zbxe_preferences zpre '
-        . ' WHERE userid in (0,' . CWebUser::$data['userid'] . ') '// and st_ativo < 2
+        . ' WHERE userid in (0,' . CWebUser::$data['userid'] . ') '
         . ' and tx_value like ' . quotestr($action . '|%')
         . ' order by userid, tx_option');
 while ($row = DBfetch($res)) {
@@ -93,7 +99,6 @@ while ($row = DBfetch($res)) {
 /* * ***************************************************************************
  * Access Control
  * ************************************************************************** */
-
 if ($module == "dashboard") {
     zbxeCheckUserLevel(zbxeMenuUserType());
     include_once dirname(__FILE__) . "/local/app/views/everyz.dashboard.view.php";
@@ -103,10 +108,11 @@ if ($module == "dashboard") {
     if (file_exists($file)) {
         include_once $file;
     } else {
-        echo "nao existe o arquivo do modulo (" . $module . ")";
+        echo "Não existe o arquivo do modulo (" . $module . ")";
     }
 }
 
+echo "<!-- Everyz Version - " . EVERYZVERSION . " -->\n";
+
 zbxeFullScreen();
 require_once dirname(__FILE__) . '/include/page_footer.php';
-

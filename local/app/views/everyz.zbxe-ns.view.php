@@ -17,7 +17,10 @@
  * * You should have received a copy of the GNU General Public License
  * * along with this program; if not, write to the Free Software
  * * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- * */
+ * Date     * Objective                                                         *
+ * 20170917 * Add easy link to host                                             *
+ */
+/* */
 /* * ***************************************************************************
  * Module Variables
  * ************************************************************************** */
@@ -116,9 +119,9 @@ switch ($filter["format"]) {
         echo zbxeToCSV(["Host", "Item", "Key", "Error Message"]);
         break;
     case PAGE_TYPE_JSON:
-        $jsonResult = []; // Array for JSON Export
+        $jsonResult = [];
         break;
-    default: // HTML
+    default:
         require_once 'include/views/js/monitoring.latest.js.php';
         commonModuleHeader($moduleName, $moduleTitle, true);
         // Filtros =====================================================================
@@ -150,7 +153,6 @@ switch ($filter["format"]) {
         $widget->addColumn($tmpColumn);
         $dashboard->addItem($widget);
         $table->setHeader(array($toggle_all, (new CColHeader(_('Host')))
-            //->addStyle('width: 15%')
             , _('Item'), _('Key'), _('Error'), _('Actions')));
 
         break;
@@ -173,7 +175,9 @@ foreach ($report as $row) {
                     ->setAttribute('data-app-id', $row['hostid'])
                     ->setAttribute('data-open-state', 1)
                     ->addItem(new CSpan())
-            , $row["host_name"]
+            , [(new CLink($row["host_name"], ""))->onClick("javascript: return redirect('hosts.php?form=update&hostid=" . $row['hostid']
+                        . "&groupid=0', 'post', 'sid', true);"
+                )]
             , (new CCol("(" . _n('%1$s Item', '%1$s Items', $resumo) . ")"))->setColSpan(4)
         ]);
     }
@@ -198,8 +202,6 @@ foreach ($report as $row) {
                             . "&hostid=" . $row['hostid']
                             . "&action=item.massdisable&sid=180b233e4008f20e', 'post', 'sid', true);"
                     )]
-
-                    //'items.php?group_itemid=' . $row['itemid'] . '&hostid=' . $row['hostid'] . '&action=item.massdisable')]
             ]);
             $tableRow->setAttribute('parent_app_id', $row['hostid']);
             $table->addRow($tableRow);

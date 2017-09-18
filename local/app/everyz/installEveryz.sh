@@ -3,12 +3,13 @@
 # Email: everyz@everyz.org
 # Objective: Install Everyz / Zabbix Extras 
 # ZABBIX_VERSIONS: 3.0.*, 3.2.* and 3.4.* - Tested with 3.0.9, 3.2.5 and 3.4.0
+# 20170918 - Update for change popup.php and validation of files for multiple zabbix versions
 
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com"; 
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="1.1.1";
-VERSAO_EZ="1.1.1";
+VERSAO_INST="1.1.2";
+VERSAO_EZ="1.1.2";
 UPDATEBD="S";
 BRANCH="master";
 NOME_PLUGIN="EVERYZ";
@@ -446,11 +447,12 @@ instalaMenus() {
     if [ "`alias | grep mv= | wc -l`" -eq 1 ]; then
         unalias mv
     fi
-    mv include/defines.inc.php include/defines.inc.php.old
+    mv include/defines.inc.php /tmp/defines.inc.php.old
     cat include/defines.inc.php.old | grep -v "EVERYZ_VERSION" > include/defines.inc.php;
-    if [ "`cat include/defines.inc.php | grep \"EVERYZ_VERSION\" | wc -l`" -eq 0 ]; then
-        echo "define ('EVERYZ_VERSION','$VERSAO_EZ');" >> include/defines.inc.php;
-    fi
+    echo "define ('EVERYZ_VERSION','$VERSAO_EZ');" >> include/defines.inc.php;
+    #if [ "`cat include/defines.inc.php | grep \"EVERYZ_VERSION\" | wc -l`" -eq 0 ]; then
+    #cat include/defines.inc.php | grep -v "EVERYZ_VERSION" > include/defines.inc.php;
+    #fi
     FIMINST=$(($FIMINST+1));
 }
 
@@ -604,36 +606,32 @@ instalaLiteral() {
 corTituloMapa() {
     # Arquivo com as principais definicoes dos mapas ===========================
     ARQUIVO="include/classes/sysmaps/CMapPainter.php";
-    backupArquivo $ARQUIVO;
-    # Ajustando o titulo do mapa ===============================================
-    TAG_INICIO="##$NOME_PLUGIN-MapTitle";
-    TAG_FINAL="$TAG_INICIO-FIM";
-    INIINST=`cat $ARQUIVO | sed -ne "/$TAG_INICIO/{=;q;}"`;
-    if [ ! -z $INIINST ]; then
-        FIMINST=`cat $ARQUIVO | sed -ne "/$TAG_FINAL/{=;q;}"`;
-        sed -i "$INIINST,$FIMINST d" $ARQUIVO;
+    if [ -f "$ARQUIVO" ]; then
+        backupArquivo $ARQUIVO;
+        # Ajustando o titulo do mapa ===============================================
+        TAG_INICIO="##$NOME_PLUGIN-MapTitle";
+        TAG_FINAL="$TAG_INICIO-FIM";
+        INIINST=`cat $ARQUIVO | sed -ne "/$TAG_INICIO/{=;q;}"`;
+        if [ ! -z $INIINST ]; then
+            FIMINST=`cat $ARQUIVO | sed -ne "/$TAG_FINAL/{=;q;}"`;
+            sed -i "$INIINST,$FIMINST d" $ARQUIVO;
+        fi
+        # Antigo controle de titulo ================================================
+        sed -i "s/\$this->canvas->drawTitle/#\$this->canvas->drawTitle/" $ARQUIVO;
+        # Removendo o titulo dos mapas =============================================
+        TXT_CUSTOM1="\t\$this->options['graphtheme']['textcolor'] = zbxeMapTitleColor();\n\tif (zbxeMapShowTitle()) {";
+        TXT_CUSTOM1="$TXT_CUSTOM1\n\t\t\$this->canvas->drawTitle(\$this->mapData['name'], \$this->options['graphtheme']['textcolor']);\n\t}";
+    #    TXT_CUSTOM1="\t\$this->options['graphtheme']['textcolor'] = \$COR\;";
+        TAG1="protected function paintTitle() {";
+        NOVO="$TAG1\n$TAG_INICIO\n$TXT_CUSTOM1\n$TAG_FINAL";
+        sed -i "s/$TAG1/$NOVO/" $ARQUIVO
     fi
-    # Antigo controle de titulo ================================================
-    sed -i "s/\$this->canvas->drawTitle/#\$this->canvas->drawTitle/" $ARQUIVO;
-    # Removendo o titulo dos mapas =============================================
-    TXT_CUSTOM1="\t\$this->options['graphtheme']['textcolor'] = zbxeMapTitleColor();\n\tif (zbxeMapShowTitle()) {";
-    TXT_CUSTOM1="$TXT_CUSTOM1\n\t\t\$this->canvas->drawTitle(\$this->mapData['name'], \$this->options['graphtheme']['textcolor']);\n\t}";
-#    TXT_CUSTOM1="\t\$this->options['graphtheme']['textcolor'] = \$COR\;";
-    TAG1="protected function paintTitle() {";
-    NOVO="$TAG1\n$TAG_INICIO\n$TXT_CUSTOM1\n$TAG_FINAL";
-    sed -i "s/$TAG1/$NOVO/" $ARQUIVO
-    # Desabilita a borda do mapa ===============================================
-# Nao achei o ponto de inclusao no zabbix 3...
-#    BORDA='false';
-#    sed -i "s/'border' => .*,/'border' => $BORDA,/" $ARQUIVO;
-    # Define a cor de fundo do mapa ============================================
-#    CORFUNDO='false';
-#    sed -i "s/'bgColor' => '.*',/'bgColor' => '#$CORFUNDO',/" $ARQUIVO;
-
     # Arquivo com as principais definicoes dos mapas ===========================
     ARQUIVO="include/classes/sysmaps/CCanvas.php";
-    backupArquivo $ARQUIVO;
-    sed -i "s/\$this->width - .*, \$this->height - 12, .*\$date/\$this->width - zbxeCompanyNameSize(), \$this->height - 12, zbxeCompanyName().\$date/" $ARQUIVO;
+    if [ -f "$ARQUIVO" ]; then
+        backupArquivo $ARQUIVO;
+        sed -i "s/\$this->width - .*, \$this->height - 12, .*\$date/\$this->width - zbxeCompanyNameSize(), \$this->height - 12, zbxeCompanyName().\$date/" $ARQUIVO;
+    fi
     # Ajuste de cor no titulo dos elementos do mapa ============================
     #ToDo
     FIMINST=$(($FIMINST+1));
@@ -774,10 +772,32 @@ instalaPortletNS() {
         FIMINST=$INIINST;
     fi
     sed -i "$INIINST,$FIMINST d" $ARQUIVO;
-    #TXT_CUSTOM="new CSpan(\$status['items_count_not_supported'], 'unknown')";
     TXT_CUSTOM="new CLink(\$status['items_count_not_supported']\, 'everyz.php?fullscreen=0&item=&action=zbxe-ns&format=0&inactiveHosts=1&filter_set=1')";
     sed -i "$INIINST i$TAG_INICIO\n$TXT_CUSTOM\n$TAG_FINAL" $ARQUIVO
 }
+
+function updatePopUp() {
+    ARQUIVO="popup.php";
+# '"itemid", "name", "master_itemname"',
+    if [ -f "$ARQUIVO" ]; then
+        TAG_INICIO='##Zabbix-Extras-POP-custom';
+        TAG_FINAL="$TAG_INICIO-FIM";
+        INIINST=`cat $ARQUIVO | sed -ne "/$TAG_INICIO/{=;q;}"`;
+        FIMINST=`cat $ARQUIVO | sed -ne "/$TAG_FINAL/{=;q;}"`;
+        if [ ! -z $INIINST ]; then
+            installMgs "U" "POP"; 
+        else
+            installMgs "N" "POP"; 
+            TMP='"name", "master_itemname"';
+            INIINST=`cat $ARQUIVO | sed -ne "/$TMP/{=;q;}"`;
+            FIMINST=$INIINST;
+        fi
+        sed -i "$INIINST,$FIMINST d" $ARQUIVO;
+        TXT_CUSTOM="\t'items' => '\"itemid\", \"name\", \"master_itemname\", \"key_\" ', ";
+        sed -i "$INIINST i$TAG_INICIO\n$TXT_CUSTOM\n$TAG_FINAL" $ARQUIVO
+    fi
+}
+
 
 ####### Parametros de instalacao -----------------------------------------------
 
@@ -805,6 +825,7 @@ instalaLiteral;
 corTituloMapa;
 configuraApache;
 instalaPortletNS;
+updatePopUp;
 
 registra "Installed - [ $VERSAO_INST ]";
  
