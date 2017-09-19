@@ -82,15 +82,17 @@ insert_show_color_picker_javascript();
 $buttonSave = (new CList())->addItem((new CSubmit('btnUpdate', _('Update'))));
 
 // Mapas =======================================================================
-$table = (new CTable());
-$table->addRow(
-        (new CFormList())
-                ->addRow(_zeT('Title', $moduleName), newComboFilterArray([_zeT("Hide"), _zeT("Show")], 'cnf_map_title_show', zbxeConfigValue('map_title_show'), false))
-                ->addRow(_zeT('Color'), new CColor('cnf_map_title_color', zbxeConfigValue('map_title_color'), false))
-                //->addRow(_zeT('White mark Color'), new CColor('cnf_map_wmark_color', zbxeConfigValue('map_wmark_color'), false))
-)
-;
-$dashboardGrid[0][0] = newWidget('maps', _zeT("Map options"), $table);
+if (intval(ezZabbixVersion()) < 340) {
+    $table = (new CTable());
+    $table->addRow(
+            (new CFormList())
+                    ->addRow(_zeT('Title', $moduleName), newComboFilterArray([_zeT("Hide"), _zeT("Show")], 'cnf_map_title_show', zbxeConfigValue('map_title_show'), false))
+                    ->addRow(_zeT('Color'), new CColor('cnf_map_title_color', zbxeConfigValue('map_title_color'), false))
+            //->addRow(_zeT('White mark Color'), new CColor('cnf_map_wmark_color', zbxeConfigValue('map_wmark_color'), false))
+    )
+    ;
+    $dashboardGrid[0][0] = newWidget('maps', _zeT("Map options"), $table);
+}
 // Empresa =====================================================================
 $table = (new CTable());
 

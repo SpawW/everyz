@@ -90,3 +90,4 @@ Changes
     - Add support for Zabbix 4.0 alfa
     - Not Supported Itens - Add link to host edit
     - Fix issue #95
+    - Disable maps patch for 3.4+ (with new maps this feature is not more needed)
