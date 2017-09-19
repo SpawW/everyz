@@ -89,5 +89,5 @@ Changes
 * 1.1.2 - 20170917
     - Add support for Zabbix 4.0 alfa
     - Not Supported Itens - Add link to host edit
-    - Fix issue #95
+    - Fix issue with popup.php for items
     - Disable maps patch for 3.4+ (with new maps this feature is not more needed)
