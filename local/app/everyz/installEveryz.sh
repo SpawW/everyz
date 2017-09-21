@@ -17,7 +17,7 @@ HORARIO_BKP=$(date +"%Y_%d_%m_%H-%M");
 BKP_FILE="/tmp/zeBackup$HORARIO_BKP.tgz";
 
 paramValue() {
-  echo $(echo $1 | awk -F'=' '{print $2}' );
+    echo $(echo $1 | awk -F'=' '{print $2}' );
 }
 
 # Parametros de configuração para automatização ================================
@@ -448,7 +448,7 @@ instalaMenus() {
         unalias mv
     fi
     mv include/defines.inc.php /tmp/defines.inc.php.old
-    cat include/defines.inc.php.old | grep -v "EVERYZ_VERSION" > include/defines.inc.php;
+    cat /tmp/defines.inc.php.old | grep -v "EVERYZ_VERSION" > include/defines.inc.php;
     echo "define ('EVERYZ_VERSION','$VERSAO_EZ');" >> include/defines.inc.php;
     #if [ "`cat include/defines.inc.php | grep \"EVERYZ_VERSION\" | wc -l`" -eq 0 ]; then
     #cat include/defines.inc.php | grep -v "EVERYZ_VERSION" > include/defines.inc.php;
