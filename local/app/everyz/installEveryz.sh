@@ -783,14 +783,17 @@ instalaPortletNS() {
 }
 
 function updatePopUp() {
+    message "Update popup.php";
     ARQUIVO="popup.php";
     # Ajusta o popup menu para suportar a pesquisa por key_
     if [ -f "$ARQUIVO" ]; then
-        IDENT=", \"name\"'";
+#        IDENT=", \"name\"'";
         #Zabbix 3.0.0
-        if [ "`cat popup.php | grep \"$IDENT\" | wc -l`" -gt 1 ]; then
-            sed -i "148s/$IDENT/,\"name\", \"key_\"'/" popup.php
-        else
+#        if [ "`cat popup.php | grep \"$IDENT\" | wc -l`" -gt 1 ]; then
+#            message "Zabbix under 3.4";
+#            sed -i "148s/$IDENT/,\"name\", \"key_\"'/" popup.php
+#        else
+            message "Zabbix more recent than 3.4";
             TAG_INICIO='##Zabbix-Extras-POP-custom';
             TAG_FINAL="$TAG_INICIO-FIM";
             INIINST=`cat $ARQUIVO | sed -ne "/$TAG_INICIO/{=;q;}"`;
@@ -806,7 +809,7 @@ function updatePopUp() {
             sed -i "$INIINST,$FIMINST d" $ARQUIVO;
             TXT_CUSTOM="\t'items' => '\"itemid\", \"name\", \"master_itemname\", \"key_\" ', ";
             sed -i "$INIINST i$TAG_INICIO\n$TXT_CUSTOM\n$TAG_FINAL" $ARQUIVO
-        fi
+#        fi
     fi
 }
 

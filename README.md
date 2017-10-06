@@ -39,7 +39,7 @@ The Wizard will start and will ask for the following informations (one for each 
  Order allow,deny
  Allow from all
 </Directory>
-<Directory "/var/www/html/local/app/everyz/images"> 
+<Directory "<FRONTEND_DIR>/app/everyz/images"> 
  Options FollowSymLinks 
  AllowOverride All 
  <IfModule mod_authz_core.c> 
@@ -48,7 +48,7 @@ The Wizard will start and will ask for the following informations (one for each 
  Order allow,deny
  Allow from all
 </Directory>
-<Directory "/var/www/html/local/app/everyz/css"> 
+<Directory "<FRONTEND_DIR>/app/everyz/css"> 
  Options FollowSymLinks 
  AllowOverride All 
  <IfModule mod_authz_core.c> 
@@ -86,6 +86,8 @@ Changes
 ---------------------------
 * 1.1.0 - 20170908
     - Add support for Zabbix 3.4
+* 1.1.1 - 20170910
+    - Installer improvements
 * 1.1.2 - 20170917
     - Add support for Zabbix 4.0 alfa
     - Not Supported Itens - Add link to host edit
