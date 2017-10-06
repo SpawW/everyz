@@ -19,7 +19,6 @@
  * * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  * */
 if ($VG_INSTALL) {
-
     if (isset($argv)) {
         parse_str(implode('&', array_slice($argv, 1)), $_GET);
     }
@@ -45,11 +44,16 @@ if ($VG_INSTALL) {
             } catch (Exception $e) {
                 
             }
+            try {
+                DBexecute(zbxeStandardDML("DROP TABLE `zbxe_shorten` "));
+            } catch (Exception $e) {
+                
+            }
             $path = str_replace("/everyz/include", "/everyz", dirname(__FILE__));
             require_once $path . '/everyz.initdb.php';
         }
 
-        /*         * **************************************************************
+        /*         * *************************************************************
          * Data Update
          * ********************************************************************** */
         for ($i = 2; $i <= EVERYZBUILD; $i++) {

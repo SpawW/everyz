@@ -9,7 +9,7 @@ INSTALAR="N";
 AUTOR="the.spaww@gmail.com"; 
 TMP_DIR="/tmp/upgZabbix";
 VERSAO_INST="1.1.3";
-VERSAO_EZ="1.1.3";
+VERSAO_EZ="1.1.4";
 UPDATEBD="S";
 BRANCH="master";
 NOME_PLUGIN="EVERYZ";
@@ -18,6 +18,17 @@ BKP_FILE="/tmp/zeBackup$HORARIO_BKP.tgz";
 
 paramValue() {
     echo $(echo $1 | awk -F'=' '{print $2}' );
+}
+infoOk() {
+    echo -e "\e[36m==>\e[32m $1 \e[39m";
+}
+
+infoError() {
+    echo -e "\e[31m==>\e[91m $1 \e[39m";
+}
+
+message() {
+    echo -e "\e[36m==>\e[37m $1 \e[39m";
 }
 
 # Parametros de configuração para automatização ================================
@@ -28,36 +39,36 @@ if [ $# -gt 0 ]; then
             -a=*|--apache=*)
                 RECONFAPACHE=$(paramValue $i);
                 if [ "$RECONFAPACHE" != 'S' ] && [ "$RECONFAPACHE" != 'N' ]; then
-                    echo "Invalid apache option: $RECONFAPACHE";
+                    infoError "Invalid apache option: $RECONFAPACHE";
                 else
-                    echo "Apache option selected: $RECONFAPACHE";
+                    message "Apache option selected: $RECONFAPACHE";
                 fi
                 shift # past argument=value
             ;;
             -f=*|--frontend-path=*)
                 CAMINHO_FRONTEND=$(paramValue $i);
                 if [ ! -d "$CAMINHO_FRONTEND"  ]; then
-                    echo "Invalid frontend path: $CAMINHO_FRONTEND";
+                    infoError "Invalid frontend path: $CAMINHO_FRONTEND";
                 else
-                    echo "Frontend selected path: $CAMINHO_FRONTEND";
+                    message "Frontend selected path: $CAMINHO_FRONTEND";
                 fi
                 shift # past argument=value
             ;;
             -d=*|--download=*)
                 DOWNLOADFILES=$(paramValue $i);
                 if [ "$DOWNLOADFILES" != 'S' ] && [ "$DOWNLOADFILES" != 'N' ]; then
-                    echo "Invalid download option: $DOWNLOADFILES";
+                    infoError "Invalid download option: $DOWNLOADFILES";
                 else
-                    echo "Download option selected: $DOWNLOADFILES";
+                    message "Download option selected: $DOWNLOADFILES";
                 fi
                 shift # past argument=value
             ;;
             -l=*|--language=*)
                 PAR_IDIOMA=$(paramValue $i);
                 if [ "$PAR_IDIOMA" != 'pt' ] && [ "$PAR_IDIOMA" != 'en' ]; then
-                    echo "Invalid language: $PAR_IDIOMA";
+                    infoError "Invalid language: $PAR_IDIOMA";
                 else
-                    echo "Language selected: $PAR_IDIOMA";
+                    message "Language selected: $PAR_IDIOMA";
                 fi
                 shift # past argument=value
             ;;
@@ -89,7 +100,7 @@ if [ $# -gt 0 ]; then
                         fi
                     ;;
                     *) 
-                        echo "Invalid DISTRO option: $LINUX_DISTRO";
+                        InfoError "Invalid DISTRO option: $LINUX_DISTRO";
                         exit;
                     ;;
                 esac
@@ -101,17 +112,12 @@ if [ $# -gt 0 ]; then
                 shift # past argument=value
             ;;
             *)
-                DEFAULT=YES
-                echo "default";
                 shift # past argument with no value
-            ;;
-            *)
-                    # unknown option
             ;;
         esac
     done
     PARAM_ENABLED="S";
-    echo "Installation using parameters! No packages are installed and absent requirements can broken the installation. ";
+    message "Installation using parameters! No packages are installed and absent requirements can broken the installation. ";
 else
     PARAM_ENABLED="N";
 fi
@@ -151,7 +157,7 @@ backupArquivo() {
 registra() {
     [ -d ${TMP_DIR} ] || mkdir ${TMP_DIR}
     echo $(date)" - $1" >> $TMP_DIR/logInstall.log; 
-    echo "-->Mensagem $1";
+    message "$1";
 }
 
 installMgs() {
@@ -377,7 +383,7 @@ caminhoFrontend() {
             registra " $M_ERRO_CAMINHO2 ($CAMINHO_FRONTEND). $M_ERRO_ABORT.";
             exit;
         fi
-        registra " Path do frontend: [$CAMINHO_FRONTEND] ";
+        registra "Path do frontend: [$CAMINHO_FRONTEND] ";
     fi
     cd $CAMINHO_FRONTEND;
 
@@ -386,13 +392,13 @@ caminhoFrontend() {
 tipoInstallZabbix(){
     case $LINUX_DISTRO in
 	"ubuntu" | "debian" | "centos" | "opensuse" | "opensuse" | "amazon" | "oracle" )
-            echo "ainda nao sei...";
+            message "ainda nao sei...";
             ;;
         "red hat" | "red" )
             rpm -qa | grep zabbix | wc -l;
             ;;
 	*) 
-            echo "$M_ERRO_DISTRO - I dont know how check packages in your distro... sory... you know? send-me how ;) ";
+            message "$M_ERRO_DISTRO - I dont know how check packages in your distro... sory... you know? send-me how ;) ";
             ;;
     esac
 }
@@ -428,10 +434,6 @@ instalaMenus() {
         registra "Instalando menu no javascript...";
         sed -i "104s/'admin': 0/'admin': 0,'extras':0/g" js/main.js 
     fi
-    # Ajusta o popup menu para suportar a pesquisa por key_
-    IDENT=", \"name\"'";
-    #Zabbix 3.0.0
-    sed -i "148s/$IDENT/, \"name\", \"key_\"'/" popup.php
     # Ajusta o copyright
 
     TAG_INICIO="##$NOME_PLUGIN-Copyright-custom";
@@ -661,12 +663,16 @@ unzipPackage() {
             rm -rf $DIR_TMP;
         fi
         unzip $ARQ_TMP > /tmp/tmp_unzip_ze.log;
+        if [ -d "/tmp/everyz" ]; then
+            message "Fix folder name for desenv";
+            mv -v /tmp/everyz /tmp/everyz-master
+        fi
         cd $DIR_TMP
         if [ ! -e "$DIR_DEST" ]; then
             mkdir -p "$DIR_DEST";
         fi 
     else
-        echo "===>Instalacao usando cache local";
+        message "Instalacao usando cache local";
     fi
 }
 
@@ -729,11 +735,11 @@ configuraApache() {
             apacheDirectoryConf "images";
             apacheDirectoryConf "css";
             if [ -f "/etc/init.d/apache2" ]; then
-                /etc/init.d/apache2 restart ;
+                /etc/init.d/apache2 reload ;
             elif [ -f "/etc/init.d/httpd" ]; then
-                /etc/init.d/httpd restart ;
+                /etc/init.d/httpd reload ;
             else
-                service httpd restart
+                service httpd reload
             fi
             registra "Reconfigurou o apache! $APACHEROOT/everyz.conf  ";
         fi
@@ -778,23 +784,29 @@ instalaPortletNS() {
 
 function updatePopUp() {
     ARQUIVO="popup.php";
-# '"itemid", "name", "master_itemname"',
+    # Ajusta o popup menu para suportar a pesquisa por key_
     if [ -f "$ARQUIVO" ]; then
-        TAG_INICIO='##Zabbix-Extras-POP-custom';
-        TAG_FINAL="$TAG_INICIO-FIM";
-        INIINST=`cat $ARQUIVO | sed -ne "/$TAG_INICIO/{=;q;}"`;
-        FIMINST=`cat $ARQUIVO | sed -ne "/$TAG_FINAL/{=;q;}"`;
-        if [ ! -z $INIINST ]; then
-            installMgs "U" "POP"; 
+        IDENT=", \"name\"'";
+        #Zabbix 3.0.0
+        if [ "`cat popup.php | grep \"$IDENT\" | wc -l`" -gt 1 ]; then
+            sed -i "148s/$IDENT/,\"name\", \"key_\"'/" popup.php
         else
-            installMgs "N" "POP"; 
-            TMP='"name", "master_itemname"';
-            INIINST=`cat $ARQUIVO | sed -ne "/$TMP/{=;q;}"`;
-            FIMINST=$INIINST;
+            TAG_INICIO='##Zabbix-Extras-POP-custom';
+            TAG_FINAL="$TAG_INICIO-FIM";
+            INIINST=`cat $ARQUIVO | sed -ne "/$TAG_INICIO/{=;q;}"`;
+            FIMINST=`cat $ARQUIVO | sed -ne "/$TAG_FINAL/{=;q;}"`;
+            if [ ! -z $INIINST ]; then
+                installMgs "U" "POP"; 
+            else
+                installMgs "N" "POP"; 
+                TMP='"name", "master_itemname"';
+                INIINST=`cat $ARQUIVO | sed -ne "/$TMP/{=;q;}"`;
+                FIMINST=$INIINST;
+            fi
+            sed -i "$INIINST,$FIMINST d" $ARQUIVO;
+            TXT_CUSTOM="\t'items' => '\"itemid\", \"name\", \"master_itemname\", \"key_\" ', ";
+            sed -i "$INIINST i$TAG_INICIO\n$TXT_CUSTOM\n$TAG_FINAL" $ARQUIVO
         fi
-        sed -i "$INIINST,$FIMINST d" $ARQUIVO;
-        TXT_CUSTOM="\t'items' => '\"itemid\", \"name\", \"master_itemname\", \"key_\" ', ";
-        sed -i "$INIINST i$TAG_INICIO\n$TXT_CUSTOM\n$TAG_FINAL" $ARQUIVO
     fi
 }
 
@@ -802,7 +814,7 @@ function updatePopUp() {
 ####### Parametros de instalacao -----------------------------------------------
 
 if [ $(alias  | grep rm | wc -l ) == "1" ]; then
-    echo "Removendo alias do rm...";
+    message "Removendo alias do rm...";
     unalias rm;
 fi
 

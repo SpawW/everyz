@@ -34,7 +34,6 @@ $sourceAgregator = array('hu.value_max', 'hu.value_min', 'hu.value_avg');
 $intervalMask = array('', '%d/%m/%Y', '%U', '%m/%Y', '%Y');
 $intervalMask2 = array('', 'd/m/Y', 'W (d/m/Y)', 'm/Y', 'Y');
 $intervalMaskSort = array('', '%Y%m%d', '%Y%U', '%Y%m', '%Y');
-
 // Common fields
 addFilterParameter("format", T_ZBX_INT, 0, false, false, false);
 addFilterActions();

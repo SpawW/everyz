@@ -35,6 +35,10 @@ if (titleBar[0] == undefined) {
             titleUL = titleBar[0].children[1].children[0];
             if (titleUL.tagName.toLowerCase() !== 'ul') {
                 tmp = titleUL.getElementsByTagName("UL");
+
+                if (tmp[0] === undefined) {
+                    titleUL.insertAdjacentHTML("beforeEnd", "<ul></ul>");
+                }
                 titleUL = tmp[0];
             }
         }
@@ -71,20 +75,3 @@ function zbxeSearch(mode) {
     }
 }
 
-/*
- // Search bar customization
- var inputValue = document.getElementById("search");
- var onFocus = function () {
- //this.classList.remove("search");
- this.classList.add("input-expand");
- };
- var onBlur = function () {
- if (!this.value)
- this.classList.remove("input-expand");
- };
- inputValue.addEventListener('focus', onFocus, false);
- inputValue.addEventListener('blur', onBlur, false);
- inputValue.classList.remove("search");
- inputValue.classList.add("input-value");
- 
- */

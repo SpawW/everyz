@@ -1,4 +1,5 @@
 <?php
+
 /*
  * * Purpose: Geolocalization of hosts - Javascript
  * * Adail Horst / Aristoteles Araujo.
@@ -24,6 +25,7 @@
     var filterButton = document.getElementById('filter-mode');
     var titleBar = document.getElementsByClassName("header-title");
     var filterDIV = document.getElementById('filter-space');
+
     for (i = 0; i <= titleBar[0].children.length - 1; i++) {
         if (titleBar[0].children[i].tagName.toLowerCase() == 'ul') {
             if (titleBar[0].children[i].tagName.toLowerCase() == 'ul') {
@@ -40,5 +42,6 @@
             }
         }
     }
+
 </script>
 <?php

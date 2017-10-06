@@ -147,7 +147,6 @@ commonModuleHeader($moduleName, $moduleTitle, true);
 
 $widget = newFilterWidget($moduleName);
 
-// Left collumn
 $leftColumn = new CFormList();
 
 $leftColumn->addRow(_('Host Groups'), multiSelectHostGroups(selectedHostGroups($filter['groupids'])));
@@ -176,7 +175,7 @@ $widget->addColumn($rightColumn);
 // Left collumn
 
 $dashboard->addItem($widget);
-if (hasRequest('filter_set')) { 
+if (hasRequest('filter_set')) {
     checkRequiredField("groupids", _zeT("You need to provide a least one host group in filter!"));
     if (!$requiredMissing) {
         $cont = 0;
@@ -233,17 +232,17 @@ $dashboard->addItem($form)->show();
     var filterButton = document.getElementById('filter-mode');
     var titleBar = document.getElementsByClassName("header-title");
     var filterDIV = document.getElementById('filter-space');
-    for (i = 0; i <= titleBar[0].children.length - 1; i++) {
-        if (titleBar[0].children[i].tagName.toLowerCase() == 'ul') {
-            titleUL = titleBar[0].children[i];
-            var newItem = document.createElement("LI");
-            var textnode = document.createTextNode(" ")
-            //newItem.appendChild(textnode);
-            //             .titleUL.appendChild(newItem);
-            titleUL.appendChild(filterButton);
-            btnMin = document.getElementsByClassName("btn-min");
-            if (btnMin.length > 0) {
-                filterDIV.style = 'display: none;'
+    if (typeof titleBar[0] !== "undefined") {
+        for (i = 0; i <= titleBar[0].children.length - 1; i++) {
+            if (titleBar[0].children[i].tagName.toLowerCase() == 'ul') {
+                titleUL = titleBar[0].children[i];
+                var newItem = document.createElement("LI");
+                var textnode = document.createTextNode(" ")
+                titleUL.appendChild(filterButton);
+                btnMin = document.getElementsByClassName("btn-min");
+                if (btnMin.length > 0) {
+                    filterDIV.style = 'display: none;'
+                }
             }
         }
     }

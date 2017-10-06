@@ -19,11 +19,9 @@
  * */
 
 
-
 // Global definitions ==========================================================
 require_once dirname(__FILE__) . '/include/config.inc.php';
 
-//define('ZBX_PAGE_DO_REFRESH', 1);
 /**
  * Base path to profiles on Zabbix Database
  */
@@ -32,6 +30,7 @@ $baseProfile = "everyz.";
 $page['title'] = _('EveryZ');
 $page['file'] = 'everyz.php';
 $filter = $fields = [];
+$TINYPAGE = true;
 
 switch (getRequest('format')) {
     case PAGE_TYPE_CSV:
@@ -52,6 +51,24 @@ switch (getRequest('format')) {
 
 $page['scripts'] = array('class.calendar.js', 'multiselect.js', 'gtlc.js');
 require_once dirname(__FILE__) . '/include/page_header.php';
+$TINYPAGE = getRequest2("shorturl") !== "";
+if ($TINYPAGE) {
+    ?>
+    <style type="text/css">
+        body {
+            min-width: 100%;
+            margin-bottom: 0px;
+        }
+        .filter-space, .filter-container, .filter-btn-container {
+            display: none;
+        }
+        article, .article {
+            padding: 0px 0px 0 0px;
+        }
+    </style>
+    <?php
+}
+zbxeCheckDBConfig();
 
 addFilterParameter("action", T_ZBX_STR, "dashboard", false, false, false);
 addFilterParameter("shorturl", T_ZBX_STR, '', false, false, false);
@@ -63,18 +80,15 @@ zbxeTranslateURL();
   ============================================================================== */
 
 $config = select_config();
-//var_dump([$action, $module, $filter["shorturl"]]);
 $action = getRequest2("action");
-//var_dump([$action, $module, $filter["shorturl"]]);
 $module = "dashboard";
 
 if (hasRequest('zbxe_reset_all') && getRequest2('zbxe_reset_all') == "EveryZ ReseT" && $action == "zbxe-config") {
-    // Remover tabelas do EveryZ
-    // Remover profiles
     try {
         show_message(_zeT('EveryZ configuration back to default factory values! Please click on "EveryZ" menu!'));
         DBexecute(zbxeStandardDML("DROP TABLE `zbxe_preferences` "));
         DBexecute(zbxeStandardDML("DROP TABLE `zbxe_translation` "));
+        DBexecute(zbxeStandardDML("DROP TABLE `zbxe_shorten` "));
         DBexecute(zbxeStandardDML("DELETE FROM `profiles` where idx like 'everyz%' "));
         $path = str_replace("local/app/views", "local/app/everyz/init", dirname(__FILE__));
         if (!file_exists($path . '/everyz.initdb.php')) {
@@ -111,8 +125,8 @@ if ($module == "dashboard") {
         echo "Não existe o arquivo do modulo (" . $module . ")";
     }
 }
-
-echo "<!-- Everyz Version - " . EVERYZVERSION . " -->\n";
-
-zbxeFullScreen();
-require_once dirname(__FILE__) . '/include/page_footer.php';
+if (!$TINYPAGE) {
+    echo "<!-- Everyz Version - " . EVERYZVERSION . " -->\n";
+    zbxeFullScreen();
+    require_once dirname(__FILE__) . '/include/page_footer.php';
+}

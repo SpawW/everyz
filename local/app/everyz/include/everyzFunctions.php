@@ -19,12 +19,12 @@
  * * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  * */
 
-        const CRYPT_SALT = '1822';
+const CRYPT_SALT = '1822';
 // Define and global variables
 define("ZE_VER", "3.0");
 define("EZ_TITLE", 'EveryZ - ');
 define("ZE_COPY", ", ZE " . ZE_VER);
-define("EVERYZVERSION", "1.1.3");
+define("EVERYZVERSION", "1.1.4");
 define("EVERYZBUILD", 9);
 if (file_exists("lockEverys.php")) {
     $VG_INSTALL = true;
@@ -488,7 +488,7 @@ function addFilterActions() {
     $filter["fullscreen"] = getRequest2("fullscreen", "0");
     $fields['hidetitle'] = array(T_ZBX_INT, O_OPT, P_SYS, IN('0,1'), null);
     $filter["hidetitle"] = getRequest2("hidetitle", "0");
-    $fields['format'] = array(T_ZBX_INT, O_OPT, P_SYS, IN('0,1'), null);
+    $fields['format'] = array(T_ZBX_INT, O_OPT, P_SYS, IN('0,1,10,6'), null);
     $filter["format"] = getRequest2("format", "0");
     $fields["mode"] = array(T_ZBX_STR, O_OPT, P_UNSET_EMPTY, NULL, null);
     $filter["mode"] = getRequest2("mode", "");
@@ -1508,40 +1508,6 @@ function zbxeButtonUserLevel($name, $value) {
     return buttonOptions($name, $value, [_('User'), _zeT('Admin'), _zeT('Super Admin')], [USER_TYPE_ZABBIX_USER, USER_TYPE_ZABBIX_ADMIN, USER_TYPE_SUPER_ADMIN]);
 }
 
-// End Functions ===============================================================
-// Enviroment configuration
-try {
-    global $VG_INSTALL;
-    if (!isset($VG_INSTALL)) {
-        global $VG_BANCO_OK;
-        $VG_BANCO_OK = false;
-        zbxeStartDefinitions();
-        $ezCurrent = DBfetch(DBselect('select tx_value from zbxe_preferences WHERE tx_option = ' . quotestr("everyz_version")));
-        if (empty($ezCurrent)) {
-            zbxeErrorLog($VG_DEBUG, 'EveryZ - Fresh install [' . $ezCurrent . '] ...');
-            $path = str_replace("/everyz/include", "/everyz", dirname(__FILE__));
-            require_once $path . '/init/everyz.initdb.php';
-        } else {
-            $VG_BANCO_OK = true;
-            $ezCurrent = $ezCurrent['tx_value'];
-        }
-        if ($VG_BANCO_OK && (int) $ezCurrent !== (int) EVERYZBUILD) {
-            zbxeErrorLog($VG_DEBUG, 'EveryZ - Upgrade - [Current: ' . $ezCurrent . ' / New:' . EVERYZBUILD . '] ');
-            $path = str_replace("/everyz/include", "/everyz", dirname(__FILE__));
-            require_once $path . '/init/everyz.upgradedb.php';
-        }
-    }
-    // Verificar se as imagens existem
-    if (intval(zbxeFieldValue("select COUNT(*) as total from images where name like 'zbxe_%' ", "total"), 0) < 9) {
-        //var_dump(zbxeFieldValue("select COUNT(*) as total from images where name like 'zbxe_%' ", "total"));
-        $path = str_replace('/include', "", realpath(dirname(__FILE__))) . "/init";
-        $json = json_decode(file_get_contents("$path/everyz_config.json"), true);
-        zbxeUpdateConfigImages($json, true, false);
-    }
-} catch (Exception $e) {
-    return FALSE;
-}
-
 /**
  * zbxeColHeader
  *
@@ -1551,7 +1517,7 @@ try {
  * @param string $text   Header text
  * @param string $size   Size of collum header
  */
-function zbxeColHeader($text, $size) {
+function zbxeColHeader($text, $size) { 
     return (new CColHeader(_zeT($text)))->addStyle('width: ' . $size . (is_int($size) ? '%' : ''));
 }
 
@@ -1628,4 +1594,94 @@ function zbxeTranslateURL() {
             $_REQUEST[$key] = $value;
         }
     }
+}
+
+/**
+ * zbxeCheckDBConfig
+ *
+ * Verifica versão corrente do BD do EveryZ e atualiza, se necessário for
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ */
+function zbxeCheckDBConfig() {
+    $ezCurrent = zbxeConfigValue("everyz_version", 1);
+    $debug = true;
+    if ($ezCurrent > 6) {
+        for ($i = $ezCurrent + 1; $i <= EVERYZBUILD; $i++) {
+            $PATH = str_replace("/include", "/init", realpath(dirname(__FILE__)));
+            DBstart();
+            $resultOK = true;
+            if (file_exists("$PATH/everyz_upgrade.$i.php")) {
+                require_once "$PATH/everyz_upgrade.$i.php";
+            }
+            // Update Configuration
+            if (file_exists("$PATH/everyz_config.$i.json")) {
+                $json = json_decode(file_get_contents("$PATH/everyz_config.$i.json"), true);
+                zbxeUpdateConfig($json, $resultOK, $debug);
+            }
+            // Update Translation
+            if (file_exists("$PATH/everyz_lang.$i.json")) {
+                $json = json_decode(file_get_contents("$PATH/everyz_lang.$i.json"), true);
+                zbxeUpdateTranslation($json, $resultOK, $debug);
+            }
+            zbxeUpdateConfigValue("everyz_version", $i, 0);
+            DBend($resultOK);
+        }
+        if (isset($resultOK)) {
+            show_messages(true, _s(_zeT('EveryZ - Configuration update to %1$s version!'), EVERYZVERSION . "." . EVERYZBUILD));
+        }
+    }
+}
+
+/**
+ * zbxeNextValue
+ *
+ * Get next value of a sequence (created for allow auto-increment feature without DB specific function)
+ * @author Adail Horst <the.spaww@gmail.com>
+ * 
+ * @param string  $param   sequence to get next value
+ * @param string  $default   default value for sequence
+ */
+function zbxeNextValue($param, $default = 1) {
+    $param = "zbxeSequence." . $param;
+    $query = 'select tx_value from zbxe_preferences WHERE userid = 0 and tx_option = ' . quotestr($param);
+    $retorno = zbxeFieldValue($query, 'tx_value');
+    $retorno = (intval($retorno,0) < 2 ? $default : intval($retorno) + 1);
+    zbxeUpdateConfigValue($param, $retorno);
+    return $retorno;
+}
+
+// End Functions ===============================================================
+// Enviroment configuration
+try {
+
+    global $VG_INSTALL;
+    if (!isset($VG_INSTALL)) {
+        global $VG_BANCO_OK;
+        $VG_BANCO_OK = false;
+        zbxeStartDefinitions();
+        $ezCurrent = DBfetch(DBselect('select tx_value from zbxe_preferences WHERE tx_option = ' . quotestr("everyz_version")));
+        if (empty($ezCurrent)) {
+            zbxeErrorLog($VG_DEBUG, 'EveryZ - Fresh install [' . $ezCurrent . '] ...');
+            $path = str_replace("/everyz/include", "/everyz", dirname(__FILE__));
+            require_once $path . '/init/everyz.initdb.php';
+        } else {
+            $VG_BANCO_OK = true;
+            $ezCurrent = $ezCurrent['tx_value'];
+        }
+        if ($VG_BANCO_OK && (int) $ezCurrent !== (int) EVERYZBUILD) {
+            zbxeErrorLog($VG_DEBUG, 'EveryZ - Upgrade - [Current: ' . $ezCurrent . ' / New:' . EVERYZBUILD . '] ');
+            $path = str_replace("/everyz/include", "/everyz", dirname(__FILE__));
+            require_once $path . '/init/everyz.upgradedb.php';
+        }
+    }
+    // Verificar se as imagens existem
+    if (intval(zbxeFieldValue("select COUNT(*) as total from images where name like 'zbxe_%' ", "total"), 0) < 9) {
+        //var_dump(zbxeFieldValue("select COUNT(*) as total from images where name like 'zbxe_%' ", "total"));
+        $path = str_replace('/include', "", realpath(dirname(__FILE__))) . "/init";
+        $json = json_decode(file_get_contents("$path/everyz_config.json"), true);
+        zbxeUpdateConfigImages($json, true, false);
+    }
+} catch (Exception $e) {
+    return FALSE;
 }

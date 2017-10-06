@@ -73,7 +73,7 @@ A.everyzGEOLink:active {text-decoration: none; color: black'';}
 #everyzTopMenuInfo {
     float: left; 
     margin: -5px 0px 0 0; 
-    //background: url("../images/zbxe-logo.png") no-repeat; 
+/*    //background: url("../images/zbxe-logo.png") no-repeat;  */
     height: 60px; 
     width: 300px; 
     cursor: pointer;

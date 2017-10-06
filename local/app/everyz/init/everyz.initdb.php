@@ -32,6 +32,12 @@ $dmlTranslation = "CREATE TABLE zbxe_translation (
       `tx_new` varchar(255) NOT NULL,
       `module_id` varchar(20)
     ) ";
+$dmlShorten = "CREATE TABLE IF NOT EXISTS `zbxe_shorten` (
+  `id_url` int(11) NOT NULL,
+  `tx_url` varchar(1000) NOT NULL,
+  `tx_desc` varchar(60) NOT NULL,
+  `userid` int(11) NOT NULL
+) ";
 
 if (php_sapi_name() === "cli") {
     // In cli-mode
@@ -70,6 +76,7 @@ try {
         zbxeErrorLog($VG_DEBUG, 'EveryZ - Creating tables');
         DBexecute(zbxeStandardDML($dmlPreferences));
         DBexecute(zbxeStandardDML($dmlTranslation));
+        DBexecute(zbxeStandardDML($dmlShorten));
     }
 } catch (Exception $e) {
     zbxeErrorLog(true, 'EveryZ - Creating tables fail');
@@ -89,6 +96,7 @@ try {
             zbxeErrorLog($VG_DEBUG, 'EveryZ - Creating tables');
             DBexecute(zbxeStandardDML($dmlPreferences));
             DBexecute(zbxeStandardDML($dmlTranslation));
+            DBexecute(zbxeStandardDML($dmlShorten));
         }
         $debug = true;
         $resultOK = true;

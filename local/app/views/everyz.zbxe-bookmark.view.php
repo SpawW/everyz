@@ -25,7 +25,7 @@
 $moduleName = "zbxe-bookmark";
 $baseProfile .= $moduleName;
 $moduleTitle = 'Bookmark Manager';
-
+//var_dump(zbxeNextValue('shorten', 1976));
 /* * ***************************************************************************
  * Module Variables
  * ************************************************************************** */
@@ -38,6 +38,7 @@ addFilterActions();
 // Specific fields =============================================================
 addFilterParameter("descriptionFilter", T_ZBX_STR, '', false, false, false);
 addFilterParameter("dml", T_ZBX_STR, '', false, true, false);
+addFilterParameter("hashKey", T_ZBX_INT, -1, false, true, false);
 
 addFilterParameter("url", T_ZBX_STR, '', false, false, false);
 addFilterParameter("description", T_ZBX_STR, '', false, false, false);
@@ -59,16 +60,15 @@ check_fields($fields);
  * Set Filter
  * ************************************************************************** */
 // Filtros =====================================================================
-if (hasRequest('filter_rst')) { 
+if (hasRequest('filter_rst')) {
     $filter['filter_rst'] = NULL;
     $filter['action'] = $moduleName;
     $filter['mode'] = "";
 } elseif (hasRequest('filter_set')) {
-    if ($filter['nameFilter'] !== "") {
-        $filterSQL = " and tx_value like " . quotestr("%|%" . $filter['nameFilter'] . "%");
+    if ($filter['descriptionFilter'] !== "") {
+        $filterSQL = " WHERE tx_desc like " . quotestr("%" . $filter['descriptionFilter'] . "%");
     }
 }
-
 /* * ***************************************************************************
  * DML actions
  * ************************************************************************** */
@@ -87,28 +87,22 @@ if (hasRequest('dml')) {
         }
     }
     if ($requiredMissing) {
-        show_messages(false, 'Configuration not updated!');
+        show_messages(false, 'Bookmark not updated!');
     } else {
         switch ($filter['mode']) {
             case "edit":
                 break;
             case "add":
-                $sql = zbxeInsert("zbxe_shorten", [ 'tx_url', 'tx_desc', 'userid'], [$filter["url"], $filter["description"], CWebUser::$data['userid']]);
+                $sql = zbxeInsert("zbxe_shorten", [ 'tx_url', 'tx_desc', 'userid', 'id_url']
+                        , [$filter["url"], $filter["description"], CWebUser::$data['userid'], zbxeNextValue('shorten', 1976)]);
                 show_messages(prepareQuery($sql), _zeT('Bookmark added'));
-                $filter['mode'] = '';
                 break;
-// Delete
             case "delete":
-                if (trim($filter["widget"]) == "") {
-                    error(_zeT("Invalid parameters!"));
-                    break;
-                }
-                $sql = 'delete from zbxe_preferences where tx_option like ' . quotestr(trim($filter["widget"] . "%"));
-
-                show_messages(prepareQuery($sql), _zeT('Widget item ' . ($filter["mode"] == "widget.add" ? "added" : "deleted")));
-                $filter['mode'] = '';
+                $sql = 'delete from zbxe_shorten where id_url = ' . quotestr(trim($filter["hashKey"]));
+                show_messages(prepareQuery($sql), _zeT('Bookmark deleted!'));
                 break;
         }
+        $filter['mode'] = '';
     }
 }
 // End DML
@@ -189,15 +183,14 @@ if ($filter['mode'] !== "") {
             break;
     }
 } else {
-//print_r(zbxeRecoverParams('zHCFkkoDqm$uAXKLyrTGGQ'));
 // Build the report header -----------------------------------------------------
     switch ($filter["format"]) {
         case 1;
             $table->setHeader(array(_zeT("Data")));
             break;
         case 0;
-            $table->setHeader(array(zbxeColHeader("Short URL",13)// (new CColHeader(_zeT("Short URL")))->addStyle('width: 5%')
-                , _("Description"), zbxeColHeader("URL",60), zbxeColHeader("Action",5)));
+            $table->setHeader(array(zbxeColHeader("Short URL", 13)// (new CColHeader(_zeT("Short URL")))->addStyle('width: 5%')
+                , _("Description"), zbxeColHeader("URL", 60), zbxeColHeader("Action", 15)));
             break;
     }
 
@@ -208,12 +201,17 @@ if ($filter['mode'] !== "") {
             switch ($filter["format"]) {
                 case 0;
                     //print_r([IdObfuscator::encode($report[$i][0]),IdObfuscator::decode(IdObfuscator::encode($report[$i][0]))]);
-                    $linha[0] = new CCol(IdObfuscator::encode($report[$i][0]), 1);
+                    $hashKey = IdObfuscator::encode($report[$i][0]);
+                    $linha[0] = new CCol($hashKey, 1);
                     $linha[1] = new CCol($report[$i][1], 1);
                     $linha[2] = new CCol($report[$i][2], 1);
                     //$linha[3] = new CCol($report[$i][3], 1);
                     $baseAction = '?action=' . $moduleName . '&hashKey=' . $report[$i][0];
-                    $linha[3] = array((new CRedirectButton(_('Delete'), $baseAction . "&dml=Y&mode=widget.delete", _('Delete record?')))->setId('delete'));
+                    $linha[3] = array((new CRedirectButton(_('Delete'), $baseAction . "&dml=Y&mode=delete", _('Delete record?')))->setId('delete')
+                        , "&nbsp;"
+                        , ((new CButton('copyURL', _('Copy URL')))->onClick("javascript:copyText("
+                                . quotestr("everyz.php?shorturl=".$hashKey."&fullscreen=1&hidetitle=1") . ");"))
+                    );
                     $table->addRow($linha);
                     break;
                 case 1;
@@ -238,3 +236,18 @@ if ($filter['mode'] !== "") {
 $form->addItem([ $table]);
 
 $dashboard->addItem($form)->show();
+?>
+<script language="Javascript">
+    function copyText(text) {
+        var textArea = document.createElement('textarea');
+        textArea.setAttribute('style', 'width:1px;border:0;opacity:0;');
+        document.body.appendChild(textArea);
+        textArea.value = text;
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        alert('Short URL copied! Paste where you need it.');
+    }
+</script>
+<?php
+
