@@ -196,8 +196,13 @@ if (hasRequest('filter_set')) {
         $result = DBselect($query);
         while ($row = DBfetch($result)) {
             if ($lastItemID !== $row['itemid']) {
-                $historyRows = round(86400 / timeUnitToSeconds($row['delay']) * (timeUnitToSeconds($row['history']) / 86400), 0);
-                $trendRows = round((timeUnitToSeconds($row['trends']) / 86400) * 24, 0);
+                if (ezZabbixVersion() >= 340) {
+                    $historyRows = round(86400 / timeUnitToSeconds($row['delay']) * (timeUnitToSeconds($row['history']) / 86400), 0);
+                    $trendRows = round((timeUnitToSeconds($row['trends']) / 86400) * 24, 0);
+                } else {
+                    $historyRows = round(86400 / $row['delay'] * $row['history'], 0);
+                    $trendRows = round($row['trends'] * 24, 0);
+                }
                 $report[$cont][-1] = $row['hostid'];
                 $report[$cont][0] = $row['host_name'];
                 $report[$cont][1] = $row['item_name'];
