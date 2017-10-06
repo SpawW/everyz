@@ -119,7 +119,7 @@ function totalUBM($vps, $gb) {
             + (
             ($gb * 100 / $refGB) / 100 * $fatorGB
             ) // Custo administrativo
-            + ($fatorHost) 
+            + ($fatorHost)
             ) / 10
             , 6)
     ;
@@ -138,7 +138,6 @@ function valorUBM($totalUBM, $cotacao) {
 /* * ***************************************************************************
  * Get Data
  * ************************************************************************** */
-
 // Check if the basic macros have values
 checkGlobalMacros();
 // Filtros =====================================================================
@@ -175,7 +174,9 @@ if (hasRequest('filter_set')) {
 
         // Recover data from items =============================================
         $query = "SELECT hos.name as host_name, it.hostid, it.name as item_name, it.key_ as item_key, it.delay, "
-                . "\n     it.history, it.trends, it.status, 86400 / it.delay * it.history AS history_costs, it.trends * 24 AS trends_costs, it.itemid as itemid "
+                . "\n it.history, it.trends, it.status, it.itemid as itemid "
+//                . "\n     it.history, it.trends, it.status, 86400 / it.delay * it.history AS history_costs,
+//                 it.trends * 24 AS trends_costs, it.itemid as itemid "
                 . "\n FROM items it "
                 . "\n INNER JOIN hosts hos ON hos.hostid = it.hostid "
                 . ($hostFilter == "" ? "" : " AND ") . $hostFilter
@@ -183,6 +184,7 @@ if (hasRequest('filter_set')) {
                 . " WHERE it.flags <> 2 and it.type not in (2,17)"
                 . ($filter["notMonitored"] == 0 ? " AND it.status = 0 " : "")
                 . "\n Order by hos.name, it.key_ ";
+        //timeUnitToSeconds  - função de conversão de tempo em notação para segundos
         $report = Array();
         $hostsReport = Array();
         $lastItemID = $cont = $historyTotal = $trendTotal = $storageTotal = $vpsTotal = $ubmTotal = (float) 0;
@@ -194,15 +196,17 @@ if (hasRequest('filter_set')) {
         $result = DBselect($query);
         while ($row = DBfetch($result)) {
             if ($lastItemID !== $row['itemid']) {
+                $historyRows = round(86400 / timeUnitToSeconds($row['delay']) * (timeUnitToSeconds($row['history']) / 86400), 0);
+                $trendRows = round((timeUnitToSeconds($row['trends']) / 86400) * 24, 0);
                 $report[$cont][-1] = $row['hostid'];
                 $report[$cont][0] = $row['host_name'];
                 $report[$cont][1] = $row['item_name'];
                 $report[$cont][2] = $row['item_key'];
                 $report[$cont][3] = $row['delay'] . " / " . $row['history'] . " / " . $row['trends'];
                 $report[$cont][4] = ($row['status'] == 1 ? _('Not monitored') : _('Active'));
-                $historyRows = round(floatval($row['history_costs']), 0); // antigo 7
+                //$historyRows = $history_costs; //round(floatval($row['history_costs']), 0); // antigo 7
                 $historyTotal += $historyRows;
-                $trendRows = round(floatval($row['trends_costs']), 0);
+                //$trendRows = round(floatval($row['trends_costs']), 0);
                 $report[$cont][5] = "[" . $historyRows . " / " . $trendRows . "] " . _zeT('rows'); // antigo 8
                 $trendTotal += $trendRows; // Antigo 8
                 // Total Rows
