@@ -93,7 +93,7 @@ Changes
     - Disable maps patch for 3.4+ (with new maps this feature is not more needed)    
 * 1.1.3 - 20170929
     - Updates in define.inc.php 
-    - Fixed installation bug related to clean installation (problem with define.inc.php) (github #96)
+    - Fixed installation bug related to clean installation (problem with define.inc.php) (github issue #96)
     - Fix JSON / CSV export problems on 3.4+ 
     - Add module for bookmark and shorten URLs 
 * 1.1.4 - 20171005
