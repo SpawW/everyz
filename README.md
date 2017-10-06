@@ -101,6 +101,6 @@ Changes
 * 1.1.4 - 20171005
     - Translation update
     - Fix bug in popup.php for zabbix versions (3.2 and 3.0) 
-    - Update costs module to work with Zabbix 3.4 (database changes) 
+    - Update costs module to work with new Zabbix 3.4 database structure 
 
 

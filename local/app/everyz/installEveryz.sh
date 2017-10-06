@@ -386,6 +386,7 @@ caminhoFrontend() {
         registra "Path do frontend: [$CAMINHO_FRONTEND] ";
     fi
     cd $CAMINHO_FRONTEND;
+    ZABBIX_VERSION=$(cat "$CAMINHO_FRONTEND/include/defines.inc.php" | grep "ZABBIX_API_VERSION" | awk -F"'" '{print $4}' | awk -F"." '{print $1$2}');
 
 }
 
@@ -785,14 +786,18 @@ instalaPortletNS() {
 function updatePopUp() {
     message "Update popup.php";
     ARQUIVO="popup.php";
+    
     # Ajusta o popup menu para suportar a pesquisa por key_
     if [ -f "$ARQUIVO" ]; then
-#        IDENT=", \"name\"'";
         #Zabbix 3.0.0
-#        if [ "`cat popup.php | grep \"$IDENT\" | wc -l`" -gt 1 ]; then
-#            message "Zabbix under 3.4";
-#            sed -i "148s/$IDENT/,\"name\", \"key_\"'/" popup.php
-#        else
+        message "Zabbix Version $ZABBIX_VERSION";
+        if [ "$ZABBIX_VERSION" -lt "34" ]; then
+            IDENT=", \"name\"'";
+            if [ "`cat popup.php | grep \"$IDENT\" | wc -l`" -gt 1 ]; then
+                message "Zabbix under 3.4";
+                sed -i "148s/$IDENT/,\"name\", \"key_\"'/" popup.php
+            fi
+        else
             message "Zabbix more recent than 3.4";
             TAG_INICIO='##Zabbix-Extras-POP-custom';
             TAG_FINAL="$TAG_INICIO-FIM";
@@ -809,7 +814,7 @@ function updatePopUp() {
             sed -i "$INIINST,$FIMINST d" $ARQUIVO;
             TXT_CUSTOM="\t'items' => '\"itemid\", \"name\", \"master_itemname\", \"key_\" ', ";
             sed -i "$INIINST i$TAG_INICIO\n$TXT_CUSTOM\n$TAG_FINAL" $ARQUIVO
-#        fi
+        fi
     fi
 }
 
