@@ -31,7 +31,6 @@ $moduleTitle = 'Geolocation';
 $config = select_config();
 
 // Common fields
-//addFilterParameter("format", T_ZBX_INT);
 addFilterActions();
 
 // Specific fields

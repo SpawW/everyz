@@ -1,4 +1,4 @@
-# everyz
+# EveryZ
 Hack for plugin support on Zabbix web interface
 
 Requirements
@@ -31,35 +31,35 @@ The Wizard will start and will ask for the following informations (one for each 
 
 ```
 <Directory "<FRONTEND_DIR>/local/app/everyz/js"> 
- Options FollowSymLinks 
- AllowOverride All 
- <IfModule mod_authz_core.c> 
-  Require all granted 
- </IfModule>
- Order allow,deny
- Allow from all
+    Options FollowSymLinks 
+    AllowOverride All 
+    <IfModule mod_authz_core.c> 
+        Require all granted 
+    </IfModule>
+    Order allow,deny
+    Allow from all
 </Directory>
 <Directory "<FRONTEND_DIR>/app/everyz/images"> 
- Options FollowSymLinks 
- AllowOverride All 
- <IfModule mod_authz_core.c> 
-  Require all granted 
- </IfModule>
- Order allow,deny
- Allow from all
+    Options FollowSymLinks 
+    AllowOverride All 
+    <IfModule mod_authz_core.c> 
+        Require all granted 
+    </IfModule>
+    Order allow,deny
+    Allow from all
 </Directory>
 <Directory "<FRONTEND_DIR>/app/everyz/css"> 
- Options FollowSymLinks 
- AllowOverride All 
- <IfModule mod_authz_core.c> 
-  Require all granted 
- </IfModule>
- Order allow,deny
- Allow from all
+    Options FollowSymLinks 
+    AllowOverride All 
+    <IfModule mod_authz_core.c> 
+        Require all granted 
+    </IfModule>
+    Order allow,deny
+    Allow from all
 </Directory>
 ```
 
-PS: Change the "<FRONTEND_DIR>" to your zabbix frontend directory.
+PS: Change the ```<FRONTEND_DIR>``` to your zabbix frontend directory.
 
 If all options were supplied correctly, you can now point your browser into the your zabbix frontend address and a new menu called "Extras" should be visible.
 
@@ -102,5 +102,9 @@ Changes
     - Translation update
     - Fix bug in popup.php for zabbix versions (3.2 and 3.0) 
     - Update costs module to work with new Zabbix 3.4 database structure 
+* 1.1.5 - 20171005
+    - Host Import:
+    -- Now can import with inventory fields
+    -- Default inventory mode now is automatic 
 
 

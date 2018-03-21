@@ -1,9 +1,18 @@
 #!/bin/bash
-# Autor: Adail Horst
-# Email: everyz@everyz.org
-# Objective: Install Everyz / Zabbix Extras 
-# ZABBIX_VERSIONS: 3.0.*, 3.2.* and 3.4.* - Tested with 3.0.9, 3.2.5 and 3.4.0
+#-------------------------------------------------------
+# Author:       Adail Spinola <everyz@everyz.org>
+# Date:         21-Mar-2018
+# Objective:    Install EveryZ
+# Update Log:
+# 20180321 - Add examples of use
+# 20180213 - Upgrade to 4.0.0 alfa
 # 20170918 - Update for change popup.php and validation of files for multiple zabbix versions
+#-------------------------------------------------------
+## ./installZabbix.sh -v=3.0.15 -s -db=zbx300 -dbup=ze123456 -dbrp=ze123456r -dbu=zbx300 -name=3.0 -epath=3.0 -dtu
+## ./installZabbix.sh -v=3.2.11 -s -db=zbx320 -dbup=ze123456 -dbrp=ze123456r -dbu=zbx320 -name=3.2 -epath=3.2 -dtu
+## ./installEveryz.sh -a=S -f=/var/www/html/3.4 -d=S -l=pt -i=redhat
+## ./installZabbix.sh -v=4.0.0 -beta -s -db=zbx400 -dbup=ze123456 -dbrp=ze123456r -dbu=zbx400 -name=4.0 -epath=4.0 -dtu
+
 
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com"; 
@@ -139,10 +148,10 @@ primeiroAcesso() {
 
 instalaPacote() {
     if [ "$PARAM_ENABLED" != "S" ]; then
-    registra "============== Instalando pacote(s) ($1 $2 $3 $4 $5 $6 $7 $8 $9) =================";
-    $GERENCIADOR_PACOTES $PARAMETRO_INSTALL $1 $2 $3 $4 $5 $6 $7 $8 $9  ${10} \
- ${11} ${12} ${13} ${14} ${15} ${16} ${17} ${18} ${19} ${20} \
- ${21} ${22} ${23} ${24} ${25} ${26} ${27} ${28} ${29} ${30};
+        registra "============== Instalando pacote(s) ($1 $2 $3 $4 $5 $6 $7 $8 $9) =================";
+        $GERENCIADOR_PACOTES $PARAMETRO_INSTALL $1 $2 $3 $4 $5 $6 $7 $8 $9  ${10} \
+     ${11} ${12} ${13} ${14} ${15} ${16} ${17} ${18} ${19} ${20} \
+     ${21} ${22} ${23} ${24} ${25} ${26} ${27} ${28} ${29} ${30};
     fi
 }
 
@@ -431,9 +440,10 @@ instalaMenus() {
     # Verificação de instalação prévia do patch no javascript --------------
     TAG_INICIO="'admin': 0,'extras':0";
     if [ "`cat js/main.js | grep \"$TAG_INICIO\" | wc -l`" -eq 0 ]; then
-        LINHA=`cat js/main.js | sed -ne "/{'empty'\:/{=;q;}"`;
+#        LINHA=`cat js/main.js | sed -ne "/{'menus'\:/{=;q;}"`;
+        LINHA=`grep -n "menus:" js/main.js | cut -d : -f 1`;
         registra "Instalando menu no javascript...";
-        sed -i "104s/'admin': 0/'admin': 0,'extras':0/g" js/main.js 
+        sed -i $LINHA"s/'admin': 0/'admin': 0,'extras':0/g" js/main.js 
     fi
     # Ajusta o copyright
 

@@ -100,6 +100,8 @@ if (hasRequest('hostData')) {
                         $groupIndex[] = $key;
                     if (strpos($value, 'template.') > -1)
                         $templateIndex[] = $key;
+                    if (strpos($value, 'inventory.') > -1)
+                        $inventoryIndex[] = [$key, str_replace('inventory.', '', $value)];
                     $extraFields[$value] = $key;
                     break;
             }
@@ -121,6 +123,12 @@ if (hasRequest('hostData')) {
                 $linhaCSV = str_getcsv($value, ';');
             }
             if (count($linhaCSV) > 3) {
+                // Buscando os itens de inventário
+                $inventory = [];
+                for ($i = 0; $i < count($inventoryIndex); $i++) {
+                    $inventory[$inventoryIndex[$i][1]] = $linhaCSV[$inventoryIndex[$i][0]];
+                }
+                //print_r($inventoryIndex);                print_r($inventory); exit;
                 // Buscando todos os grupos
                 $groups = [];
                 for ($i = 0; $i < count($groupIndex); $i++) {
@@ -137,7 +145,7 @@ if (hasRequest('hostData')) {
                 for ($i = 0; $i < count($templateIndex); $i++) {
                     if (!isset($templateArray[$linhaCSV[$templateIndex[$i]]])) {
                         error(_('Template missing') . ' - ' . $linhaCSV[$templateIndex[$i]]);
-                    } else { 
+                    } else {
                         $templates[] = ['templateid' => $templateArray[$linhaCSV[$templateIndex[$i]]]];
                     }
                 }
@@ -163,9 +171,10 @@ if (hasRequest('hostData')) {
                         [ 1 => newInterface($linhaCSV[$requiredIndex['interface.type']], $linhaCSV[$requiredIndex['address']]
                                     , (isset($requiredIndex['interface.port']) ? $linhaCSV[$requiredIndex['interface.port']] : null), true, $useip)],
                         'macros' => [],
-                        'inventory_mode' => 0,
-                        'inventory' => []
+                        'inventory_mode' => 1,
+                        'inventory' => $inventory
                     ];
+                    //  print_r($host); exit;
                     foreach ($extraFields as $key => $value) {
                         if (strpos($key, 'host.') > -1 && !isset($requiredFields[$key])) {
                             $host[str_replace('host.', '', $key)] = $linhaCSV[$value];
@@ -179,7 +188,7 @@ if (hasRequest('hostData')) {
                         $error = true;
                     }
                 } else {
-                    error("Dados inválidos na linha " . $key . ". Esperado: " . count($dataFields)
+                    error("Dados inválidos na linha " . $key . " (" . $host["host"] . "). Esperado: " . count($dataFields)
                             . " campos. Encontrado: " . count($linhaCSV) . " campos.");
                 }
             }
