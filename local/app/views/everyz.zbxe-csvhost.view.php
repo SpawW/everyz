@@ -29,6 +29,9 @@ $moduleTitle = 'Host import';
 $requiredFields = ['host.host', 'interface.type', 'interface.ip', 'group.1', 'template.1'];
 $requiredIndex = [];
 $groupCount = $templateCount = 1;
+$interfaceTypeIndex = ['AGENT' => 1, 'SNMP' => 2, 'IPMI' => 3, 'JMX' => 4];
+$interfaceDefaultPort = ['AGENT' => 10050, 'SNMP' => 161, 'IPMI' => 623, 'JMX' => 12345];
+
 $useip = false;
 // Common fields
 addFilterActions();
@@ -53,9 +56,17 @@ if (CWebUser::getType() < USER_TYPE_SUPER_ADMIN) {
  * ************************************************************************** */
 
 function newInterface($type, $address, $port = null, $default = false, $useip = true) {
-    $interfaceTypeIndex = ['AGENT' => 1, 'SNMP' => 2, 'IPMI' => 3, 'JMX' => 4];
+    global $interfaceTypeIndex, $interfaceDefaultPort;
+//aqui
+    if (!in_array($type, $interfaceTypeIndex)) {
+        $possibleInterfacesType = "";
+        foreach ($interfaceTypeIndex as $key => $value) {
+            $possibleInterfacesType .= ($possibleInterfacesType === "" ? "" : ", ") . $key ;
+        }
+        error(_zeT('Wrong interface type. Possible values: ') . ' - ' . $possibleInterfacesType);
+        return "";
+    }
     if ($port == null) {
-        $interfaceDefaultPort = ['AGENT' => 10050, 'SNMP' => 161, 'IPMI' => 623, 'JMX' => 12345];
         $port = $interfaceDefaultPort[$type];
     }
     return ['type' => $interfaceTypeIndex[$type], 'port' => $port, 'useip' => ($useip ? 1 : 0), 'useip' => ($useip ? 1 : 0)
@@ -128,7 +139,6 @@ if (hasRequest('hostData')) {
                 for ($i = 0; $i < count($inventoryIndex); $i++) {
                     $inventory[$inventoryIndex[$i][1]] = $linhaCSV[$inventoryIndex[$i][0]];
                 }
-                //print_r($inventoryIndex);                print_r($inventory); exit;
                 // Buscando todos os grupos
                 $groups = [];
                 for ($i = 0; $i < count($groupIndex); $i++) {
