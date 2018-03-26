@@ -43,14 +43,16 @@ switch (getRequest('format')) {
         break;
     default:
         $page['type'] = detect_page_type(PAGE_TYPE_HTML);
-        ?>
-        <link href="local/app/everyz/css/everyz.css" rel="stylesheet" type="text/css" id="skinSheet">
-        <?php
         break;
 }
 
 $page['scripts'] = array('class.calendar.js', 'multiselect.js', 'gtlc.js');
 require_once dirname(__FILE__) . '/include/page_header.php';
+if ($page['type'] === detect_page_type(PAGE_TYPE_HTML)) {
+  ?>
+  <link href="local/app/everyz/css/everyz.css" rel="stylesheet" type="text/css" id="skinSheet">
+  <?php
+}
 $TINYPAGE = getRequest2("shorturl") !== "";
 if ($TINYPAGE) {
     ?>
@@ -98,7 +100,7 @@ if (hasRequest('zbxe_reset_all') && getRequest2('zbxe_reset_all') == "EveryZ Res
 
         exit;
     } catch (Exception $e) {
-        
+
     }
 }
 

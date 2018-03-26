@@ -211,11 +211,13 @@ $hostData = $tmp;
 
 /* * ***************************************************************************
  * Display
-  <script src="local/app/everyz/js/leaflet.js"></script>
  * ************************************************************************** */
-zbxeJSLoad(['everyzD3Functions.js','everyz-zbxe-geolocation.static.js',
-    'leaflet.js', 'leaflet/leaflet.lineextremities.js', 'leaflet/leaflet-control-credits.js', 'leaflet/leaflet-control-credits-src.js']
-);
+ zbxeJSLoad(['everyzD3Functions.js','everyz-zbxe-geolocation.static.js',
+     'leaflet.js', 'leaflet/leaflet.lineextremities.js', 'leaflet/leaflet-control-credits.js'
+     , 'leaflet/leaflet-control-credits-src.js', 'leaflet/leaflet.oms.min.js'
+     //, 'leaflet/leaflet.draw.js'
+     ]
+ );
 ?>
 <link rel="stylesheet" href="local/app/everyz/css/leaflet.css" />
 <link rel="stylesheet" href="local/app/everyz/css/leaflet-control-credits.css" />
@@ -295,4 +297,3 @@ if (hasRequest("filter_set") && !$requiredMissing) {
     require_once 'local/app/everyz/js/everyz-zbxe-geolocation.js.php';
     //zbxeJSLoad(['everyz-zbxe-geolocation.js.php']);
 }
-

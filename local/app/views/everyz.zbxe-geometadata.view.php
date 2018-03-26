@@ -84,23 +84,23 @@ $hostData = $hostData[0];
  * ************************************************************************** */
 ?>
 <script language="JavaScript">
-    msgLinkSelfLink = <?php echo quotestr(_zeT("It's not possible link host to yourself!"));?>; 
-    msgLinkSelectHost = <?php echo quotestr(_zeT('Please select at least one host!'));?>; 
+    msgLinkSelfLink = <?php echo quotestr(_zeT("It's not possible link host to yourself!"));?>;
+    msgLinkSelectHost = <?php echo quotestr(_zeT('Please select at least one host!'));?>;
 
-    msgLineInvalidLat = <?php echo quotestr(_zeT('Invalid latitude!'));?>; 
-    msgLineInvalidLon = <?php echo quotestr(_zeT('Invalid longitude!'));?>; 
-    
-    
-    msgValidJSONTop = <?php echo quotestr(_zeT('JSON code is VALID and have:'));?>; 
-    msgValidJSONBotton = <?php echo quotestr(_zeT("Total of elements:"));?>; 
-    msgValidJSONNoElements = <?php echo quotestr(_zeT('Dont found any element!'));?>; 
+    msgLineInvalidLat = <?php echo quotestr(_zeT('Invalid latitude!'));?>;
+    msgLineInvalidLon = <?php echo quotestr(_zeT('Invalid longitude!'));?>;
 
-    msgInvalidColor = <?php echo quotestr(_zeT('Invalid color!'));?>; 
-    msgInvalidSize = <?php echo quotestr(_zeT('Invalid size!'));?>; 
-    msgInvalidWidth = <?php echo quotestr(_zeT('Invalid width!'));?>; 
 
-    msgValidateInvalidJson = <?php echo quotestr(_zeT('Invalid json!'));?>; 
-    
+    msgValidJSONTop = <?php echo quotestr(_zeT('JSON code is VALID and have:'));?>;
+    msgValidJSONBotton = <?php echo quotestr(_zeT("Total of elements:"));?>;
+    msgValidJSONNoElements = <?php echo quotestr(_zeT('Dont found any element!'));?>;
+
+    msgInvalidColor = <?php echo quotestr(_zeT('Invalid color!'));?>;
+    msgInvalidSize = <?php echo quotestr(_zeT('Invalid size!'));?>;
+    msgInvalidWidth = <?php echo quotestr(_zeT('Invalid width!'));?>;
+
+    msgValidateInvalidJson = <?php echo quotestr(_zeT('Invalid json!'));?>;
+
     currentHost = <?php echo $filter["sourceHostID"];?>;
     function validateHostJSON() {
         try {
@@ -115,7 +115,7 @@ $hostData = $hostData[0];
         }
     }
 
-    window.name = "everyz_popup"; 
+    window.name = "everyz_popup";
 
     jq2 = jQuery.noConflict();
     var json, txJson = '';
@@ -128,7 +128,7 @@ $hostData = $hostData[0];
     function formatJSON() {
         return JSON.stringify(json, null, 2).replace(/\\"/g, "\"").replace(/"\[/g, "[").replace(/\]"/g, "]");
     }
-    
+
     function validColor(color) {
         if (!/(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test('#'+color)) {
             alert(msgInvalidColor); return false;
@@ -145,21 +145,21 @@ $hostData = $hostData[0];
         var lngVal = /^-?((1?[0-7]?|[0-9]?)[0-9]|180)\.[0-9]{1,6}$/;
         return lngVal.test(pos);
     }
-    
+
     function addCircle() {
         var vColor = document.getElementById('circle_color').value;
         var vSize = parseInt(document.getElementById('circle_size').value);
         if (!validColor(vColor)) { return false; }
         if (!validNumberRange(vSize,1,100000,msgInvalidSize)) { return false; }
-        
+
         if (!json.hasOwnProperty("circle")) {
             json.circle = [];
         }
-        
+
         json["circle"].push({"size": vSize, "color": vColor});
         txJson.value = formatJSON();
     }
-    
+
     function addLine() {
         vLat = document.getElementById('line_lat').value;
         vLon = document.getElementById('line_lon').value;
@@ -168,7 +168,7 @@ $hostData = $hostData[0];
         vColor = document.getElementById('line_color').value;
         if (!validColor(vColor)) { return false; }
         if (!validNumberRange(vWidth,1,10,msgInvalidWidth)) { return false; }
-        
+
         // Validation
         if (!validPosition(vLat)) {
             alert(msgLineInvalidLat);
@@ -192,11 +192,11 @@ $hostData = $hostData[0];
         vColor = document.getElementById('link_color').value;
         if (!validColor(vColor)) { return false; }
         if (!validNumberRange(vWidth,1,10,msgInvalidWidth)) { return false; }
-                
+
         if (hostIDs.length === 0) {
             alert(msgLinkSelectHost);
             return false;
-        } else {            
+        } else {
             for (i = 0; i < hostIDs.length; i++) {
                 //alert("["+hostIDs[i].value + "][" + currentHost + "]"+msgSelfLink);
                 if (hostIDs[i].value == currentHost) {
@@ -262,8 +262,18 @@ $hostData = $hostData[0];
     }
 
 </script>
+<link rel="stylesheet" href="local/app/everyz/css/leaflet.css" />
+<link rel="stylesheet" href="local/app/everyz/css/leaflet-control-credits.css" />
+<link rel="stylesheet" href="local/app/everyz/css/leaflet.draw.css" />
 
 <?php
+zbxeJSLoad(['everyzD3Functions.js',
+//'everyz-zbxe-geolocation.static.js',
+    'leaflet.js', 'leaflet/leaflet.lineextremities.js', 'leaflet/leaflet-control-credits.js'
+    , 'leaflet/leaflet-control-credits-src.js', 'leaflet/leaflet.oms.min.js'
+    //, 'leaflet/leaflet.draw.js'
+    ]
+);
 commonModuleHeader($moduleName, $moduleTitle, true);
 
 // Tab
@@ -340,14 +350,34 @@ $leftCol->addItem(new CInput('hidden', 'sourceHostID', $filter['sourceHostID']))
 $leftCol->addItem(new CInput('hidden', 'updateHost', 1));
 
 $leftCol->addRow($subTable2);
+
+// Create table
 $table->addRow([$leftCol]);
 $table->setFooter(makeFormFooter(new CSubmit('update', _('Update'))));
 
+//------------
+/*
+$leftCol = new CFormList();
+
+$addButton = (new CButton('btnAddCircle', _('Add')))->onClick('javascript:addCircle();');
+
+$subTable = (new CTableInfo())->setHeader([ _zeT('Color'), _zeT('Size'), '']);
+$subTable->addRow([ new CColor('circle_color', '6666FF', false)
+    , (new CNumericBox('circle_size', 3000))->setWidth(ZBX_TEXTAREA_NUMERIC_STANDARD_WIDTH)
+    , $addButton
+]);
+
+$leftCol->addRow(_('Create Route'), (new CDiv())
+                ->setAttribute('id', "mapid")
+                ->setAttribute('style', "width:600px; height: 600px;"));
+addTab('route', _zeT('Route'));
+*/
 
 /* * ***************************************************************************
- * Display Footer 
+ * Display Footer
  * ************************************************************************** */
 
 $form->addItem([$dataTab, $table]);
 $dashboard->addItem($form)->show();
 
+//require_once 'local/app/everyz/js/everyz-zbxe-geolocation.js.php';

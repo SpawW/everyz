@@ -28,6 +28,7 @@ $baseProfile .= $moduleName;
 $moduleTitle = 'Host import';
 $requiredFields = ['host.host', 'interface.type', 'interface.ip', 'group.1', 'template.1'];
 $requiredIndex = [];
+$inventoryIndex = [];
 $groupCount = $templateCount = 1;
 $interfaceTypeIndex = ['AGENT' => 1, 'SNMP' => 2, 'IPMI' => 3, 'JMX' => 4];
 $interfaceDefaultPort = ['AGENT' => 10050, 'SNMP' => 161, 'IPMI' => 623, 'JMX' => 12345];
@@ -58,12 +59,13 @@ if (CWebUser::getType() < USER_TYPE_SUPER_ADMIN) {
 function newInterface($type, $address, $port = null, $default = false, $useip = true) {
     global $interfaceTypeIndex, $interfaceDefaultPort;
 //aqui
-    if (!in_array($type, $interfaceTypeIndex)) {
+
+    if (!isset ($interfaceTypeIndex[$type])) {
         $possibleInterfacesType = "";
         foreach ($interfaceTypeIndex as $key => $value) {
             $possibleInterfacesType .= ($possibleInterfacesType === "" ? "" : ", ") . $key ;
         }
-        error(_zeT('Wrong interface type. Possible values: ') . ' - ' . $possibleInterfacesType);
+        error(_zeT('Wrong interface type. Possible values: ') . "[". $type. '] - ' . $possibleInterfacesType);
         return "";
     }
     if ($port == null) {

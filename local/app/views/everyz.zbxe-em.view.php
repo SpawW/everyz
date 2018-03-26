@@ -1,7 +1,7 @@
 <?php
 
 /*
- * * Purpose: Event screen with extra filter options 
+ * * Purpose: Event screen with extra filter options
  * *          and correlate information (temporal analysis of possible causes and effects)
  * * Adail Horst - http://spinola.net.br/blog
  * *
@@ -167,7 +167,7 @@ switch ($filter["format"]) {
                         (new CDiv())->addClass(ZBX_STYLE_FORM_INPUT_MARGIN),
                         (new CButton('item_name', _('Select')))
                         ->addClass(ZBX_STYLE_BTN_GREY)
-                        ->onClick('return PopUp("popup.php?srctbl=items&srcfld1=key_&real_hosts=1&dstfld1=item' .
+                        ->onClick('return zbxePopUp("popup.php?srctbl=items&srcfld1=key_&real_hosts=1&dstfld1=item' .
                                 '&with_items=1&dstfrm=zbx_filter");')
                     ])
             ;
@@ -460,7 +460,7 @@ if ($reportMode) {
                             ITEM_VALUE_TYPE_FLOAT,
                             ITEM_VALUE_TYPE_UINT64
                         )) ? 'showgraph' : 'showvalues';
-                $i['name'] = $item['name']; 
+                $i['name'] = $item['name'];
                 $items[] = $i;
             }
 
@@ -490,7 +490,7 @@ if ($reportMode) {
                 default;
 // Actions ---------------------------------------------------------
                     // Aqui posição para adicionar link ao action simulator
-                    $actions = (new CButton("btnEM", _zeT('Correlate'), 'T'))->onClick("return PopUp('everyz.php?action=zbxe-em&mode=report&"
+                    $actions = (new CButton("btnEM", _zeT('Correlate'), 'T'))->onClick("return zbxePopUp('everyz.php?action=zbxe-em&mode=report&"
                             . "p_triggerid=" . $event['objectid']
                             . "&p_check_range=" . $filter["p_check_range"]
                             . "&fullscreen=1&form_refresh=0&filter_timesince=" . $event['clock']
@@ -604,7 +604,7 @@ if ($reportMode) {
 }
 
 /* * ***************************************************************************
- * Display Footer 
+ * Display Footer
  * ************************************************************************** */
 switch ($filter["format"]) {
     case PAGE_TYPE_CSV;

@@ -67,11 +67,31 @@ function zbxeSearch(mode) {
     inputSearch = document.getElementById("search");
     switch (mode) {
         case "share":
-            PopUp("https://share.zabbix.com/search?searchword=" + inputSearch.value + "&search_cat=1");
+            zbxePopUp("https://share.zabbix.com/search?searchword=" + inputSearch.value + "&search_cat=1");
             break;
         case "doc":
-            PopUp("https://www.zabbix.com/documentation/" + ZBX_VER + "/start?do=search&id=" + inputSearch.value);
+            zbxePopUp("https://www.zabbix.com/documentation/" + ZBX_VER + "/start?do=search&id=" + inputSearch.value);
             break;
     }
 }
 
+// Original code from js/common.js  file from Zabbix 3.4
+function zbxePopUp(url, width, height, form_name) {
+        if (!width) {
+                width = 1024;
+        }
+        if (!height) {
+                height = 768;
+        }
+        if (!form_name) {
+                form_name = 'zbx_popup';
+        }
+
+        var left = (screen.width - (width + 150)) / 2;
+        var top = (screen.height - (height + 150)) / 2;
+
+        var popup = window.open(url, form_name, 'width=' + width + ', height=' + height + ', top=' + top + ', left=' + left + ', resizable=yes, scrollbars=yes, location=no, menubar=no');
+        popup.focus();
+
+        return false;
+}

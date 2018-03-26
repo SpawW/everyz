@@ -17,6 +17,11 @@
  * * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  * */
 
+function drawControler() {
+    var toolbar = L.Toolbar();
+    toolbar.addToolbar(map);
+}
+
 function addMapTile(description, url, attribution, maxZoom) {
     baseMaps[description] = L.tileLayer(url, {maxZoom: maxZoom, attribution: attribution});
 }
@@ -32,7 +37,10 @@ function dynamicPopUp(element) {
 }
 
 function addHost(lat, lon, hostid, popUpContent) {
-    L.marker([lat, lon], {icon: zbxImage(hostid)}).addTo(ZabGeomap).bindPopup(popUpContent);
+    marker = L.marker([lat, lon], {icon: zbxImage(hostid)}).addTo(ZabGeomap);
+    //.bindPopup(popUpContent)
+    marker.desc = popUpContent;
+    oms.addMarker(marker);
 }
 
 function addErrorHost(lat, lon, hostid, popUpContent) {
@@ -40,15 +48,15 @@ function addErrorHost(lat, lon, hostid, popUpContent) {
 }
 
 function editHostMetadata(hostid) {
-    PopUp("everyz.php?action=zbxe-geometadata&fullscreen=1&hidetitle=1&sourceHostID=" + hostid);
+    zbxePopUp("everyz.php?action=zbxe-geometadata&fullscreen=1&hidetitle=1&sourceHostID=" + hostid);
 }
 
 function hostLatest(hostid) {
-    PopUp("latest.php?fullscreen=0&hostids[]=" + hostid + "&application=&select=&show_without_data=1&fullscreen=1&filter_set=Filter");
+    zbxePopUp("latest.php?fullscreen=0&hostids[]=" + hostid + "&application=&select=&show_without_data=1&fullscreen=1&filter_set=Filter");
 }
 
 function hostIncidents(hostid) {
-    PopUp("tr_status.php?fullscreen=1&groupid=0&hostid=" + hostid + "&show_triggers=1&ack_status=1&show_events=1&show_severity=0&filter_set=Filter");
+    zbxePopUp("tr_status.php?fullscreen=1&groupid=0&hostid=" + hostid + "&show_triggers=1&ack_status=1&show_events=1&show_severity=0&filter_set=Filter");
 }
 
 function addTileLayer(name) {
@@ -69,7 +77,7 @@ function onEachFeature(feature, layer) {
     layer.bindPopup(popupContent);
 }
 
-// Cria dinamicamente a referencia para o icone do host 
+// Cria dinamicamente a referencia para o icone do host
 function zbxImage(p_iconid, width, height) {
     width = typeof width !== 'undefined' ? width : 32;
     height = typeof height !== 'undefined' ? height : 32;

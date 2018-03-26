@@ -66,29 +66,51 @@ if ($easterMode) { // Clean the filter parameters
     }
     //Define area for Map (setup this data in database ZabbixExtras)
     var ZabGeomap = L.map('mapid').setView([setViewLat, setViewLong], setViewZoom);
+    //,{drawControl: true}
     //Create layerGroup Circle
     var ZabGeocircle = new L.LayerGroup();
     //Create layerGroup Lines
     var ZabGeolines = new L.LayerGroup();
     //Create layerGroup Alert
     var ZabGeoalert = new L.LayerGroup();
+
     var mbToken = '<?php echo zbxeConfigValue('geo_token') ?>';
     var baseMaps = {};
+
+// ------------------- OverLapping Layer ---------------------------------------
+    var oms = new OverlappingMarkerSpiderfier(ZabGeomap);
+    var popup = new L.Popup();
+    oms.addListener('click', function (marker) {
+      //alert('aqui');
+        popup.setContent(marker.desc);
+        popup.setLatLng(marker.getLatLng());
+        ZabGeomap.openPopup(popup);
+    });
+
+    function onMapClick(e) {
+        popup.setLatLng(e.latlng)
+                .setContent("You selected here: " + e.latlng.toString())
+                .openOn(ZabGeomap);
+    }
+
+    ZabGeomap.on('contextmenu', onMapClick);
+
+
     function addMapTile(description, url, attribution, maxZoom) {
-        baseMaps[description] = L.tileLayer(url, {maxZoom: maxZoom, attribution: '<a href="http://www.everyz.org">EveryZ</a> | '+attribution});
+        baseMaps[description] = L.tileLayer(url, {maxZoom: maxZoom, attribution: '<a href="http://www.everyz.org">EveryZ</a> | ' + attribution});
     }
     if (mbToken !== "") {
         var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
                 '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
                 'Imagery &copy <a href="http://mapbox.com">Mapbox</a>',
                 mbUrl = (mbToken == "" ? 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' : 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' + mbToken);
-        //Display Copyright 
+        //Display Copyright
         L.tileLayer(mbUrl, {
             maxZoom: 18,
             attribution: mbAttr,
             id: 'mapbox.<?php
 $mapBackgroud = [ "light", "streets", "dark", "outdoors", "satellite", "emerald"];
-echo $mapBackgroud[$filter["map"]]; //"streets"             
+echo $mapBackgroud[$filter["map"]]; //"streets"
 ?>'
         }).addTo(ZabGeomap);
         grayscale = addTileLayer("light");
@@ -171,8 +193,8 @@ $linesPackage = "";
 
 if ($easterMode) { // Clean the filter parameters
     ?>
- showEasterEgg();
-<?php
+        showEasterEgg();
+    <?php
 } else {
     // Traduções
     foreach ($hostData as $host) {
@@ -233,24 +255,13 @@ if ($easterMode) { // Clean the filter parameters
                     echo "\n console.log('Polygon: $polygons[1] - " . $polygons[6] . "')";
                 }
             }
+        } else {
+            // Hosts without coordenates
         }
     }
 }
 ?>
 
-    //Change for repeat to read JSON and add Circle inf note exist
-    //If radius exist add Circle [use lat and long more radius]
-    //Capture point in map using double click 
-
-    var popup = L.popup();
-    function onMapClick(e) {
-        popup
-                .setLatLng(e.latlng)
-                .setContent("You selected here: " + e.latlng.toString())
-                .openOn(ZabGeomap);
-    }
-
-    ZabGeomap.on('contextmenu', onMapClick);
     //Add Scale in maps
     L.control.scale().addTo(ZabGeomap);
     function addTileLayer(name) {
@@ -265,13 +276,13 @@ if ($easterMode) { // Clean the filter parameters
     // Tiles for another maps
 
     layerControl = L.control.layers(baseMaps).addTo(ZabGeomap).setPosition('topleft');
-    //If filter Circle Actived show Circles 
+    //If filter Circle Actived show Circles
     if (showCircles == 1) {
         ZabGeomap.addLayer(ZabGeocircle);
         layerControl.addOverlay(ZabGeocircle, "Circle");
     }
 
-    //If filter Lines Actived show Lines 
+    //If filter Lines Actived show Lines
     if (showLines == 1) {
         ZabGeomap.addLayer(ZabGeolines);
         layerControl.addOverlay(ZabGeolines, "Lines");
@@ -279,6 +290,8 @@ if ($easterMode) { // Clean the filter parameters
 
     //Active layer Alert
     ZabGeomap.addLayer(ZabGeoalert);
+
+    //ZabGeoMap.fitBounds(oms.getBounds());
     //Add lines between hosts
     var lineHosts = {
         "type": "FeatureCollection",
@@ -308,4 +321,3 @@ if ($easterMode) { // Clean the filter parameters
 
 
 </script>
-

@@ -81,17 +81,17 @@ function buildQueryReport($itemid, $logTable) {
     $query = "\n"
             . "SELECT " . ($DB['TYPE'] == ZBX_DB_POSTGRESQL ? " DISTINCT ON(a.ano,a.mes,a.momento) " : "" )
             . "it.units, it.description, a.ano, a.mes, a.dia, a.momento, AVG(a.valor) AS valor
-  FROM items it 
- INNER JOIN  
+  FROM items it
+ INNER JOIN
 (SELECT hu.itemid,
-DATE_FORMAT(FROM_UNIXTIME(hu.clock), '%Y') AS ano, DATE_FORMAT(FROM_UNIXTIME(hu.clock), '%m') AS mes, DATE_FORMAT(FROM_UNIXTIME(hu.clock), '%d') AS dia, 
+DATE_FORMAT(FROM_UNIXTIME(hu.clock), '%Y') AS ano, DATE_FORMAT(FROM_UNIXTIME(hu.clock), '%m') AS mes, DATE_FORMAT(FROM_UNIXTIME(hu.clock), '%d') AS dia,
 DATE_FORMAT(FROM_UNIXTIME(hu.clock), '" . $intervalMask[$filter["timeshiftsource"]] . "') AS momento, "
             . $sourceAgregator[$filter["agregation"]] . " AS valor
-FROM " . $logTable . " hu 
+FROM " . $logTable . " hu
 WHERE hu.clock between " . $filter["filter_timesince"] . " AND  "
             . $filter["filter_timetill"] . " AND hu.itemid = " . $itemid . "
-) a 
-ON a.itemid = it.itemid 
+) a
+ON a.itemid = it.itemid
 WHERE it.itemid = " . $itemid . "
 GROUP BY it.units, a.ano, a.mes, a.dia, it.description, a.momento
 ORDER BY a.ano, a.mes, a.momento
@@ -247,7 +247,7 @@ switch ($filter["format"]) {
                     (new CDiv())->addClass(ZBX_STYLE_FORM_INPUT_MARGIN),
                     (new CButton('item_name', _('Select')))
                     ->addClass(ZBX_STYLE_BTN_GREY)
-                    ->onClick('return PopUp("popup.php?srctbl=items&srcfld1=key_&real_hosts=1&dstfld1=item' .
+                    ->onClick('return zbxePopUp("popup.php?srctbl=items&srcfld1=key_&real_hosts=1&dstfld1=item' .
                             '&with_items=1&dstfrm=zbx_filter");')
                 ])
                 ->addRow(_zeT('Analysis'), $cmbTimeSource)
