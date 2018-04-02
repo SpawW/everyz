@@ -1,0 +1,10 @@
+<?php
+   function extraButtons($host)
+   {
+     // /report2.php?config=0&filter_groupid=0&filter_hostid=10259&filter_set=1
+       $img = "availability.png";
+       $onclick = 'javascript:hostAvailability('.$host["id"].');';
+       return quotestr('<img class="everyzShortcutIMG" hspace=10 vspace=10  title="Availability report" src="local/app/everyz/images/' .$img .
+      '" onclick=\'' .$onclick. '\'/>&nbsp;');
+   }
+//'<img class="' + className + '" hspace=10 vspace=10  title="' + title + '" src="local/app/everyz/images/' + img + '" onclick=\'' + onclick + '\'/>&nbsp;'

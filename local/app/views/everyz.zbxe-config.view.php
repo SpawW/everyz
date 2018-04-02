@@ -35,13 +35,15 @@ $dashboardGrid = [[], [], []];
  * Module Functions
  * ************************************************************************** */
 
-function newWidget($p_id, $p_title, $p_content, $p_expanded = true, $p_icon = []) {
+function newWidget($p_id, $p_title, $p_content, $p_expanded = true, $p_icon = [])
+{
     return (new CUiWidget($p_id, (new CDiv($p_content))->setName('body-' . $p_id)->setAttribute("style", "border: 1; margin: 0px 10px 10px 10px;")))
                     ->setHeader(_($p_title), [$p_icon], false);
 }
 
 // Constroi combo padrão para seleção de imagem
-function comboImageSelect($name, $value) {
+function comboImageSelect($name, $value)
+{
     $tmp = new CComboBox('cnf_' . $name, $value);
     $tmp->onChange('javascript:getZbxImage(this.value,"img_' . $name . '");');
     return $tmp;
@@ -51,7 +53,7 @@ function comboImageSelect($name, $value) {
  * Access Control
  * ************************************************************************** */
 if (CWebUser::getType() < USER_TYPE_SUPER_ADMIN) {
-//    access_deny(ACCESS_DENY_PAGE);
+    access_deny(ACCESS_DENY_PAGE);
 }
 
 /* * ***************************************************************************
@@ -122,14 +124,12 @@ foreach ($iconList as $icon) {
 
 $table->addRow(
         (new CFormList())
-                ->addRow(_('Name'), (new CTextBox('cnf_company_name'
-                        , zbxeConfigValue('company_name')))->setWidth(ZBX_TEXTAREA_STANDARD_WIDTH))
+                ->addRow(_('Name'), (new CTextBox('cnf_company_name', zbxeConfigValue('company_name')))->setWidth(ZBX_TEXTAREA_STANDARD_WIDTH))
                 ->addRow(_zeT('Site Logo'), [$cmbLogoSite
                     , SPACE
                     , (new CNumericBox('cnf_company_logo_width', zbxeConfigValue('company_logo_width'), 3))
                     ->setWidth(ZBX_TEXTAREA_2DIGITS_WIDTH)])
-                ->addRow((new CImg('imgstore.php?iconid=' . $idLogoSite
-                        , 'company_logo_img', zbxeConfigValue('company_logo_width'), 25))->setId("img_company_logo_site"))
+                ->addRow((new CImg('imgstore.php?iconid=' . $idLogoSite, 'company_logo_img', zbxeConfigValue('company_logo_width'), 25))->setId("img_company_logo_site"))
                 ->addRow(_zeT('Login Logo'), $cmbLogoLogin)
                 ->addRow((new CImg('imgstore.php?iconid=' . $idLogoLogin, 'company_logo_img', 120, 25))->setId("img_company_logo_login"))
                 ->addRow(_zeT('EveryZ Logo'), buttonOptions("cnf_show_everyz_logo", (int) zbxeConfigValue("show_everyz_logo", 0, 1), [_zeT('Hide'), _zeT('Show')]))
@@ -140,17 +140,15 @@ $dashboardGrid[0][1] = newWidget('company', _zeT("Company"), $table);
 $table = (new CTable());
 $table->addRow(
         (new CFormList())
-                ->addRow(_('Token'), (new CTextBox('cnf_geo_token'
-                        , zbxeConfigValue('geo_token')))->setWidth(ZBX_TEXTAREA_BIG_WIDTH)
+                ->addRow(
+                    _('Token'),
+                    (new CTextBox('cnf_geo_token', zbxeConfigValue('geo_token')))->setWidth(ZBX_TEXTAREA_BIG_WIDTH)
                         ->setAttribute('placeholder', _zeT('For use extra tiles, please inform a valid API key.'))
                 )
                 ->addRow(_zeT('Default POI'), [$cmbDefaultPoi,
-                    (new CImg('imgstore.php?iconid=' . $idGeoDefaultPOI
-                    , 'cnf_geo_default_poi', 16, 16))->setId("img_geo_default_poi")])
-                ->addRow(_zeT('Opacity of links'), buttonOptions("cnf_geo_link_opacity", (float) zbxeConfigValue("geo_link_opacity", 0, 0.9)
-                                , ['100%', '90%', '80%', '70%', '60%', '50%', '40%', '30%'], [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3]))
-                ->addRow(_zeT('Opacity of circles'), buttonOptions("cnf_geo_circle_opacity", (float) zbxeConfigValue("geo_circle_opacity", 0, 0.3)
-                                , ['100%', '90%', '80%', '70%', '60%', '50%', '40%', '30%'], [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3]))
+                    (new CImg('imgstore.php?iconid=' . $idGeoDefaultPOI, 'cnf_geo_default_poi', 16, 16))->setId("img_geo_default_poi")])
+                ->addRow(_zeT('Opacity of links'), buttonOptions("cnf_geo_link_opacity", (float) zbxeConfigValue("geo_link_opacity", 0, 0.9), ['100%', '90%', '80%', '70%', '60%', '50%', '40%', '30%'], [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3]))
+                ->addRow(_zeT('Opacity of circles'), buttonOptions("cnf_geo_circle_opacity", (float) zbxeConfigValue("geo_circle_opacity", 0, 0.3), ['100%', '90%', '80%', '70%', '60%', '50%', '40%', '30%'], [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3]))
 );
 //var_dump("aqui".zbxeConfigValue("geo_link_opacity", 0, 1));
 $dashboardGrid[1][0] = newWidget('geo', _zeT("ZabGeo", ''), $table);
@@ -159,10 +157,13 @@ $dashboardGrid[1][0] = newWidget('geo', _zeT("ZabGeo", ''), $table);
 $table = (new CTable());
 $table->addRow(
         (new CFormList())
-                ->addRow(_('Reset'), [(new CTextBox('zbxe_reset_all', ''))->setWidth(ZBX_TEXTAREA_BIG_WIDTH)
+                ->addRow(
+                    _('Reset'),
+                    [(new CTextBox('zbxe_reset_all', ''))->setWidth(ZBX_TEXTAREA_BIG_WIDTH)
                     ->setAttribute('placeholder', _zeT('Type here:') . ' "EveryZ ReseT"')
                         ]
                 )
+                ->addRow(_('Build'), [EVERYZBUILD])
 );
 $dashboardGrid[1][10] = newWidget('reset', _zeT("Reset configuration", ''), $table);
 // Options for reset data ==========================================================
@@ -187,7 +188,7 @@ $dashboardTable = (new CDiv($dashboardRow))
         ->addClass('widget-placeholder');
 
 /* * ***************************************************************************
- * Display Footer 
+ * Display Footer
  * ************************************************************************** */
 $form->addItem($dashboardTable)
         ->addItem(new CInput('hidden', 'action', $action))

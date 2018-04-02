@@ -24,8 +24,9 @@ const CRYPT_SALT = '1822';
 define("ZE_VER", "3.0");
 define("EZ_TITLE", 'EveryZ - ');
 define("ZE_COPY", ", ZE " . ZE_VER);
-define("EVERYZVERSION", "1.1.4");
-define("EVERYZBUILD", 9);
+define("EVERYZVERSION", "1.1.6");
+define("EVERYZBUILD", "257");
+//define("EVERYZBUILD", 9);
 if (file_exists("lockEverys.php")) {
     $VG_INSTALL = true;
 } else {
@@ -33,16 +34,18 @@ if (file_exists("lockEverys.php")) {
 }
 
 global $VG_DEBUG;
-global $zeMessages, $zeLocale, $baseName, $requiredMissing, $zbxeLoadedJS;
+global $zeMessages, $zeLocale, $baseName, $requiredMissing, $zbxeLoadedJS, $zbxeLoadedCSS;
 
 $requiredMissing = false;
 $zbxeLoadedJS = [];
-$VG_DEBUG = (isset($_REQUEST['p_debug']) && $_REQUEST['p_debug'] == 'S' ? true : false );
+$zbxeLoadedCSS= [];
+$VG_DEBUG = (isset($_REQUEST['p_debug']) && $_REQUEST['p_debug'] == 'S' ? true : false);
 
 // End of define and global variables
 // Functions required ==========================================================
-# Zabbix-Extras - Global Variables Start 
-function zbxeFieldValue($p_query, $p_field) {
+# Zabbix-Extras - Global Variables Start
+function zbxeFieldValue($p_query, $p_field)
+{
     $res = "";
     $result = prepareQuery($p_query);
     while ($row = DBfetch($result)) {
@@ -51,7 +54,8 @@ function zbxeFieldValue($p_query, $p_field) {
     return $res;
 }
 
-function descItem($itemName, $itemKey) {
+function descItem($itemName, $itemKey)
+{
     if (strpos($itemName, "$") !== false) {
         $tmp = explode("[", $itemKey);
         $tmp = explode(",", str_replace("]", "", $tmp[1]));
@@ -67,16 +71,19 @@ function descItem($itemName, $itemKey) {
  *
  * Translate strings using zbxe_translation. Need to be used on all modules.
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param string  $msg        text to translate
  * @param string  $moduleid   module identifier
  */
-function _zeT($msg, $moduleid = "", $autoinsert = true) {
+function _zeT($msg, $moduleid = "", $autoinsert = true)
+{
     global $VG_BANCO_OK;
-    if (!$VG_BANCO_OK)
+    if (!$VG_BANCO_OK) {
         return $msg;
-    if (trim($msg) == "")
+    }
+    if (trim($msg) == "") {
         return $msg;
+    }
     if ($moduleid == "") {
         global $moduleName;
         $moduleid = $moduleName;
@@ -100,12 +107,13 @@ function _zeT($msg, $moduleid = "", $autoinsert = true) {
  *
  * Get configuration value from zbxe_preferences.
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param string  $param   param to get current value
  * @param integer $id      get the value for specific user (default 0 = all users)
  * @param string  $default default value (used if dont exists configuration paramiter with $param name)
  */
-function zbxeConfigValue($param, $id = 0, $default = "") {
+function zbxeConfigValue($param, $id = 0, $default = "")
+{
     $query = 'select tx_value from zbxe_preferences WHERE userid = '
             . $id . " and tx_option = " . quotestr($param);
     $retorno = zbxeFieldValue($query, 'tx_value');
@@ -117,12 +125,13 @@ function zbxeConfigValue($param, $id = 0, $default = "") {
  *
  * Update configuration values on zbxe_preferences.
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param string   $param   param to update value
  * @param string   $value   new value
  * @param integer  $id      userid (default 0 = all users)
  */
-function zbxeUpdateConfigValue($param, $value, $id = 0) {
+function zbxeUpdateConfigValue($param, $value, $id = 0)
+{
     $currentValue = zbxeConfigValue($param, $id);
     if ($currentValue == "") {
         if (zbxeFieldValue("select count(*) as total from zbxe_preferences WHERE tx_option = " . quotestr($param), "total") == 0) {
@@ -130,8 +139,7 @@ function zbxeUpdateConfigValue($param, $value, $id = 0) {
         }
     }
     if ((!isset($query)) && ($currentValue != $value)) {
-        $query = zbxeUpdate("zbxe_preferences", ['userid', 'tx_option', 'tx_value', 'st_ativo'], [$id, $param, $value, '1']
-                , ['tx_option'], [$param]);
+        $query = zbxeUpdate("zbxe_preferences", ['userid', 'tx_option', 'tx_value', 'st_ativo'], [$id, $param, $value, '1'], ['tx_option'], [$param]);
         //echo "update [$currentValue] <br> [$query]";
     }
     //if ($param == "map_title_show") {
@@ -148,20 +156,21 @@ function zbxeUpdateConfigValue($param, $value, $id = 0) {
  *
  * Return SQL query to insert records in a table.
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param string   $table       table name
  * @param array    $fields      fields to insert values
  * @param array    $values      new values
  */
-function zbxeInsert($table, $fields, $values) {
+function zbxeInsert($table, $fields, $values)
+{
     global $conn;
     $field_names = $field_values = "";
     for ($i = 0; $i < count($fields); $i++) {
-        $field_names .= ($field_names == "" ? "" : ", " ) . ZE_DBFQ . $fields[$i] . ZE_DBFQ;
+        $field_names .= ($field_names == "" ? "" : ", ") . ZE_DBFQ . $fields[$i] . ZE_DBFQ;
         /* when I found the support for paramiters query on Zabbix..
           $field_values .= ($field_values == "" ? "" : ", " ) . "?";
          */
-        $field_values .= ($field_values == "" ? "" : ", " ) . quotestr($values[$i]);
+        $field_values .= ($field_values == "" ? "" : ", ") . quotestr($values[$i]);
     }
     $filter = "";
     $query = " INSERT INTO " . $table . " (" . $field_names . ") VALUES (" . $field_values . ") " . $filter;
@@ -169,22 +178,23 @@ function zbxeInsert($table, $fields, $values) {
 }
 
 /**
- * zbxeUpdate 
+ * zbxeUpdate
  *
  * Return SQL query to update records in a table.
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param string   $table       table name
  * @param array    $fields      fields to update
  * @param array    $values      new values
  * @param array    $filternames fields filter definition to update SQL
  * @param array    $filternames values of fields to search
  */
-function zbxeUpdate($table, $fields, $values, $filterNames, $filterValues) {
+function zbxeUpdate($table, $fields, $values, $filterNames, $filterValues)
+{
     global $conn;
     $updateFields = "";
     for ($i = 0; $i < count($fields); $i++) {
-        $updateFields .= ($updateFields == "" ? "" : ", " ) . ZE_DBFQ . $fields[$i] . ZE_DBFQ . " = " . quotestr($values[$i]);
+        $updateFields .= ($updateFields == "" ? "" : ", ") . ZE_DBFQ . $fields[$i] . ZE_DBFQ . " = " . quotestr($values[$i]);
     }
     $filter = "";
 
@@ -193,7 +203,7 @@ function zbxeUpdate($table, $fields, $values, $filterNames, $filterValues) {
           $filter .= ($filter == "" ? "" : ", " ) . "" . $filterNames[$i] . " = ? ";
           $values[count($values)] = $filterValues[$i];
          */
-        $filter .= ($filter == "" ? "" : " AND " ) . "" . $filterNames[$i] . " = " . quotestr($filterValues[$i]);
+        $filter .= ($filter == "" ? "" : " AND ") . "" . $filterNames[$i] . " = " . quotestr($filterValues[$i]);
     }
     $query = " UPDATE " . $table . " SET " . $updateFields . ($filter != "" ? " WHERE " . $filter : "");
     return zbxeStandardDML($query);
@@ -204,13 +214,14 @@ function zbxeUpdate($table, $fields, $values, $filterNames, $filterValues) {
  *
  * Return a combo with options from SQL values
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param string    $query   SQL statement
  * @param string    $name    name of HTML element
  * @param string    $value   current value
  * @param boolean   $reload  true - submit form when value are changed
  */
-function newComboFilter($query, $name, $value, $reload = true) {
+function newComboFilter($query, $name, $value, $reload = true)
+{
     $cmbRange = new CComboBox($name, $value, ($reload ? 'javascript: submit();' : ''));
     $result = DBselect($query);
     $cmbRange->additem("0", "");
@@ -225,13 +236,14 @@ function newComboFilter($query, $name, $value, $reload = true) {
  *
  * Return a combo with options from a array of values
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param array     $array   array of options (key and value)
  * @param string    $name    name of HTML element
  * @param string    $value   current value
  * @param boolean   $reload  true - submit form when value are changed
  */
-function newComboFilterArray($array, $name, $value, $reload = true) {
+function newComboFilterArray($array, $name, $value, $reload = true)
+{
     $cmbRange = new CComboBox($name, $value, ($reload ? 'javascript: submit();' : ''));
     $cmbRange->additem('', 'Selecione...');
     foreach ($array as $k => $v) {
@@ -245,14 +257,15 @@ function newComboFilterArray($array, $name, $value, $reload = true) {
  *
  * Execute a SQL code using native Zabbix Frontend Functions
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param string    $p_query    SQL code to execute
  */
-function prepareQuery($p_query) {
+function prepareQuery($p_query)
+{
     $result = DBselect($p_query);
     if (!$result) {
         global $DB;
-        die("Invalid query [$p_query]." . ( $DB['TYPE'] == ZBX_DB_POSTGRESQL ? "" : mysql_error()));
+        die("Invalid query [$p_query]." . ($DB['TYPE'] == ZBX_DB_POSTGRESQL ? "" : mysql_error()));
         return 0;
     } else {
         return $result;
@@ -264,12 +277,13 @@ function prepareQuery($p_query) {
  *
  * Get text between two strings
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param string    $start  Start identifier
  * @param string    $end    End identifier
  * @param string    $str    Full text
  */
-function getBetweenStrings($start, $end, $str) {
+function getBetweenStrings($start, $end, $str)
+{
     $matches = array();
     $regex = "/$start([a-zA-Z0-9_]*)$end/";
     preg_match_all($regex, $str, $matches);
@@ -281,19 +295,21 @@ function getBetweenStrings($start, $end, $str) {
  *
  * Generic function to show debug messages
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param string    $p_text   Debug text message
  * @param boolean   $p_debug  True - Show message, False - Dont show
  * @param string    $p_color  Background color of message
  */
-function debugInfo($p_text, $p_debug = false, $p_color = "") {
+function debugInfo($p_text, $p_debug = false, $p_color = "")
+{
     global $VG_DEBUG;
     if ($p_debug == true || $VG_DEBUG == true) {
-        echo (php_sapi_name() == 'cli' ? "\nDEBUG: " : '<div style="background-color:' . $p_color . ';"><pre>') . print_r($p_text, true) . (php_sapi_name() == 'cli' ? "\n" : "</pre></div>");
+        echo(php_sapi_name() == 'cli' ? "\nDEBUG: " : '<div style="background-color:' . $p_color . ';"><pre>') . print_r($p_text, true) . (php_sapi_name() == 'cli' ? "\n" : "</pre></div>");
     }
 }
 
-function array_sort($array, $on, $order = SORT_ASC) {
+function array_sort($array, $on, $order = SORT_ASC)
+{
     $new_array = array();
     $sortable_array = array();
 
@@ -332,14 +348,16 @@ function array_sort($array, $on, $order = SORT_ASC) {
  *
  * Generic function to quote strings
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param string    $p_text   Text to quote
  */
-function quotestr($p_text, $quote = true) {
+function quotestr($p_text, $quote = true)
+{
     global $DB;
     zbxeStartDefinitions();
     if ($quote) {
-        return ZE_QUOTECHAR . ($DB['TYPE'] == ZBX_DB_POSTGRESQL ?
+        return ZE_QUOTECHAR . (
+            $DB['TYPE'] == ZBX_DB_POSTGRESQL ?
                         pg_escape_string($p_text) :
                         addslashes($p_text)
                 ) . ZE_QUOTECHAR;
@@ -356,9 +374,10 @@ function quotestr($p_text, $quote = true) {
  *
  * Return Current Zabbix Version.
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  */
-function ezZabbixVersion() {
+function ezZabbixVersion()
+{
     return str_replace(".", "", substr(ZABBIX_VERSION, 0, 5));
 }
 
@@ -367,14 +386,15 @@ function ezZabbixVersion() {
  *
  * Check if current user can access (read) hostgroup data.
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param string    $p_groupid   ID of hostgroup
  */
-function checkAccessGroup($p_groupid) {
+function checkAccessGroup($p_groupid)
+{
     global $filter;
     $groupids = (isset($_REQUEST[$p_groupid]) ? $_REQUEST[$p_groupid] : $filter[$p_groupid]);
-    // var_dump (ezZabbixVersion() < 340); ezZabbixVersion() < 340 ? !API::HostGroup()->isReadable($groupids) : 
-    if (getRequest($p_groupid) && (!API::HostGroup()->get($groupids) )) {
+    // var_dump (ezZabbixVersion() < 340); ezZabbixVersion() < 340 ? !API::HostGroup()->isReadable($groupids) :
+    if (getRequest($p_groupid) && (!API::HostGroup()->get($groupids))) {
         access_deny();
     }
     return $groupids;
@@ -385,10 +405,11 @@ function checkAccessGroup($p_groupid) {
  *
  * Check if current user can access (read) trigger data.
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param string    $p_triggerid   ID of trigger
  */
-function checkAccessTrigger($p_triggerid) {
+function checkAccessTrigger($p_triggerid)
+{
     global $filter;
     $triggerids = array(isset($_REQUEST[$p_triggerid]) ? $_REQUEST[$p_triggerid] : $filter[$p_triggerid]);
     if (getRequest($p_triggerid) && !API::Trigger()->get($triggerids)) {
@@ -402,19 +423,20 @@ function checkAccessTrigger($p_triggerid) {
  *
  * Check if current user can access (read) host data.
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param string    $p_hostid       ID of host
  * @param boolean   $writeaccess    Verifica se tem acesso de GRAVACAO nos hosts
  */
-function checkAccessHost($p_hostid, $writeaccess = false) {
+function checkAccessHost($p_hostid, $writeaccess = false)
+{
     global $filter;
     $hostids = (isset($_REQUEST[$p_hostid]) ? $_REQUEST[$p_hostid] : $filter[$p_hostid]);
     if (!is_array($hostids)) {
         $hostids = [$hostids];
     }
     if (getRequest($p_hostid)) {
-        // && (!$writeaccess || API::Host()->isWritable($hostids) ) 
-        $canAccess = (API::Host()->get($hostids) );
+        // && (!$writeaccess || API::Host()->isWritable($hostids) )
+        $canAccess = (API::Host()->get($hostids));
         if ($canAccess) {
             if (count($hostids) > 0 && $hostids[0] == 0) {
                 $hostids = array();
@@ -431,11 +453,12 @@ function checkAccessHost($p_hostid, $writeaccess = false) {
  *
  * Get a parameter value with support to default value. Function created because Zabbix INC change this funcion name many times last years.
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param string    $p_name     Name of parameter
  * @param boolean   $p_message  Default value
  */
-function getRequest2($p_name, $p_default = "") {
+function getRequest2($p_name, $p_default = "")
+{
     global $_REQUEST, $filter;
     if (isset($_REQUEST[$p_name])) {
         return $_REQUEST[$p_name];
@@ -451,11 +474,12 @@ function getRequest2($p_name, $p_default = "") {
  *
  * Check if a mandatory field is empty.
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param string    $p_name     Name of parameter
  * @param boolean   $p_message  Custom error message
  */
-function checkRequiredField($p_name, $p_message = "") {
+function checkRequiredField($p_name, $p_message = "")
+{
     global $requiredMissing;
     $value = getRequest2($p_name);
     //$requiredMissing = ($requiredMissing == true ? true : false);
@@ -463,7 +487,7 @@ function checkRequiredField($p_name, $p_message = "") {
     if (is_array($value) && $value == array(0)) {
         $requiredMissing = true;
         error(_zeT($p_message));
-    } else if ($value == "") {
+    } elseif ($value == "") {
         $requiredMissing = true;
         error(_zeT($p_message));
     }
@@ -474,15 +498,16 @@ function checkRequiredField($p_name, $p_message = "") {
  *
  * Add the standard fields on $fields variable (common variable used for filter on standard zabbix pages)
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  */
-function addFilterActions() {
+function addFilterActions()
+{
     global $filter, $fields, $moduleName;
-    $fields["action"] = array(T_ZBX_STR, O_OPT, P_UNSET_EMPTY, NULL, null);
+    $fields["action"] = array(T_ZBX_STR, O_OPT, P_UNSET_EMPTY, null, null);
     $filter["action"] = $moduleName;
-    $fields["filter_rst"] = array(T_ZBX_STR, O_OPT, P_UNSET_EMPTY, NULL, null);
+    $fields["filter_rst"] = array(T_ZBX_STR, O_OPT, P_UNSET_EMPTY, null, null);
     $filter["filter_rst"] = getRequest2("filter_rst", "");
-    $fields["filter_set"] = array(T_ZBX_STR, O_OPT, P_UNSET_EMPTY, NULL, null);
+    $fields["filter_set"] = array(T_ZBX_STR, O_OPT, P_UNSET_EMPTY, null, null);
     $filter["filter_set"] = getRequest2("filter_set", "");
     $fields['fullscreen'] = array(T_ZBX_INT, O_OPT, P_SYS, IN('0,1'), null);
     $filter["fullscreen"] = getRequest2("fullscreen", "0");
@@ -490,9 +515,9 @@ function addFilterActions() {
     $filter["hidetitle"] = getRequest2("hidetitle", "0");
     $fields['format'] = array(T_ZBX_INT, O_OPT, P_SYS, IN('0,1,10,6'), null);
     $filter["format"] = getRequest2("format", "0");
-    $fields["mode"] = array(T_ZBX_STR, O_OPT, P_UNSET_EMPTY, NULL, null);
+    $fields["mode"] = array(T_ZBX_STR, O_OPT, P_UNSET_EMPTY, null, null);
     $filter["mode"] = getRequest2("mode", "");
-    $fields["shorturl"] = array(T_ZBX_STR, O_OPT, P_UNSET_EMPTY, NULL, null);
+    $fields["shorturl"] = array(T_ZBX_STR, O_OPT, P_UNSET_EMPTY, null, null);
     $filter["shorturl"] = getRequest2("shorturl", "");
 }
 
@@ -501,9 +526,10 @@ function addFilterActions() {
  *
  * Return a object for control fullscreen mode
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  */
-function fullScreenIcon() {
+function fullScreenIcon()
+{
     global $filter;
     return (new CList())->addItem(get_icon('fullscreen', ['fullscreen' => $filter['fullscreen']]));
 }
@@ -513,7 +539,7 @@ function fullScreenIcon() {
  *
  * Add filter fields with support to default values and profiles.
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param string  $p_name         Paramiter name
  * @param string  $p_type         Type of data
  * @param string  $p_default      Default value
@@ -521,8 +547,8 @@ function fullScreenIcon() {
  * @param boolean $p_unset_empty  Clear data on profile when empty
  * @param boolean $p_use_profile  Use Zabbix Profile system
  */
-function addFilterParameter($p_name, $p_type, $p_default = "", $p_array = false
-, $p_unset_empty = false, $p_use_profile = true) {
+function addFilterParameter($p_name, $p_type, $p_default = "", $p_array = false, $p_unset_empty = false, $p_use_profile = true)
+{
     global $baseProfile, $fields, $filter;
     $typeProfile = ($p_type == T_ZBX_INT ? PROFILE_TYPE_INT : PROFILE_TYPE_STR);
     if (!array_key_exists($p_name, $filter)) {
@@ -551,11 +577,12 @@ function addFilterParameter($p_name, $p_type, $p_default = "", $p_array = false
  *
  * Clear profile data on Zabbix Database.
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param string    $p_name   Last part of profile name on Zabbix Database ($baseProfile$p_name)
  * @param boolean   $p_array  True - Filter variable will receive "blank value" | False - Filter variable will receive "null" value.
  */
-function resetProfile($p_name, $p_array = false, $resetVariable = true) {
+function resetProfile($p_name, $p_array = false, $resetVariable = true)
+{
     global $baseProfile, $filter;
     CProfile::delete($baseProfile . "." . $p_name);
     if ($resetVariable) {
@@ -572,11 +599,12 @@ function resetProfile($p_name, $p_array = false, $resetVariable = true) {
  *
  * Return current URL of frontend. Used for create dynamic links (for example)
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  */
-function baseURL() {
+function baseURL()
+{
     global $s, $_SERVER;
-    return "http" . ((!empty($s['HTTPS']) && $s['HTTPS'] == 'on' ) ? "s" : "") . "://{$_SERVER['HTTP_HOST']}";
+    return "http" . ((!empty($s['HTTPS']) && $s['HTTPS'] == 'on') ? "s" : "") . "://{$_SERVER['HTTP_HOST']}";
 }
 
 /**
@@ -584,10 +612,11 @@ function baseURL() {
  *
  * Return a standard object with item data.
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param array     $itemid   Primary Key (unique identifier) of item on Zabbix Database
  */
-function getItem($itemid) {
+function getItem($itemid)
+{
     $item = API::Item()->get([
         'itemids' => $itemid,
         'output' => ['itemid', 'name', 'status', 'key_', 'units', 'valuemapid', 'value_type', 'state']
@@ -604,10 +633,11 @@ function getItem($itemid) {
  *
  * Return a standard object for select hosts.
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param array     $multiSelectHostData   Array with hosts from Zabbix
  */
-function multiSelectHosts($multiSelectHostData) {
+function multiSelectHosts($multiSelectHostData)
+{
     return (new CMultiSelect([
         'name' => 'hostids[]',
         'objectName' => 'hosts',
@@ -623,10 +653,11 @@ function multiSelectHosts($multiSelectHostData) {
  *
  * Return a standard object for select host groups.
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param array     $multiSelectHostGroupData   Array with hostgroups from Zabbix
  */
-function multiSelectHostGroups($multiSelectHostGroupData) {
+function multiSelectHostGroups($multiSelectHostGroupData)
+{
     return (new CMultiSelect(
             [
         'name' => 'groupids[]',
@@ -636,7 +667,8 @@ function multiSelectHostGroups($multiSelectHostGroupData) {
             'parameters' => 'srctbl=host_groups&dstfrm=zbx_filter&dstfld1=groupids_' .
             '&srcfld1=groupid&multiselect=1'
         ]
-            ]))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH)
+            ]
+    ))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH)
     ;
 }
 
@@ -645,12 +677,13 @@ function multiSelectHostGroups($multiSelectHostGroupData) {
  *
  * Return data from grouphosts.
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param array     $groupids   Array with groupid to get grouphost data
  */
-function selectedHostGroups($groupids) {
-    $multiSelectHostGroupData = NULL;
-    if ($groupids !== [] && $groupids !== NULL && $groupids[0] !== NULL) {
+function selectedHostGroups($groupids)
+{
+    $multiSelectHostGroupData = null;
+    if ($groupids !== [] && $groupids !== null && $groupids[0] !== null) {
         $filterGroups = API::HostGroup()->get([
             'output' => ['groupid', 'name'],
             'groupids' => $groupids
@@ -672,20 +705,23 @@ function selectedHostGroups($groupids) {
  *
  * Return Hosts from a list of groupids with inventory data.
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param array     $groupids   Array with groupid to get hosts
  * @param integer   $inventoryFields   Array with name of inventory fields to return with host data
  */
-function selectHostsByGroup($groupids, $inventoryFields = NULL) {
+function selectHostsByGroup($groupids, $inventoryFields = null)
+{
     $multiSelectHostData = [];
-    if ($groupids !== [] && $groupids !== NULL && $groupids[0] !== NULL) {
+    if ($groupids !== [] && $groupids !== null && $groupids[0] !== null) {
         // Get hosts only with inventory enabled
         $filterHosts = API::Host()->get([
-            'output' => ['hostid', 'name'],
+            'output' => ['hostid', 'name', 'host', 'interfaces'],
             'selectInventory' => $inventoryFields,
             'withInventory' => true,
+            'selectInterfaces' => ["ip","dns","main","useip"],
             'groupids' => $groupids
         ]);
+        //echo "---adail";        var_dump($filterHosts);
         foreach ($filterHosts as $host) {
             $tmp = [
                 'id' => $host['hostid'],
@@ -694,8 +730,14 @@ function selectHostsByGroup($groupids, $inventoryFields = NULL) {
             foreach ($inventoryFields as $Inv) {
                 $tmp[$Inv] = $host['inventory'][$Inv];
             }
+            foreach ($host['interfaces'] as $interface) {
+                if ($interface['main'] === "1") {
+                    $tmp['conn'] = ($interface["useip"] === "1" ?  $interface["ip"] : $interface["dns"]);
+                }
+            }
             $multiSelectHostData[] = $tmp;
         }
+        //echo "----adail1.5";var_dump($multiSelectHostData);
     }
     return $multiSelectHostData;
 }
@@ -705,14 +747,15 @@ function selectHostsByGroup($groupids, $inventoryFields = NULL) {
  *
  * Return active events from a list of groupids.
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param array     $groupids   Array with groupid to search triggers and events
  * @param integer   $status     Status of trigger (1 - Problem, 0 - OK)
  * @param integer   $severity   Minimum severity of trigger
  */
-function selectEventsByGroup($groupids, $status = 1, $severity = 0) {
+function selectEventsByGroup($groupids, $status = 1, $severity = 0)
+{
     $events = [];
-    if ($groupids !== [] && $groupids !== NULL && $groupids[0] !== NULL) {
+    if ($groupids !== [] && $groupids !== null && $groupids[0] !== null) {
         // Find active triggers from selected host groups
         $events = API::Trigger()->get([
             'output' => ['triggerid', 'description', 'priority'
@@ -735,9 +778,10 @@ function selectEventsByGroup($groupids, $status = 1, $severity = 0) {
 
 /* Return Hosts form a list of hostids with inventory data */
 
-function selectedHosts($hostids, $inventoryFields = NULL) {
+function selectedHosts($hostids, $inventoryFields = null)
+{
     $multiSelectHostData = [];
-    if ($hostids !== [] && $hostids !== NULL && $hostids[0] !== NULL) {
+    if ($hostids !== [] && $hostids !== null && $hostids[0] !== null) {
         $filterHosts = API::Host()->get([
             'output' => ['hostid', 'name'],
             'selectInventory' => [$inventoryFields],
@@ -754,7 +798,8 @@ function selectedHosts($hostids, $inventoryFields = NULL) {
     return $multiSelectHostData;
 }
 
-function hostMacroValue($hostid, $macroName, $default = 0) {
+function hostMacroValue($hostid, $macroName, $default = 0)
+{
     // Recupera o valor das macros no host
     $array_host = API::Host()->get([
         'output' => ['name', 'hostid'],
@@ -770,14 +815,15 @@ function hostMacroValue($hostid, $macroName, $default = 0) {
         }
     }
 
-    if (!isset($macroValue) || $macroValue == NULL) {
+    if (!isset($macroValue) || $macroValue == null) {
         $macroValue = globalMacroValue($macroName);
     }
     // Recupera o valor global da macro caso ela não exista no host
     return $macroValue;
 }
 
-function globalMacroValue($macroName, $default = 0) {
+function globalMacroValue($macroName, $default = 0)
+{
     global $globalMacros;
     if (!isset($globalMacros)) {
         $globalMacros = API::UserMacro()->get([
@@ -792,10 +838,11 @@ function globalMacroValue($macroName, $default = 0) {
             break;
         }
     }
-    return ( isset($macroValue) ? $macroValue : $default);
+    return (isset($macroValue) ? $macroValue : $default);
 }
 
-function hostName($hostid, $array_host = []) {
+function hostName($hostid, $array_host = [])
+{
     if ($array_host == []) {
         $array_host = API::Host()->get([
             'output' => ['name', 'hostid'],
@@ -816,7 +863,8 @@ function hostName($hostid, $array_host = []) {
     return $retorno;
 }
 
-function templateName($templateid, $array_template = []) {
+function templateName($templateid, $array_template = [])
+{
     if ($array_template == []) {
         $array_template = API::Template()->get([
             'output' => ['name', 'hostid'],
@@ -837,19 +885,22 @@ function templateName($templateid, $array_template = []) {
     return $retorno;
 }
 
-function zbxeDBConditionInt($p_field, $p_array) {
-    if ($p_array !== [] && $p_array !== NULL && $p_array[0] !== NULL) {
+function zbxeDBConditionInt($p_field, $p_array)
+{
+    if ($p_array !== [] && $p_array !== null && $p_array[0] !== null) {
         return dbConditionInt($p_field, $p_array);
     } else {
         return "";
     }
 }
 
-function zeDBConditionInt($fieldName, array $values, $notIn = false, $sort = true) {
+function zeDBConditionInt($fieldName, array $values, $notIn = false, $sort = true)
+{
     return (count($values) > 0 ? dbConditionInt($fieldName, $values) : "");
 }
 
-function buttonOptions($name, $value, $options, $values = []) {
+function buttonOptions($name, $value, $options, $values = [])
+{
     $radioOptions = (new CRadioButtonList($name, (is_int($value) ? (int) $value : (float) $value)));
     for ($i = 0; $i < count($options); $i++) {
         $radioOptions->addValue($options[$i], (count($values) > 0 ? $values[$i] : $i));
@@ -858,12 +909,14 @@ function buttonOptions($name, $value, $options, $values = []) {
     return $radioOptions;
 }
 
-function buttonOutputFormat($name, $value) {
+function buttonOutputFormat($name, $value)
+{
     return (new CRadioButtonList($name, (int) $value))->addValue('HTML', PAGE_TYPE_HTML)->addValue('CSV', PAGE_TYPE_CSV)->addValue('JSON', PAGE_TYPE_JSON)->setModern(true);
 }
 
 // Adiciona link para javascript externo
-function zeAddJsFile($scripts) {
+function zeAddJsFile($scripts)
+{
     if (!is_array($scripts)) {
         $scripts = array($scripts);
     }
@@ -872,39 +925,47 @@ function zeAddJsFile($scripts) {
     }
 }
 
-function zeCancelButton($url) {
+function zeCancelButton($url)
+{
     return (new CRedirectButton(_('Cancel'), $url, null))->setId('cancel');
 }
 
-function zbxeMapTitleColor() {
+function zbxeMapTitleColor()
+{
     return zbxeFieldValue("select tx_value from zbxe_preferences WHERE tx_option='map_title_color'", "tx_value");
 }
 
-function zbxeMapShowTitle() {
+function zbxeMapShowTitle()
+{
     return zbxeFieldValue("select tx_value from zbxe_preferences WHERE tx_option='map_title_show'", "tx_value");
 }
 
-function zbxeCompanyName() {
+function zbxeCompanyName()
+{
     return zbxeFieldValue("select tx_value from zbxe_preferences WHERE tx_option='company_name'", "tx_value") . " ";
 }
 
-function zbxeCompanyNameSize() {
+function zbxeCompanyNameSize()
+{
     $empresa = zbxeCompanyName();
     $tamanho = (120 + (strlen($empresa) * 4));
     return $tamanho;
 }
 
-function zbxeImageId($name) {
+function zbxeImageId($name)
+{
     $query = "SELECT imageid FROM images WHERE name = '" . $name . "'";
     return zbxeFieldValue($query, 'imageid');
 }
 
-function zbxeImageName($id) {
+function zbxeImageName($id)
+{
     $query = "SELECT name FROM images WHERE imageid = '" . $id . "'";
     return zbxeFieldValue($query, 'name');
 }
 
-function zbxeJSONKey($name, $value) {
+function zbxeJSONKey($name, $value)
+{
     $value = '"' . ltrim(rtrim($value, "'"), "'") . '"';
     return "\"" . $name . "\": " . $value;
 }
@@ -914,11 +975,12 @@ function zbxeJSONKey($name, $value) {
  *
  * Return a combo with all icon mappings as options
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param string    $p_name        Name of HTML object
  * @param integer   $default       Value for selected option
  */
-function zbxeComboIconMap($p_name = 'iconmapid', $p_default = 0) {
+function zbxeComboIconMap($p_name = 'iconmapid', $p_default = 0)
+{
     // icon maps
     $data = [];
     $data['iconMaps'] = API::IconMap()->get([
@@ -939,10 +1001,11 @@ function zbxeComboIconMap($p_name = 'iconmapid', $p_default = 0) {
  *
  * Return the API name of a host inventory Field
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param integer  $inventoryId        ID of inventory Field
  */
-function zbxeInventoryField($inventoryId) {
+function zbxeInventoryField($inventoryId)
+{
     $inventoryFields = ["", "type", "type_full", "name", "alias", "os", "os_full"
         , "os_short", "serialno_a", "serialno_b", "tag", "asset_tag"
         , "macaddress_a", "macaddress_b", "hardware", "hardware_full"
@@ -970,9 +1033,10 @@ function zbxeInventoryField($inventoryId) {
  *
  * Get All parameters without Zabbix interference
  * @author http://php.net/manual/en/language.variables.external.php#94607
- * 
+ *
  */
-function getRealPOST() {
+function getRealPOST()
+{
     $pairs = explode("&", file_get_contents("php://input"));
     $vars = array();
     foreach ($pairs as $pair) {
@@ -990,12 +1054,13 @@ function getRealPOST() {
  * Add a standard module header
  * Uses 2 global variables: $dashboard, $form
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param string  $module_id        module identifier
  * @param string  $title            Title of module
  * @param string  $allowFullScreen  Add a button to full screen view
  */
-function commonModuleHeader($module_id, $title, $allowFullScreen = false, $method = 'POST', $customControls = null) {
+function commonModuleHeader($module_id, $title, $allowFullScreen = false, $method = 'POST', $customControls = null)
+{
     global $dashboard, $form, $table, $toggle_all, $commonList, $filter;
     if (getRequest2('hidetitle') == 1) {
         $dashboard = (new CWidget());
@@ -1029,10 +1094,11 @@ function commonModuleHeader($module_id, $title, $allowFullScreen = false, $metho
  *
  * Return a array with all records from a SQL code
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param string  $query  SQL code to search dat
  */
-function zbxeSQLList($query) {
+function zbxeSQLList($query)
+{
     $result = prepareQuery($query);
     $tmp = [];
     while ($row = DBfetch($result)) {
@@ -1047,13 +1113,14 @@ function zbxeSQLList($query) {
 /**
  * zbxeNeedFilter
  *
- * Universal error message. For page_type = HTML show error message using $table object, 
+ * Universal error message. For page_type = HTML show error message using $table object,
  * for another case show a text message only
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param string  $message  error message
  */
-function zbxeNeedFilter($message) {
+function zbxeNeedFilter($message)
+{
     global $page, $table;
     if ($page['type'] == detect_page_type(PAGE_TYPE_HTML)) {
         if (!isset($table)) {
@@ -1070,10 +1137,11 @@ function zbxeNeedFilter($message) {
  *
  * Standard filter form using zabbix native profile
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param string  $name  name of object in HTML
  */
-function newFilterWidget($name) {
+function newFilterWidget($name)
+{
     return (new CFilter('web.' . $name . '.filter.state'))->addVar('fullscreen', getRequest('fullscreen'));
 }
 
@@ -1082,10 +1150,11 @@ function newFilterWidget($name) {
  *
  * Standard CSV line of values
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param string  $array  Array of values
  */
-function zbxeToCSV($array) {
+function zbxeToCSV($array)
+{
     $return = "";
     foreach ($array as $value) {
         $return .= quotestr($value, true) . ",";
@@ -1098,11 +1167,12 @@ function zbxeToCSV($array) {
  *
  * Add HTML tag for external JS file
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param array  $scripts  Array of scripts
  * @param string $path     Path to scripts
  */
-function zbxeJSLoad($scripts, $path = 'local/app/everyz/js') {
+function zbxeJSLoad($scripts, $path = 'local/app/everyz/js')
+{
     global $zbxeLoadedJS;
     foreach ($scripts as $value) {
         if (!in_array($path . '/' . $value, $zbxeLoadedJS)) {
@@ -1113,16 +1183,37 @@ function zbxeJSLoad($scripts, $path = 'local/app/everyz/js') {
 }
 
 /**
+ * zbxeCSSLoad
+ *
+ * Add HTML tag for external CSS file
+ * @author Adail Horst <the.spaww@gmail.com>
+ *
+ * @param array  $scripts  Array of css files
+ * @param string $path     Path to css files
+ */
+function zbxeCSSLoad($CSSs, $path = 'local/app/everyz/css')
+{
+    global $zbxeLoadedCSS;
+    foreach ($CSSs as $value) {
+        if (!in_array($path . '/' . $value, $zbxeLoadedCSS)) {
+            echo '<link rel="stylesheet" href="' . $path . '/' . $value . '"/>';
+            $zbxeLoadedCSS[] = $path . '/' . $value;
+        }
+    }
+}
+
+/**
  * zbxeArraySearch
  *
  * Search for values in a named array
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param array  $array  Array
  * @param string $key    Key to check
  * @param string $value  Required value
  */
-function zbxeArraySearch($array, $key, $value) {
+function zbxeArraySearch($array, $key, $value)
+{
     foreach ($array as $k => $v) {
         if ($v[$key] == $value) {
             return $k;
@@ -1136,12 +1227,13 @@ function zbxeArraySearch($array, $key, $value) {
  *
  * Importa traduções do EveryZ e de seus módulos
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param array  $json      JSON data converted to PHP array
  * @param boolean $resultOK  Variable with information about problems runing SQL commands
  * @param boolean $debug     If true the function will show debug messages instead run sql commands
  */
-function zbxeUpdateTranslation($json, $resultOK, $debug = false) {
+function zbxeUpdateTranslation($json, $resultOK, $debug = false)
+{
     if (isset($json["translation"])) {
         $insert = $update = 0;
         foreach ($json["translation"] as $row) {
@@ -1167,8 +1259,9 @@ function zbxeUpdateTranslation($json, $resultOK, $debug = false) {
             }
             if (trim($sql) !== '') {
                 $resultOK = DBexecute($sql);
-                if (!$resultOK)
+                if (!$resultOK) {
                     return false;
+                }
             }
         }
         if ($debug) {
@@ -1184,12 +1277,13 @@ function zbxeUpdateTranslation($json, $resultOK, $debug = false) {
  *
  * Importa as imagens padrões do everyz
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param array   $json      JSON data converted to PHP array
  * @param boolean $resultOK  Variable with information about problems runing SQL commands
  * @param boolean $debug     If true the function will show debug messages instead run sql commands
  */
-function zbxeUpdateConfigImages($json, $resultOK, $debug = false) {
+function zbxeUpdateConfigImages($json, $resultOK, $debug = false)
+{
     $extraCheck = (CWebUser::getType() > USER_TYPE_ZABBIX_ADMIN) && (zbxeConfigValue("zbxe_init_images", 0) == 0);
     if (isset($json["images"]) && $extraCheck) {
         zbxeUpdateConfigValue("zbxe_init_images", 1);
@@ -1226,12 +1320,13 @@ function zbxeUpdateConfigImages($json, $resultOK, $debug = false) {
  *
  * Importa configurações do EveryZ e de seus módulos
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param array   $json      JSON data converted to PHP array
  * @param boolean $resultOK  Variable with information about problems runing SQL commands
  * @param boolean $debug     If true the function will show debug messages instead run sql commands
  */
-function zbxeUpdateConfig($json, $resultOK, $debug = false) {
+function zbxeUpdateConfig($json, $resultOK, $debug = false)
+{
     $report = [];
     if (isset($json["config"])) {
         $report['config'] = ['source' => count($json["config"]), 'insert' => 0, 'update' => 0];
@@ -1240,20 +1335,18 @@ function zbxeUpdateConfig($json, $resultOK, $debug = false) {
         foreach ($json["config"] as $row) {
             $cIndex = zbxeArraySearch($config, 'tx_option', $row['tx_option']);
             if (!isset($config[$cIndex]['tx_option'])) {
-                $sql = zbxeInsert("zbxe_preferences", ['userid', 'tx_option', 'tx_value', 'st_ativo']
-                        , [$row['userid'], $row['tx_option'], $row['tx_value'], $row['st_ativo']]);
+                $sql = zbxeInsert("zbxe_preferences", ['userid', 'tx_option', 'tx_value', 'st_ativo'], [$row['userid'], $row['tx_option'], $row['tx_value'], $row['st_ativo']]);
                 $report['config']['insert'] ++;
             } else {
                 $sql = ($config[$cIndex]['tx_value'] == $row['tx_value'] ? '' :
-                                zbxeUpdate("zbxe_preferences", ['userid', 'tx_option', 'tx_value', 'st_ativo']
-                                        , [$row['userid'], $row['tx_option'], $row['tx_value'], $row['st_ativo']]
-                                        , ['tx_option'], [$row['tx_option']]));
+                                zbxeUpdate("zbxe_preferences", ['userid', 'tx_option', 'tx_value', 'st_ativo'], [$row['userid'], $row['tx_option'], $row['tx_value'], $row['st_ativo']], ['tx_option'], [$row['tx_option']]));
                 $report['config']['update'] ++;
             }
             if (trim($sql) !== '') {
                 $resultOK = DBexecute($sql);
-                if (!$resultOK)
+                if (!$resultOK) {
                     return false;
+                }
             }
         }
         if ($debug) {
@@ -1272,10 +1365,11 @@ function zbxeUpdateConfig($json, $resultOK, $debug = false) {
  *
  * Normaliza comandos DML entre o MySQL e o PostgreSQL
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param string  $query     SQL Statement
  */
-function zbxeStandardDML($query) {
+function zbxeStandardDML($query)
+{
     global $DB;
     if ($DB['TYPE'] == ZBX_DB_POSTGRESQL) {
         $query = str_replace('varchar', 'character varying', $query);
@@ -1290,10 +1384,11 @@ function zbxeStandardDML($query) {
  *
  * Return the imageid from a image name
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param string $name     Name of image
  */
-function getImageId($name) {
+function getImageId($name)
+{
     return zbxeFieldValue("select imageid from images WHERE name = " . quotestr($name), "imageid");
 }
 
@@ -1302,10 +1397,11 @@ function getImageId($name) {
  *
  * Return the imageid from a image name
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param string $name     Name of image
  */
-function getImageName($imageid) {
+function getImageName($imageid)
+{
     return zbxeFieldValue("select name from images WHERE imageid = " . quotestr($imageid), "name");
 }
 
@@ -1314,10 +1410,11 @@ function getImageName($imageid) {
  *
  * Adiciona ou atualiza uma imagem no repositório de imagens do Zabbix
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param string    $image        Array with image information
  */
-function updateImage($image) {
+function updateImage($image)
+{
     $imageid = getImageId($image['name']);
     if (intval($imageid) > 0) {
         $result = API::Image()->update([
@@ -1340,9 +1437,10 @@ function updateImage($image) {
  *
  * Inicializa as CONSTANTES compatíveis com o banco de dados utilizado pelo Zabbix
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  */
-function zbxeStartDefinitions() {
+function zbxeStartDefinitions()
+{
     global $DB;
     if (isset($DB) && !defined("ZE_DBFQ")) {
         if ($DB['TYPE'] == ZBX_DB_POSTGRESQL) {
@@ -1360,9 +1458,10 @@ function zbxeStartDefinitions() {
  *
  * Retorna os IDs de imagens utilizadas na configuração do EveryZ. Metodo utilizado para a exportação de dados.
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  */
-function zbxeConfigImageIDs() {
+function zbxeConfigImageIDs()
+{
     return 'tx_option in (' . quotestr("company_logo_login") . ',' . quotestr("company_logo_site") . ',' . quotestr("geo_default_poi") . ')'
             . " OR tx_option like " . quotestr('zbxe_default_image_%') . " OR tx_option like " . quotestr('%_poi')
             . " OR tx_option like " . quotestr('%_logo_%') . " AND tx_option not like " . quotestr('%_width%')
@@ -1372,14 +1471,15 @@ function zbxeConfigImageIDs() {
 /**
  * isJson
  *
- * Verifica se determinado texto é um array json válido 
+ * Verifica se determinado texto é um array json válido
  * Original: http://stackoverflow.com/questions/6041741/fastest-way-to-check-if-a-string-is-json-in-php
  * With changes by Adail Horst
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param string    $string String with JSON
  */
-function isJson($string) {
+function isJson($string)
+{
     $return = json_decode($string, true);
     return (json_last_error() == JSON_ERROR_NONE ? $return : false);
 }
@@ -1387,14 +1487,15 @@ function isJson($string) {
 /**
  * optArrayValue
  *
- * Busca em um array associativo a existência e valor de determinada chave. 
+ * Busca em um array associativo a existência e valor de determinada chave.
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param array     $array      Array with keys and values
  * @param string    $key        Key for search
  * @param array     $default    Default value (is used if $key does not exists on $array
  */
-function optArrayValue($array, $key, $default = "") {
+function optArrayValue($array, $key, $default = "")
+{
     return (isset($array[$key]) ? $array[$key] : $default);
 }
 
@@ -1403,9 +1504,10 @@ function optArrayValue($array, $key, $default = "") {
  *
  * Adiciona referência ao script padrão de funções do EveryZ. Isso ocorre somente se a opção de otimização de espaço em tela estiver ativa.
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  */
-function zbxeFullScreen() {
+function zbxeFullScreen()
+{
     if (zbxeConfigValue('custom_full_screen') == "1") {
         zbxeJSLoad(['everyzFunctions.js']);
     }
@@ -1416,18 +1518,17 @@ function zbxeFullScreen() {
  *
  * Reinicia as configurações do EveryZ que são baseadas nas tabelas de controle zbxe_*
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  */
-function zbxeResetConfiguration() {
+function zbxeResetConfiguration()
+{
     try {
         DBexecute(zbxeStandardDML("DROP TABLE `zbxe_preferences` "));
     } catch (Exception $e) {
-        
     }
     try {
         DBexecute(zbxeStandardDML("DROP TABLE `zbxe_translation` "));
     } catch (Exception $e) {
-        
     }
     $path = str_replace("/everyz/include", "/everyz", dirname(__FILE__));
     require_once $path . '/everyz.initdb.php';
@@ -1436,12 +1537,13 @@ function zbxeResetConfiguration() {
 /**
  * zbxeErrorLog
  *
- * Adiciona o logotipo dinâmico no Zabbix. 
+ * Adiciona o logotipo dinâmico no Zabbix.
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param boolean $show     True - Add a log line on error_log, False - do noting
  */
-function zbxeErrorLog($show, $message) {
+function zbxeErrorLog($show, $message)
+{
     if ($show == true) {
         error_log($message, 0);
     }
@@ -1450,11 +1552,12 @@ function zbxeErrorLog($show, $message) {
 /**
  * zbxeCustomMenu
  *
- * Adiciona o logotipo dinâmico no Zabbix. 
+ * Adiciona o logotipo dinâmico no Zabbix.
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  */
-function zbxeCustomMenu() {
+function zbxeCustomMenu()
+{
     $logoSize = zbxeConfigValue("company_logo_width", 0, 120) . "px";
     $logoCompany = new CDiv(SPACE, '');
     $logoCompany->setAttribute('style', 'float: left; margin: 10px 0px 0 0; background: url("zbxe-logo.php") no-repeat; height: 25px; width: '
@@ -1473,9 +1576,10 @@ function zbxeCustomMenu() {
  *
  * Adiciona referências HTML para os scripts padrões do EveryZ e os estilos adicionais
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  */
-function zbxeEveryZGlobal() {
+function zbxeEveryZGlobal()
+{
     echo "\n" . '<script src="local/app/everyz/js/everyzFunctions.js"></script>';
     echo "\n" . '<link href="local/app/everyz/css/everyz.css" rel="stylesheet" type="text/css" id="skinSheet">';
 }
@@ -1485,9 +1589,10 @@ function zbxeEveryZGlobal() {
  *
  * Retorna o tipo mínimo de usuário para utilizar o EveryZ
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  */
-function zbxeMenuUserType() {
+function zbxeMenuUserType()
+{
     return zbxeConfigValue("everyz_userlevel", 0, USER_TYPE_SUPER_ADMIN);
 }
 
@@ -1496,15 +1601,18 @@ function zbxeMenuUserType() {
  *
  * Verifica se o tipo do usuário atende ao requisito mínimo do módulo
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param integer $minimum     Minimum level to access the module
  */
-function zbxeCheckUserLevel($minimum = USER_TYPE_SUPER_ADMIN) {
-    if (CWebUser::getType() < $minimum)
+function zbxeCheckUserLevel($minimum = USER_TYPE_SUPER_ADMIN)
+{
+    if (CWebUser::getType() < $minimum) {
         access_deny();
+    }
 }
 
-function zbxeButtonUserLevel($name, $value) {
+function zbxeButtonUserLevel($name, $value)
+{
     return buttonOptions($name, $value, [_('User'), _zeT('Admin'), _zeT('Super Admin')], [USER_TYPE_ZABBIX_USER, USER_TYPE_ZABBIX_ADMIN, USER_TYPE_SUPER_ADMIN]);
 }
 
@@ -1513,24 +1621,26 @@ function zbxeButtonUserLevel($name, $value) {
  *
  * Adiciona uma coluna de titulo com tamanho definido
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param string $text   Header text
  * @param string $size   Size of collum header
  */
-function zbxeColHeader($text, $size) { 
+function zbxeColHeader($text, $size)
+{
     return (new CColHeader(_zeT($text)))->addStyle('width: ' . $size . (is_int($size) ? '%' : ''));
 }
 
 // Origin: http://raymorgan.net/web-development/how-to-obfuscate-integer-ids/
-class IdObfuscator {
-
-    public static function encode($id) {
+class IdObfuscator
+{
+    public static function encode($id)
+    {
         if (!is_numeric($id) or $id < 1) {
-            return FALSE;
+            return false;
         }
         $id = (int) $id;
         if ($id > pow(2, 31)) {
-            return FALSE;
+            return false;
         }
         $segment1 = self::getHash($id, 16);
         $segment2 = self::getHash($segment1, 8);
@@ -1546,7 +1656,8 @@ class IdObfuscator {
         return $oid;
     }
 
-    public static function decode($oid) {
+    public static function decode($oid)
+    {
         if (!preg_match('/^[A-Z0-9\:\$]{21,23}$/i', $oid)) {
             return 0;
         }
@@ -1571,10 +1682,10 @@ class IdObfuscator {
         return $id;
     }
 
-    private static function getHash($str, $len) {
+    private static function getHash($str, $len)
+    {
         return substr(sha1($str . CRYPT_SALT), 0, $len);
     }
-
 }
 
 /**
@@ -1582,9 +1693,10 @@ class IdObfuscator {
  *
  * Transforma um shorturl nos parâmetros salvos pelo módulo de bookmark
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  */
-function zbxeTranslateURL() {
+function zbxeTranslateURL()
+{
     global $filter;
     if (hasRequest("shorturl")) {
         $hash = getRequest2("shorturl");
@@ -1601,9 +1713,10 @@ function zbxeTranslateURL() {
  *
  * Verifica versão corrente do BD do EveryZ e atualiza, se necessário for
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  */
-function zbxeCheckDBConfig() {
+function zbxeCheckDBConfig()
+{
     $ezCurrent = zbxeConfigValue("everyz_version", 1);
     $debug = true;
     if ($ezCurrent > 6) {
@@ -1638,15 +1751,16 @@ function zbxeCheckDBConfig() {
  *
  * Get next value of a sequence (created for allow auto-increment feature without DB specific function)
  * @author Adail Horst <the.spaww@gmail.com>
- * 
+ *
  * @param string  $param   sequence to get next value
  * @param string  $default   default value for sequence
  */
-function zbxeNextValue($param, $default = 1) {
+function zbxeNextValue($param, $default = 1)
+{
     $param = "zbxeSequence." . $param;
     $query = 'select tx_value from zbxe_preferences WHERE userid = 0 and tx_option = ' . quotestr($param);
     $retorno = zbxeFieldValue($query, 'tx_value');
-    $retorno = (intval($retorno,0) < 2 ? $default : intval($retorno) + 1);
+    $retorno = (intval($retorno, 0) < 2 ? $default : intval($retorno) + 1);
     zbxeUpdateConfigValue($param, $retorno);
     return $retorno;
 }
@@ -1654,7 +1768,6 @@ function zbxeNextValue($param, $default = 1) {
 // End Functions ===============================================================
 // Enviroment configuration
 try {
-
     global $VG_INSTALL;
     if (!isset($VG_INSTALL)) {
         global $VG_BANCO_OK;
@@ -1683,5 +1796,15 @@ try {
         zbxeUpdateConfigImages($json, true, false);
     }
 } catch (Exception $e) {
-    return FALSE;
+    return false;
+}
+
+// Original code from https://stackoverflow.com/questions/5701985/vsprintf-or-sprintf-with-named-arguments-or-simple-template-parsing-in-php with adaptations
+function parse_html($html, $args)
+{
+    foreach ($args as $key => $val) {
+        $html = str_replace("<$key>", $val, $html);
+    }
+
+    return $html;
 }

@@ -15,10 +15,10 @@
 
 
 INSTALAR="N";
-AUTOR="the.spaww@gmail.com"; 
+AUTOR="the.spaww@gmail.com";
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="1.1.4";
-VERSAO_EZ="1.1.4";
+VERSAO_INST="1.1.6";
+VERSAO_EZ="1.1.6";
 UPDATEBD="S";
 BRANCH="master";
 NOME_PLUGIN="EVERYZ";
@@ -108,7 +108,7 @@ if [ $# -gt 0 ]; then
                             exit
                         fi
                     ;;
-                    *) 
+                    *)
                         InfoError "Invalid DISTRO option: $LINUX_DISTRO";
                         exit;
                     ;;
@@ -165,7 +165,7 @@ backupArquivo() {
 
 registra() {
     [ -d ${TMP_DIR} ] || mkdir ${TMP_DIR}
-    echo $(date)" - $1" >> $TMP_DIR/logInstall.log; 
+    echo $(date)" - $1" >> $TMP_DIR/logInstall.log;
     message "$1";
 }
 
@@ -181,7 +181,7 @@ installMgs() {
 identificaDistro() {
     if [ -z "$LINUX_DISTRO" ]; then
         if [ "$CAMINHO_FRONTEND" = "" ]; then
-            registra "Finding zabbix frontend location...";    
+            registra "Finding zabbix frontend location...";
             PATHDEF=$(find / -name zabbix.php | head -n1 | sed 's/\/zabbix.php//g');
         fi
         if [ -f /etc/redhat-release -o -f /etc/system-release ]; then
@@ -215,7 +215,7 @@ identificaDistro() {
                 CAMINHO_RCLOCAL="/etc/rc.local";
                 registra "Versao do Linux - OK ($LINUX_DISTRO - $LINUX_VER)"
                 ;;
-            *) 
+            *)
                 echo "$M_ERRO_DISTRO Required: wget, unzip, dialog";
                 dialog \
                     --title 'Problem'        \
@@ -235,7 +235,7 @@ identificaDistro() {
                 else
                     exit 1;
                 fi
-                #registra "Distribucao nao prevista ($LINUX_DISTRO)... favor contactar $AUTOR"; exit 1; 
+                #registra "Distribucao nao prevista ($LINUX_DISTRO)... favor contactar $AUTOR"; exit 1;
             ;;
         esac
     fi
@@ -338,7 +338,7 @@ idioma() {
       M_CONFAPACHE_SIM="SIM, configura e reinicia o apache.";
       M_CONFAPACHE_NAO="NAO, você terá que verificar manualmente suas configurações do apache.";
             ;;
-	*) 
+	*)
       M_BASE="This installer will add an extra menu to the end of the menu bar of your environment. For installation are needed to inform some parameters.";
       M_CAMINHO="Please enter the path to the zabbix frontend ";
       M_BASE_PHP="This installer will configure the PHP: short_open_tag, activating it. This step is required to install and ZabTree ZabGeo.";
@@ -383,7 +383,7 @@ caminhoFrontend() {
         dialog --inputbox "$M_BASE\n$M_CAMINHO" 0 0 "$PATHDEF" 2> $TMP_DIR/resposta_dialog.txt;
         CAMINHO_FRONTEND=`cat $TMP_DIR/resposta_dialog.txt`;
     fi
-    if [ ! -d "$CAMINHO_FRONTEND" ]; then        
+    if [ ! -d "$CAMINHO_FRONTEND" ]; then
         registra " $M_ERRO_CAMINHO ($CAMINHO_FRONTEND). $M_ERRO_ABORT";
         exit;
     else
@@ -407,7 +407,7 @@ tipoInstallZabbix(){
         "red hat" | "red" )
             rpm -qa | grep zabbix | wc -l;
             ;;
-	*) 
+	*)
             message "$M_ERRO_DISTRO - I dont know how check packages in your distro... sory... you know? send-me how ;) ";
             ;;
     esac
@@ -424,16 +424,16 @@ instalaMenus() {
     INIINST=`cat $ARQUIVO | sed -ne "/$TAG_INICIO/{=;q;}"`;
     FIMINST=`cat $ARQUIVO | sed -ne "/$TAG_FINAL/{=;q;}"`;
     if [ ! -z $INIINST ]; then
-        installMgs "U" "NS"; 
+        installMgs "U" "NS";
         sed -i "$INIINST,$FIMINST d" $ARQUIVO;
     else
-        installMgs "N" "NS"; 
+        installMgs "N" "NS";
         TMP="\$deny";
         INIINST=`cat $ARQUIVO | sed -ne "/$TMP/{=;q;}"`;
         INIINST=`expr $INIINST + 1`;
         FIMINST=$INIINST;
     fi
- 
+
     TXT_CUSTOM=" if (file_exists(\"local/include/menu.inc.change.php\")) { \n include_once \"local/include/menu.inc.change.php\"; \n } ";
     sed -i "$INIINST i$TAG_INICIO\n$TXT_CUSTOM\n$TAG_FINAL" $ARQUIVO
 
@@ -443,14 +443,14 @@ instalaMenus() {
 #        LINHA=`cat js/main.js | sed -ne "/{'menus'\:/{=;q;}"`;
         LINHA=`grep -n "menus:" js/main.js | cut -d : -f 1`;
         registra "Instalando menu no javascript...";
-        sed -i $LINHA"s/'admin': 0/'admin': 0,'extras':0/g" js/main.js 
+        sed -i $LINHA"s/'admin': 0/'admin': 0,'extras':0/g" js/main.js
     fi
     # Ajusta o copyright
 
     TAG_INICIO="##$NOME_PLUGIN-Copyright-custom";
     TAG_FINAL="$TAG_INICIO-FIM";
     if [ "`cat include/html.inc.php | grep \"$TAG_INICIO\" | wc -l`" -eq 0 ]; then
-               
+
     # Ajuste do Copyright
         registra "Instalando Copyright...";
         IDENT="->setAttribute('target', '_blank')";
@@ -517,7 +517,7 @@ customLogo() {
     NOVO="#$TAG1\n$TAG_INICIO\n$TXT_CUSTOM1\n$TAG_FINAL";
     sed -i "s/$TAG1/$NOVO/" $ARQUIVO
 
-    # Comentando classe de logo 
+    # Comentando classe de logo
     TAG1="->addClass(ZBX_STYLE_HEADER_LOGO)";
     sed -i "s/$TAG1/#$TAG1/" $ARQUIVO
 
@@ -558,7 +558,7 @@ customLogo() {
     # ==========================================================================
     # Configuracao login screen ================================================
     # ==========================================================================
-    # Objetos de suporte aos logos customizados 
+    # Objetos de suporte aos logos customizados
     registra "Configurando suporte a logotipo personalizado na tela de login...";
     ARQUIVO="include/views/general.login.php";
     # Logotipo do login
@@ -569,13 +569,13 @@ customLogo() {
     TAG_FINAL="$TAG_INICIO-FIM";
     INIINST=`cat $ARQUIVO | sed -ne "/$TAG_INICIO/{=;q;}"`;
     if [ -z $INIINST ]; then
-        installMgs "N" "logo"; 
+        installMgs "N" "logo";
     else
-        installMgs "U" "logo"; 
+        installMgs "U" "logo";
         FIMINST=`cat $ARQUIVO | sed -ne "/$TAG_FINAL/{=;q;}"`;
         sed -i "$INIINST,$FIMINST d" $ARQUIVO;
     fi
-    
+
     TAG1='global $ZBX_SERVER_NAME;';
     NOVO="$TAG1\n$TAG_INICIO\n$TXT_CUSTOM_LOGO\n$TAG_FINAL";
     sed -i "s/$TAG1/$NOVO/" $ARQUIVO
@@ -595,7 +595,7 @@ customLogo() {
 }
 
 instalaLiteral() {
-    installMgs "N" "Literal values"; 
+    installMgs "N" "Literal values";
     ARQUIVO="include/func.inc.php";
     backupArquivo $ARQUIVO;
     TAG_INICIO="\#\#$NOME_PLUGIN-Literal";
@@ -666,7 +666,7 @@ unzipPackage() {
     ARQ_TMP="$1";
     DIR_TMP="$2";
     DIR_DEST="$3";
-    
+
     cd /tmp;
     # Descompacta em TMP
     if [ -f "$ARQ_TMP" ]; then
@@ -681,7 +681,7 @@ unzipPackage() {
         cd $DIR_TMP
         if [ ! -e "$DIR_DEST" ]; then
             mkdir -p "$DIR_DEST";
-        fi 
+        fi
     else
         message "Instalacao usando cache local";
     fi
@@ -754,7 +754,7 @@ configuraApache() {
             fi
             registra "Reconfigurou o apache! $APACHEROOT/everyz.conf  ";
         fi
-    else 
+    else
         registra "Nao reconfigurou o apache!";
     fi
 }
@@ -781,9 +781,9 @@ instalaPortletNS() {
     INIINST=`cat $ARQUIVO | sed -ne "/$TAG_INICIO/{=;q;}"`;
     FIMINST=`cat $ARQUIVO | sed -ne "/$TAG_FINAL/{=;q;}"`;
     if [ ! -z $INIINST ]; then
-        installMgs "U" "NS"; 
+        installMgs "U" "NS";
     else
-        installMgs "N" "NS"; 
+        installMgs "N" "NS";
         TMP="items_count_not_supported";
         INIINST=`cat $ARQUIVO | sed -ne "/$TMP/{=;q;}"`;
         FIMINST=$INIINST;
@@ -796,7 +796,7 @@ instalaPortletNS() {
 function updatePopUp() {
     message "Update popup.php";
     ARQUIVO="popup.php";
-    
+
     # Ajusta o popup menu para suportar a pesquisa por key_
     if [ -f "$ARQUIVO" ]; then
         #Zabbix 3.0.0
@@ -814,9 +814,9 @@ function updatePopUp() {
             INIINST=`cat $ARQUIVO | sed -ne "/$TAG_INICIO/{=;q;}"`;
             FIMINST=`cat $ARQUIVO | sed -ne "/$TAG_FINAL/{=;q;}"`;
             if [ ! -z $INIINST ]; then
-                installMgs "U" "POP"; 
+                installMgs "U" "POP";
             else
-                installMgs "N" "POP"; 
+                installMgs "N" "POP";
                 TMP='"name", "master_itemname"';
                 INIINST=`cat $ARQUIVO | sed -ne "/$TMP/{=;q;}"`;
                 FIMINST=$INIINST;
@@ -847,7 +847,7 @@ confirmaApache;
 ####### Download de arquivos ---------------------------------------------------
 
 ####### Instalacao -------------------------------------------------------------
-instalaGit;  
+instalaGit;
 primeiroAcesso;
 instalaMenus;
 customLogo;
@@ -858,6 +858,6 @@ instalaPortletNS;
 updatePopUp;
 
 registra "Installed - [ $VERSAO_INST ]";
- 
+
 #echo "Installed - [ $VERSAO_INST ]";
 #echo "You need to check your apache server and restart!";

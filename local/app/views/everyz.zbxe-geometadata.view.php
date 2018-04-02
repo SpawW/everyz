@@ -18,7 +18,6 @@
  * * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  * TodoS: ===========================================================================
  * */
-
 /* * ***************************************************************************
  * Module Variables
  * ************************************************************************** */
@@ -356,7 +355,7 @@ $table->addRow([$leftCol]);
 $table->setFooter(makeFormFooter(new CSubmit('update', _('Update'))));
 
 //------------
-/*
+
 $leftCol = new CFormList();
 
 $addButton = (new CButton('btnAddCircle', _('Add')))->onClick('javascript:addCircle();');
@@ -371,7 +370,7 @@ $leftCol->addRow(_('Create Route'), (new CDiv())
                 ->setAttribute('id', "mapid")
                 ->setAttribute('style', "width:600px; height: 600px;"));
 addTab('route', _zeT('Route'));
-*/
+
 
 /* * ***************************************************************************
  * Display Footer

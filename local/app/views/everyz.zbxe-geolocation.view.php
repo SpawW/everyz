@@ -56,12 +56,14 @@ checkAccessGroup('groupids');
  * Module Functions
  * ************************************************************************** */
 
-function cleanPosition($position) {
+function cleanPosition($position)
+{
     $position = str_replace('°', '', $position);
     return $position;
 }
 
-function hostIndex($hostid, $hostArray) {
+function hostIndex($hostid, $hostArray)
+{
     foreach ($hostArray as $k => $v) {
         if ($v['id'] == $hostid) {
             return $k;
@@ -73,6 +75,7 @@ function hostIndex($hostid, $hostArray) {
 /* * ***************************************************************************
  * Get Data
  * ************************************************************************** */
+ require_once 'everyz.zbxe-geolocation.popup.php'; // PopUp template
 // Filtros =====================================================================
 if (hasRequest('filter_rst')) { // Clean the filter parameters
     resetProfile('groupids', true);
@@ -82,7 +85,7 @@ if (hasRequest('filter_rst')) { // Clean the filter parameters
     resetProfile('zoomLevel', true);
     resetProfile('layers', true);
     resetProfile('map', true);
-    $filter['filter_rst'] = NULL;
+    $filter['filter_rst'] = null;
     $filter['layers'] = intval($filter['layers'], 99);
     $filter['map'] = intval($filter['map'], 0);
 } else { // Put the date in required format
@@ -108,6 +111,7 @@ if ($withIconMapping) {
 
 $eventData = selectEventsByGroup($filter["groupids"], 1);
 $hostData = selectHostsByGroup($filter["groupids"], $inventoryFields);
+//echo "----adail3";var_dump($hostData);
 
 $cont = 0;
 $imagesArray = [];
@@ -166,22 +170,24 @@ foreach ($hostData as $key => $host) {
             $jsonArray = isJson($host["notes"]);
             if (!$jsonArray == false) {
                 // Tratamento dos Circles
-                if (isset($jsonArray['circle']))
+                if (isset($jsonArray['circle'])) {
                     foreach ($jsonArray['circle'] as $value) {
                         $hostData[$cont]['circle'][] = ['size' => $value['size'], 'color' => (!strpos($value['color'], "#") ? "#" : "") . $value['color']];
                     }
+                }
                 $defaultColor = "000088";
                 $defaultWidth = 4;
                 // Tratamento dos Lines
-                if (isset($jsonArray['line']))
+                if (isset($jsonArray['line'])) {
                     foreach ($jsonArray['line'] as $value) {
                         $hostData[$cont]['line'][] = ['lat' => cleanPosition($value['lat']), 'lon' => cleanPosition($value['lon'])
                             , 'popup' => optArrayValue($value, 'popup')
                             , 'color' => "#" . optArrayValue($value, 'color', $defaultColor), 'width' => optArrayValue($value, 'width', $defaultWidth)
                         ];
                     }
+                }
                 // Tratamento dos Links
-                if (isset($jsonArray['link']))
+                if (isset($jsonArray['link'])) {
                     foreach ($jsonArray['link'] as $value) {
                         $targetHost = hostIndex($value['hostid'], $hostData);
                         if ($targetHost > -1) {
@@ -191,6 +197,7 @@ foreach ($hostData as $key => $host) {
                             ];
                         }
                     }
+                }
             }
         }
     }
@@ -212,15 +219,22 @@ $hostData = $tmp;
 /* * ***************************************************************************
  * Display
  * ************************************************************************** */
- zbxeJSLoad(['everyzD3Functions.js','everyz-zbxe-geolocation.static.js',
+ zbxeJSLoad(
+     ['everyzD3Functions.js','everyz-zbxe-geolocation.static.js',
      'leaflet.js', 'leaflet/leaflet.lineextremities.js', 'leaflet/leaflet-control-credits.js'
-     , 'leaflet/leaflet-control-credits-src.js', 'leaflet/leaflet.oms.min.js'
+     , 'leaflet/leaflet-control-credits-src.js'
+     , 'leaflet/leaflet.oms.min.js'
+     , 'leaflet/L.Icon.Pulse.js'
+     //,'leaflet/stamen.js'
+     , 'leaflet/leaflet.polylineDecorator.js'
      //, 'leaflet/leaflet.draw.js'
      ]
  );
+ zbxeCSSLoad(['leaflet.css','leaflet-control-credits.css', 'L.Icon.Pulse.css']);
+ //<link rel="stylesheet" href="local/app/everyz/css/leaflet.css" />
+ //<link rel="stylesheet" href="local/app/everyz/css/leaflet-control-credits.css" />
+
 ?>
-<link rel="stylesheet" href="local/app/everyz/css/leaflet.css" />
-<link rel="stylesheet" href="local/app/everyz/css/leaflet-control-credits.css" />
 <?php
 commonModuleHeader($moduleName, $moduleTitle, true);
 $widget = newFilterWidget($moduleName);
@@ -244,12 +258,20 @@ $tmpColumn->addRow(_('Host Groups'), multiSelectHostGroups(selectedHostGroups($f
 ;
 if (zbxeConfigValue("geo_token", 0, '') !== "") {
     $tmpColumn->addRow(_zeT('Default tile'), [newComboFilterArray(
-                ["Grayscale", "Streets", "Dark", "Outdoors", "Satellite", "Emerald"]
-                , "map", $filter['map'], false, false)]);
+                ["Grayscale", "Streets", "Dark", "Outdoors", "Satellite", "Emerald"],
+        "map",
+        $filter['map'],
+        false,
+        false
+    )]);
 } else {
     $tmpColumn->addRow(_zeT('Default tile'), [newComboFilterArray(
-                ["OpenStreet_Base", "OpenStreet_Grayscale", "OpenTopo", "Stamen_Terrain", "CartoDB_DarkMatter", "Esri_WorldStreetMap"]
-                , "map", $filter['map'], false, false)]);
+                ["OpenStreet_Base", "OpenStreet_Grayscale", "OpenTopo", "Stamen_Terrain", "CartoDB_DarkMatter", "Esri_WorldStreetMap"],
+        "map",
+        $filter['map'],
+        false,
+        false
+    )]);
 }
 
 $tmpColumn->addItem(new CInput('hidden', 'action', $filter["action"]));
@@ -269,8 +291,11 @@ $tmpColumn->addRow(_('Center'), [
             ->addValue(_zeT('none'), 1)->addValue(_zeT('Lines'), 2)->addValue(_zeT('Circles'), 3)->addValue(_zeT('All'), 99)
         ])
         ->addRow(_zeT('Default zoom level'), [$radioZoom])
-
+/*$tmpColumn->addItem(new CInput('hidden', 'height', $filter["height"]));
+$tmpColumn->addItem(new CInput('hidden', 'width', $filter["width"]));
+*/
 ;
+//var_dump(ZBX_TEXTAREA_TINY_WIDTH);
 $widget->addColumn($tmpColumn);
 $dashboard->addItem($widget);
 
@@ -285,9 +310,10 @@ if (hasRequest('filter_set')) {
 }
 
 if (hasRequest("filter_set") && !$requiredMissing) {
-    $table->addRow((new CDiv())
+    $table->addRow(
+        (new CDiv())
                     ->setAttribute('id', "mapid")
-                    ->setAttribute('style', "width:100%; height: 100%;")
+                    ->setAttribute('style', "width: 100%; height: 100%")
     );
 }
 $form->addItem([$table]);

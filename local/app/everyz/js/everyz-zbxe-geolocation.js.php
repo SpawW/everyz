@@ -24,7 +24,14 @@
     geoTitleMetadata = "<?php echo _('Edit host metadata'); ?>";
     geoTitleLatest = "<?php echo _('Latest Data'); ?>";
     geoTitleTriggers = "<?php echo _('Status of triggers'); ?>";
-<?php
+    geoPopUpTemplate = "<?php echo "$popupHost"; ?>";
+    severityColors = [<?php
+    for ($i = 0; $i < 6; $i++) {
+        echo($i == 0 ? "" : ","). "'#".getSeverityColor($i, [$config])."'";
+    }
+    ?>];
+
+ <?php
 $easterMode = hasRequest('showteam') || count($hostData) == 0;
 if ($easterMode) { // Clean the filter parameters
     echo "var setViewLat = 24.43419;";
@@ -42,30 +49,30 @@ if ($easterMode) { // Clean the filter parameters
     echo "var setViewLat = " . $filter['centerLat'] . ";";
     echo "var setViewLong = " . $filter['centerLong'] . ";";
     echo "var setViewZoom = " . getRequest2("zoomLevel", 19) . ";";
-    echo "var showCircles = " . ( in_array($filter["layers"], [3, 99]) ? 1 : 0) . ";";
-    echo "var showLines = " . ( in_array($filter["layers"], [2, 99]) ? 1 : 0) . ";";
+    echo "var showCircles = " . (in_array($filter["layers"], [3, 99]) ? 1 : 0) . ";";
+    echo "var showLines = " . (in_array($filter["layers"], [2, 99]) ? 1 : 0) . ";";
     echo "var easterEggMode=0;";
 }
 ?>
 
-
-    vDiv = document.getElementById("mapid");
-    if (location.search.split('fullscreen=1')[1] !== undefined) {
-        vDiv.style.height = window.innerHeight - 10;
-        if (location.search.split('hidetitle=1')[1] !== undefined) {
-            vDiv.style.width = window.innerWidth - 10;
-            document.getElementsByTagName("body")[0].style.overflow = "hidden";
-            document.getElementsByClassName("article")[0].style.padding = "0px 0px 0px 0px";
-        } else {
-            vDiv.style.width = window.innerWidth - 50;
-            vDiv.style.height = window.innerHeight - 70;
-        }
+vDiv = document.getElementById("mapid");
+if (location.search.split('fullscreen=1')[1] !== undefined) {
+    vDiv.style.height = (window.innerHeight - 10)+'px';
+    if (location.search.split('hidetitle=1')[1] !== undefined) {
+        vDiv.style.width = (window.innerWidth - 10)+'px';
+        document.getElementsByTagName("body")[0].style.overflow = "hidden";
+        document.getElementsByClassName("article")[0].style.padding = "0px 0px 0px 0px";
     } else {
-        vDiv.style.height = window.innerHeight - 140;
-        vDiv.style.width = window.innerWidth - 50;
+        vDiv.style.width = (window.innerWidth - 50)+'px';
+        vDiv.style.height = (window.innerHeight - 70)+'px';
     }
+} else {
+    vDiv.style.height = (window.innerHeight - 140)+'px';
+    vDiv.style.width = (window.innerWidth - 50)+'px';
+}
     //Define area for Map (setup this data in database ZabbixExtras)
     var ZabGeomap = L.map('mapid').setView([setViewLat, setViewLong], setViewZoom);
+//.bindTooltip("My Label", {permanent: true, className: "my-label", offset: [0, 0] }).addTo(ZabGeomap);
     //,{drawControl: true}
     //Create layerGroup Circle
     var ZabGeocircle = new L.LayerGroup();
@@ -79,6 +86,7 @@ if ($easterMode) { // Clean the filter parameters
 
 // ------------------- OverLapping Layer ---------------------------------------
     var oms = new OverlappingMarkerSpiderfier(ZabGeomap);
+
     var popup = new L.Popup();
     oms.addListener('click', function (marker) {
       //alert('aqui');
@@ -92,6 +100,7 @@ if ($easterMode) { // Clean the filter parameters
                 .setContent("You selected here: " + e.latlng.toString())
                 .openOn(ZabGeomap);
     }
+// ------------------- OverLapping Layer end -----------------------------------
 
     ZabGeomap.on('contextmenu', onMapClick);
 
@@ -152,7 +161,8 @@ echo $mapBackgroud[$filter["map"]];
     }
 <?php
 
-function bigSeverity($host) {
+function bigSeverity($host)
+{
     $bigPriority = 0;
     if (isset($host["events"])) {
         $eventList = "";
@@ -163,7 +173,8 @@ function bigSeverity($host) {
     return $bigPriority;
 }
 
-function showEvents($host) {
+function showEvents($host)
+{
     global $config;
     if (isset($host["events"])) {
         $eventList = "";
@@ -171,9 +182,9 @@ function showEvents($host) {
             $eventList .= "<li style='background: #" . getSeverityColor($value["priority"], [$config])
                     . "; list-style:square;'><a class='everyzGEOLink' href='tr_events.php?triggerid="
                     . $value["triggerid"] . "&eventid=" . $value["eventid"] . "'"
-                    . (strlen($value["description"]) > 30 ? " title='" . $value["description"] . "' " : "" )
+                    . (strlen($value["description"]) > 30 ? " title='" . $value["description"] . "' " : "")
                     . "> "
-                    . (strlen($value["description"]) > 30 ? substr($value["description"], 0, 30) . "..." : $value["description"] )
+                    . (strlen($value["description"]) > 30 ? substr($value["description"], 0, 30) . "..." : $value["description"])
                     . "</a></li>";
         }
         return quotestr('<hr width="99%" color="gray"><ul>' . $eventList . '</ul>');
@@ -185,7 +196,7 @@ function showEvents($host) {
 // Array com os índices de imagens de erro
 echo "\n errorImages = [";
 for ($i = 0; $i < 6; $i++) {
-    echo ($i == 0 ? "" : ","), zbxeImageId('zbxe_icon_error_' . $i);
+    echo($i == 0 ? "" : ","), zbxeImageId('zbxe_icon_error_' . $i);
 }
 echo "]; ";
 // Cria os hosts no mapa
@@ -196,70 +207,83 @@ if ($easterMode) { // Clean the filter parameters
         showEasterEgg();
     <?php
 } else {
-    // Traduções
-    foreach ($hostData as $host) {
-        if (array_key_exists("location_lat", $host)) {
-            $bigPriority = bigSeverity($host);
-            $hostEvents = showEvents($host);
-            // Add host
-            if ($bigPriority > 0) {
-                echo "\n addErrorHost(" . $host["location_lat"] . "," . $host["location_lon"] . ",errorImages[$bigPriority],"
+        // Traduções
+        //echo "------ adail2";    var_dump($hostData);
+        if (file_exists("local/app/everyz/include/geolocation.buttons.change.php")) {
+            require_once "local/app/everyz/include/geolocation.buttons.change.php"; ?>
+             zbxeConsole('Load extra buttons.');
+             <?php
+        } else {
+            function extraButtons($host)
+            {
+                return "";
+            } ?>
+             zbxeConsole('No extra buttons.');
+             <?php
+        }
+        foreach ($hostData as $host) {
+            if (array_key_exists("location_lat", $host)) {
+                $bigPriority = bigSeverity($host);
+                $hostEvents = showEvents($host);
+                // Add host
+                if ($bigPriority > 0) {
+                    echo "\n addErrorHost(" . $host["location_lat"] . "," . $host["location_lon"] . ",errorImages[$bigPriority],"
                 . 'popupHost(' . $host["id"] . ', ' . quotestr($host["name"])//.', '.(isset($host["events"]) && count($host["events"]))
-                . ',' . $hostEvents . ')'
-                . ");";
-            }
-            echo "\n addHost(" . $host["location_lat"] . "," . $host["location_lon"] . "," . $host["iconid"] . ","
+                . ',' . $hostEvents . ', '. quotestr($host["conn"]).')'
+                .','. $bigPriority. ");";
+                }
+                echo "\n addHost(" . $host["location_lat"] . "," . $host["location_lon"] . "," . $host["iconid"] . ","
             . 'popupHost(' . $host["id"] . ', ' . quotestr($host["name"])
-            . ',' . $hostEvents . ')'
+            . ',' . $hostEvents . ', '. quotestr($host["conn"]).",".extraButtons($host).')'
             . " );";
 
-            // Add circles
-            if (isset($host["circle"])) {
-                foreach ($host["circle"] as $circles) {
-                    echo "addCircle(" . $host["location_lat"] . "," . $host["location_lon"] . "," . $circles['size'] . ",'" . $circles['color'] . "'," . zbxeConfigValue('geo_circle_opacity', 0, 0.3) . ");";
+                // Add circles
+                if (isset($host["circle"])) {
+                    foreach ($host["circle"] as $circles) {
+                        echo "addCircle(" . $host["location_lat"] . "," . $host["location_lon"] . "," . $circles['size'] . ",'" . $circles['color'] . "'," . zbxeConfigValue('geo_circle_opacity', 0, 0.3) . ");";
+                    }
                 }
-            }
-            // Add lines
-            if (isset($host["line"])) {
-                foreach ($host["line"] as $lines) {
-                    echo "\n addLine([" . $host["location_lat"] . "," . $host["location_lon"] . "], ["
-                    . $lines['lat'] . "," . $lines['lon'] . "],'" . $lines['popup'] . "','" . $lines['color'] . "'," . $lines['width'] . "," . zbxeConfigValue("geo_link_opacity", 0, 1) . ");";
+                // Add lines
+                if (isset($host["line"])) {
+                    foreach ($host["line"] as $lines) {
+                        echo "\n addLine([" . $host["location_lat"] . "," . $host["location_lon"] . "], ["
+                    . $lines['lat'] . "," . $lines['lon'] . "],'" . CMacrosResolverHelper::resolveMapLabelMacros($lines['popup']) . "','" . $lines['color'] . "'," . $lines['width'] . "," . zbxeConfigValue("geo_link_opacity", 0, 1) . ");";
+                    }
                 }
-            }
-            // Add Multiline
-            if (isset($host["multiline"])) {
-                $multilineCount = 1;
-                foreach ($host["multiline"] as $multilines) {
-                    $linesPackage .= ($linesPackage == "" ? "" : ", ")
+                // Add Multiline
+                if (isset($host["multiline"])) {
+                    $multilineCount = 1;
+                    foreach ($host["multiline"] as $multilines) {
+                        $linesPackage .= ($linesPackage == "" ? "" : ", ")
                             . "\n"
                             . '{"type": "Feature", "geometry": { "type": "MultiLineString", "coordinates": [['
                             . '[' . $host["location_lon"] . "," . $host["location_lat"] . '],' . $multilines[1]
                             . ']]}, "style": { "color":"red" } , "properties": {  "color":"red",  "popupContent": "' . $multilines[6] . '"},"id": '
                             . $multilineCount . '}';
-                    $multilineCount++;
-                    echo "\n console.log('Multiline: [" . $host['location_lon'] . "],[" . $host['location_lat'] . "]," . $multilines[1] . " - " . $multilines[6] . "')";
+                        $multilineCount++;
+                        //echo "\n console.log('Multiline: [" . $host['location_lon'] . "],[" . $host['location_lat'] . "]," . $multilines[1] . " - " . $multilines[6] . "')";
+                    }
                 }
-            }
 
-            // Add Polygon
-            if (isset($host["polygon"])) {
-                $polygonCount = 1;
-                foreach ($host["polygon"] as $polygons) {
-                    $linesPackage .= ($linesPackage == "" ? "" : ", ")
+                // Add Polygon
+                if (isset($host["polygon"])) {
+                    $polygonCount = 1;
+                    foreach ($host["polygon"] as $polygons) {
+                        $linesPackage .= ($linesPackage == "" ? "" : ", ")
                             . "\n"
                             . '{"type": "Feature", "properties": { "popupContent": "' . $polygons[6] . '"}, "geometry": { "type": "Polygon", "coordinates": [['
                             . $polygons[1]
                             . ']]}, "className":{ "baseVal":"line2" },"id": '
                             . $polygonCount . '}';
-                    $polygonCount++;
-                    echo "\n console.log('Polygon: $polygons[1] - " . $polygons[6] . "')";
+                        $polygonCount++;
+                        echo "\n console.log('Polygon: $polygons[1] - " . $polygons[6] . "')";
+                    }
                 }
+            } else {
+                // Hosts without coordenates
             }
-        } else {
-            // Hosts without coordenates
         }
     }
-}
 ?>
 
     //Add Scale in maps

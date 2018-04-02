@@ -22,76 +22,80 @@ var filterDIV = document.getElementById('filter-space');
 var filterButton = document.getElementById('filter-mode');
 
 if (titleBar[0] == undefined) {
-    if (filterButton !== null) {
-        filterDIV.style = 'display: none;';
-        filterButton.style = 'display: none;';
-    }
+  if (filterButton !== null) {
+    filterDIV.style = 'display: none;';
+    filterButton.style = 'display: none;';
+  }
 } else {
-    var filterButton = document.getElementById('filter-mode');
-    var btnMax = document.getElementsByClassName("btn-max");
-    if (titleBar[0].children[0].tagName.toLowerCase() == 'div') {
-        ZBX_VER = "3.2";
-        if (titleBar[0].children[1] !== undefined) {
-            titleUL = titleBar[0].children[1].children[0];
-            if (titleUL.tagName.toLowerCase() !== 'ul') {
-                tmp = titleUL.getElementsByTagName("UL");
+  var filterButton = document.getElementById('filter-mode');
+  var btnMax = document.getElementsByClassName("btn-max");
+  if (titleBar[0].children[0].tagName.toLowerCase() == 'div') {
+    ZBX_VER = "3.2";
+    if (titleBar[0].children[1] !== undefined) {
+      titleUL = titleBar[0].children[1].children[0];
+      if (titleUL.tagName.toLowerCase() !== 'ul') {
+        tmp = titleUL.getElementsByTagName("UL");
 
-                if (tmp[0] === undefined) {
-                    titleUL.insertAdjacentHTML("beforeEnd", "<ul></ul>");
-                }
-                titleUL = tmp[0];
-            }
+        if (tmp[0] === undefined) {
+          titleUL.insertAdjacentHTML("beforeEnd", "<ul></ul>");
         }
-    } else {
-        ZBX_VER = "3.0";
-        titleUL = titleBar[0].children[1];
-        if (titleUL.tagName.toLowerCase() !== 'ul') {
-            tmp = titleUL.getElementsByTagName("UL");
-            titleUL = tmp[0];
-        }
+        titleUL = tmp[0];
+      }
     }
-    if (titleBar[0].children.length > 1) {
-        if (filterButton !== null) {
-            var newItem = document.createElement("LI");
-            newItem.appendChild(filterButton);
-            titleUL.appendChild(newItem);
-        }
-        var btnMin = document.getElementsByClassName("btn-min");
-        if (btnMin.length > 0) {
-            filterDIV.style = 'display: none;';
-        }
+  } else {
+    ZBX_VER = "3.0";
+    titleUL = titleBar[0].children[1];
+    if (titleUL.tagName.toLowerCase() !== 'ul') {
+      tmp = titleUL.getElementsByTagName("UL");
+      titleUL = tmp[0];
     }
+  }
+  if (titleBar[0].children.length > 1) {
+    if (filterButton !== null) {
+      var newItem = document.createElement("LI");
+      newItem.appendChild(filterButton);
+      titleUL.appendChild(newItem);
+    }
+    var btnMin = document.getElementsByClassName("btn-min");
+    if (btnMin.length > 0) {
+      filterDIV.style = 'display: none;';
+    }
+  }
 }
 
 function zbxeSearch(mode) {
-    inputSearch = document.getElementById("search");
-    switch (mode) {
-        case "share":
-            zbxePopUp("https://share.zabbix.com/search?searchword=" + inputSearch.value + "&search_cat=1");
-            break;
-        case "doc":
-            zbxePopUp("https://www.zabbix.com/documentation/" + ZBX_VER + "/start?do=search&id=" + inputSearch.value);
-            break;
-    }
+  inputSearch = document.getElementById("search");
+  switch (mode) {
+    case "share":
+      zbxePopUp("https://share.zabbix.com/search?searchword=" + inputSearch.value + "&search_cat=1");
+      break;
+    case "doc":
+      zbxePopUp("https://www.zabbix.com/documentation/" + ZBX_VER + "/start?do=search&id=" + inputSearch.value);
+      break;
+  }
 }
 
 // Original code from js/common.js  file from Zabbix 3.4
 function zbxePopUp(url, width, height, form_name) {
-        if (!width) {
-                width = 1024;
-        }
-        if (!height) {
-                height = 768;
-        }
-        if (!form_name) {
-                form_name = 'zbx_popup';
-        }
+  if (!width) {
+    width = 1024;
+  }
+  if (!height) {
+    height = 768;
+  }
+  if (!form_name) {
+    form_name = 'zbx_popup';
+  }
 
-        var left = (screen.width - (width + 150)) / 2;
-        var top = (screen.height - (height + 150)) / 2;
+  var left = (screen.width - (width + 150)) / 2;
+  var top = (screen.height - (height + 150)) / 2;
 
-        var popup = window.open(url, form_name, 'width=' + width + ', height=' + height + ', top=' + top + ', left=' + left + ', resizable=yes, scrollbars=yes, location=no, menubar=no');
-        popup.focus();
+  var popup = window.open(url, form_name, 'width=' + width + ', height=' + height + ', top=' + top + ', left=' + left + ', resizable=yes, scrollbars=yes, location=no, menubar=no');
+  popup.focus();
 
-        return false;
+  return false;
+}
+
+function zbxeConsole(msg) {
+  console.log('EveryZ - ' + msg);
 }
