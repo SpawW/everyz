@@ -163,7 +163,7 @@ $table->addRow(
                     ->setAttribute('placeholder', _zeT('Type here:') . ' "EveryZ ReseT"')
                         ]
                 )
-                ->addRow(_('Build'), [EVERYZBUILD])
+                ->addRow(_('Build'), [EVERYZVERSION."-".EVERYZBUILD])
 );
 $dashboardGrid[1][10] = newWidget('reset', _zeT("Reset configuration", ''), $table);
 // Options for reset data ==========================================================

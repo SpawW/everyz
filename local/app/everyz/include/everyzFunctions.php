@@ -25,7 +25,7 @@ define("ZE_VER", "3.0");
 define("EZ_TITLE", 'EveryZ - ');
 define("ZE_COPY", ", ZE " . ZE_VER);
 define("EVERYZVERSION", "1.1.6");
-define("EVERYZBUILD", "257");
+define("EVERYZBUILD", "258");
 //define("EVERYZBUILD", 9);
 if (file_exists("lockEverys.php")) {
     $VG_INSTALL = true;
