@@ -1,4 +1,4 @@
-# EveryZ
+# everyz
 Hack for plugin support on Zabbix web interface
 
 Requirements
@@ -30,36 +30,36 @@ The Wizard will start and will ask for the following informations (one for each 
  * Apache Configuration: Select if Yes if you leave the configuration of the apache/httpd to the installer (Recommended). If you select no, you will need to define the following configurations in your httpd environment:
 
 ```
-<Directory "<FRONTEND_DIR>/local/app/everyz/js"> 
-    Options FollowSymLinks 
-    AllowOverride All 
-    <IfModule mod_authz_core.c> 
-        Require all granted 
-    </IfModule>
-    Order allow,deny
-    Allow from all
+<Directory "<FRONTEND_DIR>/local/app/everyz/js">
+ Options FollowSymLinks
+ AllowOverride All
+ <IfModule mod_authz_core.c>
+  Require all granted
+ </IfModule>
+ Order allow,deny
+ Allow from all
 </Directory>
-<Directory "<FRONTEND_DIR>/app/everyz/images"> 
-    Options FollowSymLinks 
-    AllowOverride All 
-    <IfModule mod_authz_core.c> 
-        Require all granted 
-    </IfModule>
-    Order allow,deny
-    Allow from all
+<Directory "/var/www/html/local/app/everyz/images">
+ Options FollowSymLinks
+ AllowOverride All
+ <IfModule mod_authz_core.c>
+  Require all granted
+ </IfModule>
+ Order allow,deny
+ Allow from all
 </Directory>
-<Directory "<FRONTEND_DIR>/app/everyz/css"> 
-    Options FollowSymLinks 
-    AllowOverride All 
-    <IfModule mod_authz_core.c> 
-        Require all granted 
-    </IfModule>
-    Order allow,deny
-    Allow from all
+<Directory "/var/www/html/local/app/everyz/css">
+ Options FollowSymLinks
+ AllowOverride All
+ <IfModule mod_authz_core.c>
+  Require all granted
+ </IfModule>
+ Order allow,deny
+ Allow from all
 </Directory>
 ```
 
-PS: Change the ```<FRONTEND_DIR>``` to your zabbix frontend directory.
+PS: Change the "<FRONTEND_DIR>" to your zabbix frontend directory.
 
 If all options were supplied correctly, you can now point your browser into the your zabbix frontend address and a new menu called "Extras" should be visible.
 
@@ -76,7 +76,7 @@ If you don't have dialog installed or want to create a script to install everyz,
 A working example using all options can be viewed bellow:
 
 ```
-    sh installEveryz.sh -a=S -f=/var/www/html -l=pt -d=S 
+    sh installEveryz.sh -a=S -f=/var/www/html -l=pt -d=S
 ```
 
 PS: Unlike the Wizard method, the installer **will not install dependencies** using parameters as information. Check at the Topic 'Requirements' to verify what packages are needed.
@@ -85,26 +85,23 @@ PS: Unlike the Wizard method, the installer **will not install dependencies** us
 Changes
 ---------------------------
 * 1.1.0 - 20170908
-    - Add support for Zabbix 3.4
-* 1.1.1 - 20170910
-    - Installer improvements
+   - Add support for Zabbix 3.4
 * 1.1.2 - 20170917
-    - Add support for Zabbix 4.0 alfa
-    - Not Supported Itens - Add link to host edit
-    - Fix issue with popup.php for items
-    - Disable maps patch for 3.4+ (with new maps this feature is not more needed)    
-* 1.1.3 - 20170929
-    - Updates in define.inc.php 
-    - Fixed installation bug related to clean installation (problem with define.inc.php) (github issue #96)
-    - Fix JSON / CSV export problems on 3.4+ 
-    - Add module for bookmark and shorten URLs 
-* 1.1.4 - 20171005
-    - Translation update
-    - Fix bug in popup.php for zabbix versions (3.2 and 3.0) 
-    - Update costs module to work with new Zabbix 3.4 database structure 
-* 1.1.5 - 20171005
-    - Host Import:
-    -- Now can import with inventory fields
-    -- Default inventory mode now is automatic 
-
-
+   - Add support for Zabbix 4.0 alfa
+   - Fix (github.issue #95)
+* 1.1.3 - 20180112
+   - Fix issues related to Zabbix 3.4 upgrades
+* 1.1.4 - 20180210
+   - Small issues related to install process
+* 1.1.5 - 20180321
+   - Fix (github.issue #98)
+   - Improve data validation on host import 
+   - Add example about host import (https://github.com/SpawW/everyz/wiki/Modules---Host-Import---Example) 
+* 1.1.6 - 20180403
+   - Fix issues related to refactoring of popups on ZBX 4.0    
+   - Fix issues related to low retention of events / triggers 
+   - Add support to resolve macros on popups and titles of lines and polylines (github.issue #30)
+   - Add support to arrows in lines and polylines (github.issue #27 #24)
+   - Add IP/DNS address of default host interface (github.issue #21)
+   - Add host grouping when 2 hosts are very close in zoom level or at same position (github.issue #13)
+   - Add support to extra buttons on host popup (github.issue #14)
