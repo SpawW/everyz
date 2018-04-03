@@ -16,7 +16,6 @@
  * * You should have received a copy of the GNU General Public License
  * * along with this program; if not, write to the Free Software
  * * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- * TodoS: ===========================================================================
  * */
 
 /* * ***************************************************************************
@@ -111,7 +110,6 @@ if ($withIconMapping) {
 
 $eventData = selectEventsByGroup($filter["groupids"], 1);
 $hostData = selectHostsByGroup($filter["groupids"], $inventoryFields);
-//echo "----adail3";var_dump($hostData);
 
 $cont = 0;
 $imagesArray = [];
@@ -137,7 +135,17 @@ foreach ($hostData as $key => $host) {
                     $related = true;
                 }
             }
-            if ($related) {
+            /*
+            set_error_handler(function () { 
+                global $host, $event;
+                print_r(array(
+                "tem_clock" => isset($event["lastEvent"]["clock"]),
+                "tem_event" => isset($event["lastEvent"]["eventid"]),
+               "hostid" => $host["id"],    "moment" => zbx_date2age($event["lastEvent"]["clock"]),   "eventid" => $event["lastEvent"]["eventid"]));
+            }, E_WARNING);
+            dns_get_record();
+            restore_error_handler();*/
+            if ($related && isset($event["lastEvent"]["eventid"]) && isset($event["lastEvent"]["clock"])) {
                 $hostData[$cont]["events"][count($hostData[$cont]["events"])] = [
                     "triggerid" => $event["triggerid"], "description" => $event["description"]
                     , "priority" => $event["priority"], "moment" => zbx_date2age($event["lastEvent"]["clock"])
@@ -212,7 +220,6 @@ foreach ($hostData as $key => $host) {
     } else {
         array_unshift($tmp, $host);
     }
-    //$hostData
 }
 $hostData = $tmp;
 

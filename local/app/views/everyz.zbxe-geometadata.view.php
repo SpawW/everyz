@@ -41,13 +41,14 @@ check_fields($fields);
  * ************************************************************************** */
 zbxeCheckUserLevel(USER_TYPE_ZABBIX_ADMIN);
 checkAccessHost('hostids');
-checkAccessHost('sourceHostID',true);
+checkAccessHost('sourceHostID', true);
 
 /* * ***************************************************************************
  * Module Functions
  * ************************************************************************** */
 
-function addTab($key, $desc) {
+function addTab($key, $desc)
+{
     global $dataTab, $leftCol;
     $dataTab->addTab($key, _zeT($desc), $leftCol);
     $leftCol = new CFormList();
@@ -266,11 +267,12 @@ $hostData = $hostData[0];
 <link rel="stylesheet" href="local/app/everyz/css/leaflet.draw.css" />
 
 <?php
-zbxeJSLoad(['everyzD3Functions.js',
+zbxeJSLoad(
+    ['everyzD3Functions.js',
 //'everyz-zbxe-geolocation.static.js',
     'leaflet.js', 'leaflet/leaflet.lineextremities.js', 'leaflet/leaflet-control-credits.js'
     , 'leaflet/leaflet-control-credits-src.js', 'leaflet/leaflet.oms.min.js'
-    //, 'leaflet/leaflet.draw.js'
+    , 'leaflet/leaflet.draw.js'
     ]
 );
 commonModuleHeader($moduleName, $moduleTitle, true);
@@ -368,7 +370,7 @@ $subTable->addRow([ new CColor('circle_color', '6666FF', false)
 
 $leftCol->addRow(_('Create Route'), (new CDiv())
                 ->setAttribute('id', "mapid")
-                ->setAttribute('style', "width:600px; height: 600px;"));
+                ->setAttribute('style', "width:100%; height: 100%; min-height: 400px;"));
 addTab('route', _zeT('Route'));
 
 
@@ -378,5 +380,53 @@ addTab('route', _zeT('Route'));
 
 $form->addItem([$dataTab, $table]);
 $dashboard->addItem($form)->show();
+?>
+<script language="JavaScript">
+  var ZabGeomap = L.map('mapid').setView([<?php echo $hostData['inventory']['location_lat'].",".$hostData['inventory']['location_lon']?>], 10);
+  L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}{r}.png', {    attribution: '© OpenStreetMap contributors'}).addTo(ZabGeomap);
+  var drawnItems = new L.FeatureGroup();
+  ZabGeomap.addLayer(drawnItems);
 
+  var drawControl = new L.Control.Draw({
+    draw: {
+    polyline: {
+        shapeOptions: {
+            color: "blue",
+            weight: 10
+        }
+    },
+    polygon: {
+        allowIntersection: true,
+        drawError: {
+            color: '#e1e100'
+        },
+        shapeOptions: {
+            color: "green"
+        }
+    },
+    circle: false,
+    rectangle: {
+        shapeOptions: {
+            clickable: false
+        }
+    },
+    marker: false
+  },
+    edit: {
+    featureGroup: drawnItems
+  }
+  });
+ZabGeomap.addControl(drawControl);
+
+ZabGeomap.on(L.Draw.Event.CREATED, function (e) {
+  var type = e.layerType
+  var layer = e.layer;
+
+  // Do whatever else you need to. (save to db, add to map etc)
+
+  drawnItems.addLayer(layer);
+});
+
+</script>
+<?php
 //require_once 'local/app/everyz/js/everyz-zbxe-geolocation.js.php';
