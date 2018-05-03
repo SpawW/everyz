@@ -367,12 +367,12 @@ $subTable->addRow([ new CColor('circle_color', '6666FF', false)
     , (new CNumericBox('circle_size', 3000))->setWidth(ZBX_TEXTAREA_NUMERIC_STANDARD_WIDTH)
     , $addButton
 ]);
-
+/*
 $leftCol->addRow(_('Create Route'), (new CDiv())
                 ->setAttribute('id', "mapid")
                 ->setAttribute('style', "width:100%; height: 100%; min-height: 400px;"));
 addTab('route', _zeT('Route'));
-
+*/
 
 /* * ***************************************************************************
  * Display Footer
