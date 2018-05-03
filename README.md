@@ -98,7 +98,6 @@ Changes
    - Improve data validation on host import 
    - Add example about host import (https://github.com/SpawW/everyz/wiki/Modules---Host-Import---Example) 
 * 1.1.6 - 20180403
-   - Fix issues related to refactoring of popups on ZBX 4.0    
    - Fix issues related to low retention of events / triggers 
    - Add support to resolve macros on popups and titles of lines and polylines (github.issue #30)
    - Add support to arrows in lines and polylines (github.issue #27 #24)
