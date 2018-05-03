@@ -1,4 +1,4 @@
-# EveryZ
+# EveryZ v1.6
 Hack for plugin support on Zabbix web interface
 
 Requirements
