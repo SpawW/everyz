@@ -7,6 +7,7 @@
 # 20180321 - Add examples of use
 # 20180213 - Upgrade to 4.0.0 alfa
 # 20170918 - Update for change popup.php and validation of files for multiple zabbix versions
+# ZABBIX_VERSIONS - 3.2 | 3.4 | 3.0
 #-------------------------------------------------------
 ## ./installZabbix.sh -v=3.0.15 -s -db=zbx300 -dbup=ze123456 -dbrp=ze123456r -dbu=zbx300 -name=3.0 -epath=3.0 -dtu
 ## ./installZabbix.sh -v=3.2.11 -s -db=zbx320 -dbup=ze123456 -dbrp=ze123456r -dbu=zbx320 -name=3.2 -epath=3.2 -dtu
