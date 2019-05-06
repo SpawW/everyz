@@ -48,6 +48,9 @@ if [ $# -gt 0 ]; then
             --onlypatch)
                ONLYPATCH="S";
             ;;
+            -b=*|--branch=*)
+                BRANCH=$(paramValue $i);
+            ;;
             -a=*|--apache=*)
                 RECONFAPACHE=$(paramValue $i);
                 if [ "$RECONFAPACHE" != 'S' ] && [ "$RECONFAPACHE" != 'N' ]; then
