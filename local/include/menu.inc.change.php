@@ -21,4 +21,3 @@
 ** Sugestion by: Adail Horst / Zabbix Extras
 **/
 require_once './local/app/everyz/include/dbmenu.php';
-

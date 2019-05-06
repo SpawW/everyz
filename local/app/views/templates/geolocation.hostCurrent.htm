@@ -1,0 +1,15 @@
+<ul class="table-forms">
+  <li>Host: <b>[name]([inventory.location_lat]/[inventory.location_lon])</b></li>
+  <li>Current JSON configuration: <br><textarea cols="48" rows="4" id="newJSON">[inventory.notes]</textarea></li>
+  <li>Original JSON configuration: <br><textarea cols="48" rows="4" id="originalJSON" readonly>[inventory.notes]</textarea></li>
+  <li>Resumo:<br>
+    <table class="table-forms">
+      <tr>
+        <td><label>Lines:</label> <span id="lineCount">[linecount]</span></td>
+        <td><label>Circles:</label> <span id="circleCount">[circlecount]</td>
+        <td><label>Links:</label> <span id="linkCount">[linkcount]</td>
+        <td><label>Polygons:</label> <span id="polygonCount">[polygoncount]</td>
+      </tr>
+    </table>
+  </li>
+</ul>

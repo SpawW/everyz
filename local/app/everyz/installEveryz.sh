@@ -7,24 +7,23 @@
 # 20180321 - Add examples of use
 # 20180213 - Upgrade to 4.0.0 alfa
 # 20170918 - Update for change popup.php and validation of files for multiple zabbix versions
-# ZABBIX_VERSIONS - 3.4 | 3.2 | 3.0
 #-------------------------------------------------------
-## ./installZabbix.sh -v=3.0.15 -s -db=zbx300 -dbup=ze123456 -dbrp=ze123456r -dbu=zbx300 -name=3.0 -epath=3.0 -dtu
-## ./installZabbix.sh -v=3.2.11 -s -db=zbx320 -dbup=ze123456 -dbrp=ze123456r -dbu=zbx320 -name=3.2 -epath=3.2 -dtu
-## ./installEveryz.sh -a=S -f=/var/www/html/3.4 -d=S -l=pt -i=redhat
+## bash /var/www/html/4.0/local/app/everyz/installEveryz.sh -a=S -f=/var/www/html/4.0 -d=N -l=pt -i=redhat
+## bash /var/www/html/4.0/local/app/everyz/installEveryz.sh -a=S -f=/var/www/html/4.0 -d=N -l=pt -i=redhat --onlypatch
 ## ./installZabbix.sh -v=4.0.0 -beta -s -db=zbx400 -dbup=ze123456 -dbrp=ze123456r -dbu=zbx400 -name=4.0 -epath=4.0 -dtu
 
 
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com";
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="1.1.6";
-VERSAO_EZ="1.1.6";
+VERSAO_INST="1.1.8";
+VERSAO_EZ="1.1.7";
 UPDATEBD="S";
 BRANCH="master";
 NOME_PLUGIN="EVERYZ";
 HORARIO_BKP=$(date +"%Y_%d_%m_%H-%M");
 BKP_FILE="/tmp/zeBackup$HORARIO_BKP.tgz";
+ONLYPATCH="N";
 
 paramValue() {
     echo $(echo $1 | awk -F'=' '{print $2}' );
@@ -46,6 +45,9 @@ if [ $# -gt 0 ]; then
     for i in "$@"
     do
         case $i in
+            --onlypatch)
+               ONLYPATCH="S";
+            ;;
             -a=*|--apache=*)
                 RECONFAPACHE=$(paramValue $i);
                 if [ "$RECONFAPACHE" != 'S' ] && [ "$RECONFAPACHE" != 'N' ]; then
@@ -264,12 +266,6 @@ preReq() {
         instalaPacote "unzip";
         STATUSPR="Changed";
     fi
-    # Verificando e instalando o php-curl
-    #if [ `which unzip 2>&-  | wc -l` -eq 0 ]; then
-    #    registra "Installing php-curl";
-    #    instalaPacote "php-curl php5-curl";
-    #    STATUSPR="Changed";
-    #fi
     registra "Pre-req verification - $STATUSPR";
 }
 
@@ -464,15 +460,11 @@ instalaMenus() {
     mv include/defines.inc.php /tmp/defines.inc.php.old
     cat /tmp/defines.inc.php.old | grep -v "EVERYZ_VERSION" > include/defines.inc.php;
     echo "define ('EVERYZ_VERSION','$VERSAO_EZ');" >> include/defines.inc.php;
-    #if [ "`cat include/defines.inc.php | grep \"EVERYZ_VERSION\" | wc -l`" -eq 0 ]; then
-    #cat include/defines.inc.php | grep -v "EVERYZ_VERSION" > include/defines.inc.php;
-    #fi
     FIMINST=$(($FIMINST+1));
 }
 
 customLogo() {
     registra "Configurando suporte aos scripts e estilos do EveryZ...";
-
     # Especialmente para o  dashboard do Zabbix
     ARQUIVO="app/views/monitoring.dashboard.view.php";
     TAG_INICIO="<!--$NOME_PLUGIN-dashsearch-->";
@@ -483,6 +475,8 @@ customLogo() {
         sed -i "$INIINST,$FIMINST d" $ARQUIVO;
     fi
     TXT_CUSTOM1="<link href=\"local\/app\/everyz\/css\/everyz.css\" rel=\"stylesheet\" type=\"text\/css\" id=\"skinSheet\">";
+    message "Add everyz javascript files"
+    #TXT_CUSTOM1="$TXT_CUSTOM1\n<script src=\"local\/app\/everyz\/js\/everyzConst.js.php\" type=\"text\/javascript\"><\/script>";
     TXT_CUSTOM1="$TXT_CUSTOM1\n<script src=\"local\/app\/everyz\/js\/everyzFunctions.js\" type=\"text\/javascript\"><\/script>";
     TAG1="?>";
     NOVO="$TAG1\n$TAG_INICIO\n$TXT_CUSTOM1\n$TAG_FINAL";
@@ -509,18 +503,19 @@ customLogo() {
     TAG_INICIO="##$NOME_PLUGIN-logo-custom";
     TAG_FINAL="$TAG_INICIO-FIM";
     INIINST=`cat $ARQUIVO | sed -ne "/$TAG_INICIO/{=;q;}"`;
-    if [ ! -z $INIINST ]; then
-        FIMINST=`cat $ARQUIVO | sed -ne "/$TAG_FINAL/{=;q;}"`;
-        sed -i "$INIINST,$FIMINST d" $ARQUIVO;
-    fi
     TXT_CUSTOM1="\t (zbxeCustomMenu())";
     TAG1="(new CLink((new CDiv())->addClass(ZBX_STYLE_LOGO), 'zabbix.php?action=dashboard.view'))";
     NOVO="#$TAG1\n$TAG_INICIO\n$TXT_CUSTOM1\n$TAG_FINAL";
+    if [ ! -z $INIINST ]; then
+      message "Reinstall - Logo ==============";
+      FIMINST=`cat $ARQUIVO | sed -ne "/$TAG_FINAL/{=;q;}"`;
+      sed -i "$INIINST,$FIMINST d" $ARQUIVO;
+    else
+      message "Fresh install - Logo ==========";
+      sed -i '90,96 {s/^/#/}' $ARQUIVO
+      sed -i "97 i $TAG1" $ARQUIVO
+    fi
     sed -i "s/$TAG1/$NOVO/" $ARQUIVO
-
-    # Comentando classe de logo
-    TAG1="->addClass(ZBX_STYLE_HEADER_LOGO)";
-    sed -i "s/$TAG1/#$TAG1/" $ARQUIVO
 
     # Customizacao do global search ============================================
     registra "Configurando suporte a global search personalizado...";
@@ -531,13 +526,16 @@ customLogo() {
         FIMINST=`cat $ARQUIVO | sed -ne "/$TAG_FINAL/{=;q;}"`;
         sed -i "$INIINST,$FIMINST d" $ARQUIVO;
     fi
-#    Share
     TAG1="(new CLink('Share'";
     LINHA=`cat $ARQUIVO | sed -ne "/$TAG1/{=;q;}"`;
     sed -i "s/$TAG1/#$TAG1/g" $ARQUIVO
+    LINHA2=$((LINHA + 2));
+    sed -i "$LINHA2,$LINHA2 {s/^/#/}" $ARQUIVO
     TAG1="(new CLink('', ''))->setAttribute('onclick','zbxeSearch(\"share\");')";
     sed -i "$LINHA i\\$TAG_INICIO\n$TAG1\n$TAG_FINAL" $ARQUIVO;
-#    Documentation
+
+#    Share - Documentation -----------------------------------------------------
+    message "Search on documentation"
     TAG_INICIO="##$NOME_PLUGIN-custom-search-doc";
     TAG_FINAL="$TAG_INICIO-FIM";
     INIINST=`cat $ARQUIVO | sed -ne "/$TAG_INICIO/{=;q;}"`;
@@ -545,15 +543,17 @@ customLogo() {
         FIMINST=`cat $ARQUIVO | sed -ne "/$TAG_FINAL/{=;q;}"`;
         sed -i "$INIINST,$FIMINST d" $ARQUIVO;
     fi
-    TAG1="(new CLink(SPACE, 'h";
+
+    TAG1="getHelpUrl";
     LINHA=`cat $ARQUIVO | sed -ne "/$TAG1/{=;q;}"`;
-    sed -i "s/$TAG1/#$TAG1/g" $ARQUIVO
-    TAG1="(new CLink('', ''))->setAttribute('onclick','zbxeSearch(\"doc\");')";
+    sed -i "$LINHA,$LINHA {s/^/#/}" $ARQUIVO
+    LINHA2=$((LINHA + 2));
+    sed -i "$LINHA2,$LINHA2 {s/^/#/}" $ARQUIVO
+    #sed -i "s/$TAG1/#$TAG1/g" $ARQUIVO
+    TAG1="->addItem((new CLink('', ''))->setAttribute('onclick','zbxeSearch(\"doc\");')";
     sed -i "$LINHA i\\$TAG_INICIO\n$TAG1\n$TAG_FINAL" $ARQUIVO;
 
-    #Comentando o target
-    TAG1="->setAttribute('target', '_blank')";
-    sed -i "s/$TAG1/#$TAG1/g" $ARQUIVO
+#    message "debug abort"; exit;
 
     FIMINST=$(($FIMINST+1));
     # ==========================================================================
@@ -592,28 +592,6 @@ customLogo() {
     TAG1="(new CDiv())->addClass(ZBX_STYLE_SIGNIN_LOGO),";
     NOVO="$TAG1\n$TAG_INICIO\n$TXT_CUSTOM1\n$TAG_FINAL";
     sed -i "s/$TAG1/$NOVO/" $ARQUIVO
-    FIMINST=$(($FIMINST+1));
-}
-
-instalaLiteral() {
-    installMgs "N" "Literal values";
-    ARQUIVO="include/func.inc.php";
-    backupArquivo $ARQUIVO;
-    TAG_INICIO="\#\#$NOME_PLUGIN-Literal";
-    TAG_FINAL="$TAG_INICIO-FIM";
-    cd $CAMINHO_FRONTEND;
-    INIINST=`cat $ARQUIVO | sed -ne "/$TAG_INICIO/{=;q;}"`;
-    FIMINST=`cat $ARQUIVO | sed -ne "/$TAG_FINAL/{=;q;}"`;
-    if [ ! -z $INIINST ]; then
-      sed -i "$INIINST,$FIMINST d" $ARQUIVO
-    fi
-    NUMLINHA=`cat $ARQUIVO | sed -ne "/\/\/ any other unit/{=;q;}"`;
-    sed -i "$NUMLINHA i##$TAG_INICIO\n##$TAG_FINAL" $ARQUIVO
-    INIINST=`cat $ARQUIVO | sed -ne "/$TAG_INICIO/{=;q;}"`;
-    FIMINST=`cat $ARQUIVO | sed -ne "/$TAG_FINAL/{=;q;}"`;
-#    sed -i "$FIMINST i if(strpos(strtolower(\$options['units']),'literal-') > -1){ \$sufixo=explode('-',\$options['units']); $options['units'] = \" \" . $sufixo[1]; }" $ARQUIVO
-    sed -i "$FIMINST i if(strpos(strtolower(\$options['units']),'literal') > -1){ \$sufixo=explode('-',\$options['units']); return round(\$options['value']).\" \".\$sufixo[1]; }" $ARQUIVO
-#    sed -i "$FIMINST i if(strpos(strtolower(\$options['units']),'literal') > -1){ \$sufixo=explode('-',\$options['units']); return round(\$options['value'], ZBX_UNITS_ROUNDOFF_UPPER_LIMIT).\" \".\$sufixo[1]; }" $ARQUIVO
     FIMINST=$(($FIMINST+1));
 }
 
@@ -695,14 +673,19 @@ instalaGit() {
     ARQ_TMP="/tmp/EveryZ.zip";
     DIR_TMP="/tmp/everyz-$BRANCH/";
 
-    downloadPackage "$ARQ_TMP" "$REPOS";
-    unzipPackage "$ARQ_TMP" "$DIR_TMP" "$CAMINHO_FRONTEND";
+    if [ $ONLYPATCH == "N" ]; then
+      message "Update everyz files [$ONLYPATCH]"
+      downloadPackage "$ARQ_TMP" "$REPOS";
+      unzipPackage "$ARQ_TMP" "$DIR_TMP" "$CAMINHO_FRONTEND";
+      cp -Rp * "$CAMINHO_FRONTEND";
 
-    cp -Rp * "$CAMINHO_FRONTEND";
-
-    if [ -f "$ARQ_TMP_BD" ]; then
-        rm "$ARQ_TMP_BD";
+      if [ -f "$ARQ_TMP_BD" ]; then
+          rm "$ARQ_TMP_BD";
+      fi
+    else
+      message "Everyz files not updated [$ONLYPATCH]"
     fi
+
 }
 
 confirmaDownload() {
@@ -773,9 +756,9 @@ confirmaApache() {
     fi
 }
 
-instalaPortletNS() {
+addSystemInformationLinkNS() {
     cd $CAMINHO_FRONTEND;
-    registra "Configurando portlet com link para itens nao suportados...";
+    registra "Add link on system information widget to not supported items...";
     ARQUIVO="include/blocks.inc.php";
     TAG_INICIO='##Zabbix-Extras-NS-custom';
     TAG_FINAL="$TAG_INICIO-FIM";
@@ -802,6 +785,8 @@ function updatePopUp() {
     if [ -f "$ARQUIVO" ]; then
         #Zabbix 3.0.0
         message "Zabbix Version $ZABBIX_VERSION";
+        message "Current Zabbix Version - [$ZABBIX_VERSION]";
+        exit;
         if [ "$ZABBIX_VERSION" -lt "34" ]; then
             IDENT=", \"name\"'";
             if [ "`cat popup.php | grep \"$IDENT\" | wc -l`" -gt 1 ]; then
@@ -852,13 +837,9 @@ instalaGit;
 primeiroAcesso;
 instalaMenus;
 customLogo;
-instalaLiteral;
 corTituloMapa;
 configuraApache;
-instalaPortletNS;
+addSystemInformationLinkNS;
 updatePopUp;
 
 registra "Installed - [ $VERSAO_INST ]";
-
-#echo "Installed - [ $VERSAO_INST ]";
-#echo "You need to check your apache server and restart!";

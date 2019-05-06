@@ -137,12 +137,10 @@ commonModuleHeader($moduleName, $moduleTitle, true);
 $commonList->addItem($createButton);
 
 if ($filter['mode'] == "") {
-    $widget = (new CFilter('web.' . $moduleName . '.filter.state'));
     $tmpColumn = new CFormList();
     $tmpColumn->addRow(_zeT('Description'), [ (new CTextBox('descriptionFilter', $filter['descriptionFilter']))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH)]);
     $tmpColumn->addItem(new CInput('hidden', 'action', $filter["action"]));
-    $widget->addColumn($tmpColumn);
-    $dashboard->addItem($widget);
+    $dashboard->addItem(newFilterTab($moduleName,[$tmpColumn]));
 }
 
 
@@ -230,7 +228,7 @@ if ($filter['mode'] !== "") {
 }
 
 /* * ***************************************************************************
- * Display Footer 
+ * Display Footer
  * ************************************************************************** */
 
 $form->addItem([ $table]);
@@ -250,4 +248,3 @@ $dashboard->addItem($form)->show();
     }
 </script>
 <?php
-

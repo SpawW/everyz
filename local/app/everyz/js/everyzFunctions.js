@@ -1,65 +1,70 @@
 /*
- * * Purpose: Generic JS functions
- * * Adail Horst.
- * *
- * * This program is free software; you can redistribute it and/or modify
- * * it under the terms of the GNU General Public License as published by
- * * the Free Software Foundation; either version 2 of the License, or
- * * (at your option) any later version.
- * *
- * * This program is distributed in the hope that it will be useful,
- * * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * * GNU General Public License for more details.
- * *
- * * You should have received a copy of the GNU General Public License
- * * along with this program; if not, write to the Free Software
- * * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- * */
+* * Purpose: Generic JS functions
+* * Adail Horst.
+* *
+* * This program is free software; you can redistribute it and/or modify
+* * it under the terms of the GNU General Public License as published by
+* * the Free Software Foundation; either version 2 of the License, or
+* * (at your option) any later version.
+* *
+* * This program is distributed in the hope that it will be useful,
+* * but WITHOUT ANY WARRANTY; without even the implied warranty of
+* * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* * GNU General Public License for more details.
+* *
+* * You should have received a copy of the GNU General Public License
+* * along with this program; if not, write to the Free Software
+* * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+* */
 
-var titleBar = document.getElementsByClassName("header-title");
-var filterDIV = document.getElementById('filter-space');
-var filterButton = document.getElementById('filter-mode');
-
-if (titleBar[0] == undefined) {
-  if (filterButton !== null) {
-    filterDIV.style = 'display: none;';
-    filterButton.style = 'display: none;';
+function zbxeCheckZabbixVersion(str) {
+  const regex = /Zabbix (.*). ©/g;
+  let m;
+  let vReturn = 0;
+  while ((m = regex.exec(str)) !== null) {
+    if (m.index === regex.lastIndex) {
+      regex.lastIndex++;
+    }
+    m.forEach((match, groupIndex) => {
+      //console.log(`Current Zabbix Version, group ${groupIndex}: ${match}`);
+      vReturn = match;
+    });
   }
-} else {
-  var filterButton = document.getElementById('filter-mode');
-  var btnMax = document.getElementsByClassName("btn-max");
-  if (titleBar[0].children[0].tagName.toLowerCase() == 'div') {
-    ZBX_VER = "3.2";
-    if (titleBar[0].children[1] !== undefined) {
-      titleUL = titleBar[0].children[1].children[0];
-      if (titleUL.tagName.toLowerCase() !== 'ul') {
-        tmp = titleUL.getElementsByTagName("UL");
+  return vReturn;
+}
 
-        if (tmp[0] === undefined) {
-          titleUL.insertAdjacentHTML("beforeEnd", "<ul></ul>");
-        }
-        titleUL = tmp[0];
-      }
+function zbxeMoveFilterButton() {
+  let filterButton = document.getElementsByClassName('filter-btn-container')[0];
+  if (typeof filterButton != 'undefined') {
+    filterButton.children[0].children[0].innerText = "";
+    translations = [];
+    translations[ 'filter'] = "filllterr";
+    filterButton.setAttribute('Title', translations['filter']);
+    //alert(filterButton.children[0].children[0].innerText);
+    let titleBar = document.getElementsByClassName("header-title")[0];
+
+    filterDIV = document.getElementById('filter-space');
+    if (titleBar !== undefined) {
+      titleBar.appendChild(filterButton);
+      zbxeConsole('Filter button moved option !');
+    }
+    if (window.location.pathname.indexOf('everyz.php')) {
+      var style = '<style type="text/css">' + " {"
+      + " .ui-tabs-nav .filter-trigger li a:hover { text-decoration: none; color: #000000; background-color: #33B5E5; padding: 1px 34px 7px 10px; }"
+      + " .filter-btn-container{ position: relative; text-align: left; width: 22px; margin-left: -10px; } "
+      + " #ui-id-1{ padding: 6px 35px 0px 0px; } "
+      +"} " + "</style>";
     }
   } else {
-    ZBX_VER = "3.0";
-    titleUL = titleBar[0].children[1];
-    if (titleUL.tagName.toLowerCase() !== 'ul') {
-      tmp = titleUL.getElementsByTagName("UL");
-      titleUL = tmp[0];
-    }
+    zbxeConsole('Screen without filter option!');
   }
-  if (titleBar[0].children.length > 1) {
-    if (filterButton !== null) {
-      var newItem = document.createElement("LI");
-      newItem.appendChild(filterButton);
-      titleUL.appendChild(newItem);
-    }
-    var btnMin = document.getElementsByClassName("btn-min");
-    if (btnMin.length > 0) {
-      filterDIV.style = 'display: none;';
-    }
+}
+
+function zbxeSetContentInfo() {
+  let contentInfo = document.getElementsByTagName("footer")[0];
+  if (typeof contentInfo != 'undefined') {
+    let title = (ZABBIXVERSIONS.includes(zbxeCheckZabbixVersion(contentInfo.innerHTML)) ? "" : 'title="Not tested for this zabbix version."');
+    contentInfo.innerHTML += ' | <a class="grey link-alt" target="_blank" '+title+' href="http://www.everyz.org/">EveryZ '+EVERYZVERSION+'</a>';
   }
 }
 
@@ -67,12 +72,13 @@ function zbxeSearch(mode) {
   inputSearch = document.getElementById("search");
   switch (mode) {
     case "share":
-      zbxePopUp("https://share.zabbix.com/search?searchword=" + inputSearch.value + "&search_cat=1");
-      break;
+    zbxePopUp("https://share.zabbix.com/search?searchword=" + inputSearch.value + "&search_cat=1");
+    break;
     case "doc":
-      zbxePopUp("https://www.zabbix.com/documentation/" + ZBX_VER + "/start?do=search&id=" + inputSearch.value);
-      break;
+    zbxePopUp("https://www.zabbix.com/documentation/" + ZBX_VER + "/start?do=search&id=" + inputSearch.value);
+    break;
   }
+  return false;
 }
 
 // Original code from js/common.js  file from Zabbix 3.4
@@ -82,6 +88,7 @@ function zbxePopUp(url, width, height, form_name) {
   }
   if (!height) {
     height = 768;
+    let contentInfo = document.getElementsByTagName("footer")[0];
   }
   if (!form_name) {
     form_name = 'zbx_popup';
@@ -98,4 +105,10 @@ function zbxePopUp(url, width, height, form_name) {
 
 function zbxeConsole(msg) {
   console.log('EveryZ - ' + msg);
+}
+
+window.onload = function () {
+  zbxeSetContentInfo();
+  zbxeConsole('Loaded');
+  //zbxeMoveFilterButton();
 }

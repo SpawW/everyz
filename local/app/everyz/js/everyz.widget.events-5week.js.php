@@ -16,7 +16,6 @@
  * * You should have received a copy of the GNU General Public License
  * * along with this program; if not, write to the Free Software
  * * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- * TodoS: ===========================================================================
  * */
 
 /* * ***************************************************************************
@@ -27,42 +26,17 @@ $moduleName = "events-5week";
 $baseProfile .= $moduleName;
 $moduleTitle = 'Events / Last 5 weeks';
 $divName = "body-$moduleName";
-// Common fields
-addFilterActions();
-// Specific fields
-//addFilterParameter("format", T_ZBX_INT, 0, false, false, false);
-//addFilterParameter("hostids", T_ZBX_INT, 0, false, false, false);
-// Field validation
 check_fields($fields);
 
 /* * ***************************************************************************
  * Access Control
  * ************************************************************************** */
 
-//$hosts = checkAccessHost('hostids');
-
 /* * ***************************************************************************
  * Module Functions
  * ************************************************************************** */
-/*
-  function getStartAndEndDate($week, $year) {
-  $time = strtotime("1 January $year", time());
-  $day = date('w', $time);
-  $time += ((7 * $week) + 1 - $day) * 24 * 3600;
-  $mask = 'j M'; //'Y-n-j'
-  $tmp = date($mask, $time);
-  $start = explode(' ', $tmp);
-  $time += 6 * 24 * 3600;
-  $tmp = date($mask, $time);
-  $end = explode(' ', $tmp);
-  if ($start[1] == $end[1]) {
-  return $start[0] . " a " . $end[0] . "/" . _($end[1]);
-  } else {
-  return $start[0] . "/" . _($start[1]) . " a " . $end[0] . "/" . _($end[1]);
-  }
-  }
- */
-function getStartAndEndDate($week, $year) {    
+
+function getStartAndEndDate($week, $year) {
     $dto = new DateTime();
     $dto->setISODate($year, $week);
     $ret['week_start'] = $dto->format('d m');
@@ -77,8 +51,6 @@ function getStartAndEndDate($week, $year) {
     }
 }
 
-
-
 function events5WeekData() {
     global $DB;
     $query = "SELECT COUNT(subt.week) as total, subt.week FROM
@@ -86,14 +58,13 @@ function events5WeekData() {
                     //MySQL
                     "DATE_FORMAT(sub1.clock,'%Y'),DATE_FORMAT(sub1.clock,'%U') " )
             . ") AS week FROM
-    (SELECT " . ($DB['TYPE'] == ZBX_DB_POSTGRESQL ? "TO_TIMESTAMP" : "FROM_UNIXTIME") . "(eve.clock) AS clock FROM events eve WHERE 
+    (SELECT " . ($DB['TYPE'] == ZBX_DB_POSTGRESQL ? "TO_TIMESTAMP" : "FROM_UNIXTIME") . "(eve.clock) AS clock FROM events eve WHERE
     source = 0 AND value =1) sub1
   ) subt
 GROUP BY week
 ORDER BY week DESC
 LIMIT 5 OFFSET 0
 ";
-    //echo $query;
     $res = DBselect($query);
     $jsonResult = [];
     while ($row = DBfetch($res)) {
@@ -102,13 +73,10 @@ LIMIT 5 OFFSET 0
         $weekInfo = getStartAndEndDate((int) $weekNum, (int) $year);
         $jsonResult[] = [
             "label" => $weekInfo,
-            //$row['week'] . ' [' .$year.' - '.$weekNum. ']',
             "value" => (int) $row['total']
-                //"color": "#2484c1"
         ];
     }
-    // Array padrao JSON / Javascript??
-    return json_encode($jsonResult, JSON_UNESCAPED_UNICODE); //'[]';
+    return json_encode($jsonResult, JSON_UNESCAPED_UNICODE);
 }
 
 /* * ***************************************************************************
@@ -122,5 +90,3 @@ zbxeJSLoad(['d3/d3.min.js', 'd3/d3pie.js', 'everyzD3Functions.js']);
     newD3Pie(container, data, "{label}: {value} <?php echo strtolower(_zeT("Events")); ?>", true, 350);
 </script>
 <?php
-
-

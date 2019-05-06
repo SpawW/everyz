@@ -1,5 +1,6 @@
-# EveryZ
-Hack for plugin support on Zabbix web interface
+# EveryZ v2.0-beta
+
+Hack for plugin support on Zabbix web interface.
 
 Requirements
 ------------
@@ -104,3 +105,12 @@ Changes
    - Add IP/DNS address of default host interface (github.issue #21)
    - Add host grouping when 2 hosts are very close in zoom level or at same position (github.issue #13)
    - Add support to extra buttons on host popup (github.issue #14)
+   - Geolocation - Change to use problems screen instead triggers screen 
+   - Change references to popup.php for Zabbix 4.0 
+
+* 2.0.0 - 20190221
+   - Fix issues related to refactoring of popups on ZBX 4.0    
+   - Update git repository structure to control versions
+   - Small issues fix 
+   - Conversion of zbxe-cat, zbxe-em, zbxe-translation, zbxe-ns, zbxe-sc to 4.0 
+   - Conversion of zbxe-bookmark to 4.0. Ps. Now this module is restricted to use with same domain by default browsers rules, its possible change in http.conf configuration for accept external urls in frame. 

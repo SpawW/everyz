@@ -36,8 +36,11 @@ addFilterParameter("format", T_ZBX_INT);
 addFilterActions();
 
 // Specific fields
-addFilterParameter("hostids", PROFILE_TYPE_STR, [], true, true);
-addFilterParameter("groupids", PROFILE_TYPE_STR, [], true, true);
+
+//addFilterParameter("groupids", T_ZBX_INT, [], true, true);
+//addFilterParameter("hostids", T_ZBX_INT, [], true, true);
+addIdFilterParameter("hostids");
+addIdFilterParameter("groupids");
 addFilterParameter("mode", T_ZBX_STR, "", false, false, false);
 addFilterParameter("item", T_ZBX_STR);
 addFilterParameter("trigger", T_ZBX_STR);
@@ -46,10 +49,12 @@ addFilterParameter("p_min_events", T_ZBX_INT, 6);
 addFilterParameter("groupmode", T_ZBX_INT, 3600);
 addFilterParameter("p_check_range", T_ZBX_INT, 30);
 
-addFilterParameter("filter_timesince", T_ZBX_STR);
-addFilterParameter("filter_timetill", T_ZBX_STR);
+addFilterParameter("from", T_ZBX_STR);
+addFilterParameter("to", T_ZBX_STR);
 
 check_fields($fields);
+
+
 
 $range = $filter["p_check_range"] * 60;
 
@@ -113,20 +118,19 @@ if (hasRequest('filter_rst')) { // Clean the filter parameters
     resetProfile('hostids', true);
     resetProfile('groupids', true);
     resetProfile('item');
-    resetProfile('filter_timesince', true);
     resetProfile('period', true);
     resetProfile('p_triggerid', true);
-    $filter['filter_timesince'] = zbxDateToTime(date(TIMESTAMP_FORMAT_ZERO_TIME, time() - (SEC_PER_DAY * 30)));
-    $filter['filter_timetill'] = zbxDateToTime(date(TIMESTAMP_FORMAT_ZERO_TIME, time()));
     $filter['filter_rst'] = NULL;
     $filter['filter_set'] = NULL;
-} else { // Put the date in required format
-    $filter['filter_timesince'] = zbxDateToTime($filter['filter_timesince'] ? $filter['filter_timesince'] : date(TIMESTAMP_FORMAT_ZERO_TIME, time() - (SEC_PER_DAY * 30)));
-    $filter['filter_timetill'] = zbxDateToTime($filter['filter_timetill'] ? $filter['filter_timetill'] : date(TIMESTAMP_FORMAT_ZERO_TIME, time()));
 }
-// Get the multiselect hosts
+
+// Get data for report ---------------------------------------------------------
+if (hasRequest('filter_set')) {
+  // Check if all required fields have values
+  checkRequiredField("from", _zeT("You need to provide a start date!"));
+  checkRequiredField("to", _zeT("You need to provide a final date!"));
+}
 $multiSelectHostData = selectedHosts($filter['hostids']);
-// Get the multiselect hosts
 $multiSelectHostGroupData = selectedHostGroups($filter['groupids']);
 
 /* * ***************************************************************************
@@ -157,11 +161,10 @@ switch ($filter["format"]) {
             )));
             $dashboard->addItem(_zeT('Report generated on') . SPACE . '[' . zbx_date2str(_('d M Y H:i:s')) . ']');
         } else {
+          // Source data filter
             commonModuleHeader($moduleName, $moduleTitle, true);
-            $widget = newFilterWidget($moduleName);
-// Source data filter
-            $tmpColumn = new CFormList();
-            $tmpColumn->addRow(_('Host Groups'), multiSelectHostGroups($multiSelectHostGroupData))
+            $leftFilter = new CFormList();
+            $leftFilter->addRow(_('Host Groups'), multiSelectHostGroups($multiSelectHostGroupData))
                     ->addRow(_('Hosts'), multiSelectHosts($multiSelectHostData))
                     ->addRow(_('Key'), [(new CTextBox('item', $filter['item']))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH),
                         (new CDiv())->addClass(ZBX_STYLE_FORM_INPUT_MARGIN),
@@ -172,14 +175,10 @@ switch ($filter["format"]) {
                     ])
             ;
 
-            $tmpColumn->addItem(new CInput('hidden', 'action', $action));
-            $widget->addColumn($tmpColumn);
+            $leftFilter->addItem(new CInput('hidden', 'action', $action));
 
-            $tmpColumn = (new CFormList())
-                    ->addRow(_('From'), createDateSelector('filter_timesince', $filter['filter_timesince'], 'filter_timetill'))
-                    ->addRow(_('To'), createDateSelector('filter_timetill', $filter['filter_timetill'], 'filter_timesince'))
-                    ->addVar('filter_timesince', date(TIMESTAMP_FORMAT, $filter['filter_timesince']))
-                    ->addVar('filter_timetill', date(TIMESTAMP_FORMAT, $filter['filter_timetill']))
+            $rightFilter = (new CFormList())
+                    ->addRow('Period',zbxeDatePeriod ($filter['from'],$filter['to'],ZBX_DATE_TIME))
                     ->addRow(_zeT('Grouping mode'), (new CRadioButtonList('groupmode', (int) $filter['groupmode']))
                     ->addValue(_('Hour'), 3600)
                     ->addValue('30 ' . _('Minutes'), 1800)
@@ -187,11 +186,8 @@ switch ($filter["format"]) {
                     ->addValue(_('Minute'), 60)
                     ->setModern(true)
                     )
-//                    ->addRow(_zeT('Output format'), buttonOutputFormat('format', $filter['format']))
             ;
-            $widget->addColumn($tmpColumn)
-//                    ->addVar('stime', $filter["stime"])->addVar('period', $filter["period"])->addNavigator()
-            ;
+            $widget = (new CWidget())->addItem((new CFilter(new CUrl('everyz.php')))->addFilterTab(_('Filter'),[$leftFilter, $rightFilter]));
             $dashboard->addItem($widget);
         }
 
@@ -215,7 +211,8 @@ if ($reportMode) {
     $count = 1;
     $tmp = $options;
     $tmp['objectids'] = $filter["p_triggerid"];
-    $tmp['time_till'] = $filter["filter_timesince"] + ($range);
+    //aqui
+    $tmp['time_till'] = strtotime($filter["to"]) + ($range);
     $tmp['sortfield'] = 'eventid';
     $tmp['sortorder'] = "DESC";
     $events = API::Event()->get($tmp);
@@ -364,7 +361,7 @@ if ($reportMode) {
                 _('Status'),
                 _('Severity'),
                 _('Duration'),
-                ($config['event_ack_enable']) ? _('Ack') : null,
+                //($config['event_ack_enable']) ? _('Ack') : null,
                 _('Actions')
             ));
         }
@@ -386,7 +383,7 @@ if ($reportMode) {
             $triggerOptions['hostids'] = $filter["hostids"];
         }
         if ($filter["item"] !== "") {
-            $hostFilter = zeDBConditionInt('it.hostid', $filter["hostids"]);
+            $hostFilter = zbxeDBConditionInt('it.hostid', $filter["hostids"]);
             $query = "SELECT it.itemid, it.hostid FROM items it WHERE it.key_ LIKE " . quotestr($filter['item'] . "%")
                     . ($hostFilter == "" ? "" : " AND ") . $hostFilter
                     . "\n order by it.hostid, it.itemid";
@@ -397,14 +394,11 @@ if ($reportMode) {
             }
             $triggerOptions['itemids'] = $itemids;
         }
-        //Todo: Filtro por trigger (com suporte a expressão regular)
-
         $triggers = API::Trigger()->get($triggerOptions);
-
         // End filters
         $events = API::Event()->get([
-            'time_from' => $filter["filter_timesince"],
-            'time_till' => $filter["filter_timetill"],
+            'time_from' => strtotime($filter["from"]),
+            'time_till' => strtotime($filter["to"]),
             'source' => EVENT_SOURCE_TRIGGERS,
             'object' => EVENT_OBJECT_TRIGGER,
             'objectids' => zbx_objectValues($triggers, 'triggerid'),
@@ -465,10 +459,12 @@ if ($reportMode) {
             }
 
             $ack = getEventAckState($event, true);
-            $description = CMacrosResolverHelper::resolveEventDescription(zbx_array_merge($trigger, array(
+            $description = $event['name'];
+/*            $description = CMacrosResolverHelper::resolveEventDescription(zbx_array_merge($trigger, array(
                         'clock' => $event['clock'],
                         'ns' => $event['ns']
             )));
+*/
 // duration
             $event['duration'] = zbx_date2age($event['clock']);
             $momento = floor($event['clock'] / (int) $filter["groupmode"]) * (int) $filter["groupmode"];
@@ -508,6 +504,7 @@ if ($reportMode) {
                         $descMomento = substr($descMomento, 0, strlen($descMomento) - ($filter["groupmode"] == 3600 ? 5 :
                                                 ($filter["groupmode"] == 1800 || $filter["groupmode"] == 600 ? 4 : 2 ) )
                                 ) . "*";
+
                         $table->addRow([
                                     (new CDiv())
                                     ->addClass(ZBX_STYLE_TREEVIEW)
@@ -525,28 +522,28 @@ if ($reportMode) {
                     }
 
                     $tableRow = new CRow(array('',
-                        new CLink(zbx_date2str(DATE_TIME_FORMAT_SECONDS, $event['clock'])
-                                , 'tr_events.php?triggerid=' . $event['objectid'] . '&eventid=' . $event['eventid'], 'action'),
+                        ($event['value'] ? new CLink(zbx_date2str(DATE_TIME_FORMAT_SECONDS, $event['clock'])
+                                , 'tr_events.php?triggerid=' . $event['objectid'] . '&eventid=' . $event['eventid'], 'action') : ""),
                         $hostSpan,
                         new CSpan($tr_desc, 'link_menu'),
                         $statusSpan,
                         getSeverityCell($trigger['priority'], $config, null, !$event['value']),
                         $event['duration'],
-                        ($config['event_ack_enable']) ? $ack : null,
+                        //($config['event_ack_enable']) ? $ack : null,
                         $actions
                     ));
                     $tableRow->setAttribute('parent_app_id', $momento);
                     $table->addRow($tableRow);
                     // Report title
                     $table->setHeader(array($toggle_all,
-                        _('Time'),
-                        _('Host'),
-                        (new CColHeader(_('Description')))->addStyle('width: 35%'),
+                        (new CColHeader(_('Time')))->addStyle('width: 10%'),
+                        (new CColHeader(_('Host')))->addStyle('width: 10%'),
+                        (new CColHeader(_('Description')))->addStyle('width: 55%'),
                         (new CColHeader(_('Status')))->addStyle('width: 5%'),
                         (new CColHeader(_('Severity')))->addStyle('width: 5%'),
                         (new CColHeader(_('Duration')))->addStyle('width: 5%'),
-                        (new CColHeader(($config['event_ack_enable']) ? _('Ack') : null))->addStyle('width: 3%'),
-                        (new CColHeader(_('Actions')))->addStyle('width: 7%')
+                        //(new CColHeader(($config['event_ack_enable']) ? _('Ack') : null))->addStyle('width: 3%'),
+                        (new CColHeader(_('Actions')))->addStyle('width: 10%')
                     ));
                     break;
             }

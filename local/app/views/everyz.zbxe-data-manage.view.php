@@ -24,7 +24,7 @@
  * Module Variables
  * ************************************************************************** */
 // Definitions -----------------------------------------------------------------
-// Module Functions 
+// Module Functions
 // Configuration variables =====================================================
 $moduleName = "zbxe-data-manage";
 $baseProfile .= $moduleName;
@@ -124,7 +124,7 @@ switch ($filter['actionType']) {
                 document.getElementById("format").value = (document.getElementById("actionType_1").checked ? 6 : 0);
                 document.getElementById("langExport").disabled = document.getElementById("typeExport_1").checked;
                 document.getElementById("typeExport_1").disabled = document.getElementById("actionType_0").checked;
-                document.getElementById("typeExport_2").disabled = document.getElementById("actionType_0").checked;
+                //document.getElementById("typeExport_2").disabled = document.getElementById("actionType_0").checked;
             }
         </script>
         <?php

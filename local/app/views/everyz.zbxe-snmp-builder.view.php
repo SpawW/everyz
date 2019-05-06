@@ -26,7 +26,7 @@ zeAddJsFile(array('local/app/everyz/js/DynTable.js', 'local/app/everyz/js/snmp_b
 
 //require_once 'include/views/js/monitoring.latest.js.php';
 // Definitions -----------------------------------------------------------------
-// Module Functions 
+// Module Functions
 // Configuration variables =====================================================
 $moduleName = "zbxe-snmp-builder";
 $baseProfile .= $moduleName;
@@ -36,7 +36,8 @@ addFilterParameter("format", T_ZBX_INT);
 addFilterActions();
 
 // Specific fields
-addFilterParameter("groupids", PROFILE_TYPE_STR, [], true, true);
+//addFilterParameter("groupids", PROFILE_TYPE_STR, [], true, true);
+addIdFilterParameter("groupids");
 
 // Mode of report
 addFilterParameter("mode", T_ZBX_STR, "", false, false, false);
@@ -276,7 +277,7 @@ if (isset($_REQUEST['select'])) { // get snmp values for oid for "OID data" tabl
     // Create items
     $items = array();
     foreach ($oidlist as $oid) {
-        //item = [OID, Descr/OID, 
+        //item = [OID, Descr/OID,
         // value_type ('Numeric', 'Text'...),
         // data_type ('Decimal'),
         // units ('s', ...),
@@ -286,7 +287,7 @@ if (isset($_REQUEST['select'])) { // get snmp values for oid for "OID data" tabl
         if (!$oid_num)
             error(_s('OID is null "%1$s"', $oid[0]));
 
-        //value_type	
+        //value_type
         switch ($oid[2]) {
             case 'Numeric (integer 64bit)' :
                 $value_type = ITEM_VALUE_TYPE_UINT64;
@@ -707,7 +708,7 @@ if (isset($_REQUEST['select'])) { // get snmp values for oid for "OID data" tabl
 							"initially_open" : [ "all" ],
 							"animation" : 0,
 						}
-					
+
 					}).bind("select_node.jstree", function(e, data) {
 						var selectedObj = data.rslt.obj;
 						clickTree(selectedObj.attr("id"), 0, null, ["' . _zeT('OID Name') . '", "' . _('Type of information') . '", "' . _('Value') . '"]);
@@ -845,7 +846,7 @@ function get_oid_content($oid) {
     return ($content);
 }
 
-//Get oid tree per mib 
+//Get oid tree per mib
 function get_oid_tree($mib) {
     $cmd = SNMPB_SNMP_PATH . "/snmptranslate -Ts -M " . MIBS_ALL_PATH . " -m $mib";
     exec($cmd, $results, $code);

@@ -120,7 +120,7 @@ A.everyzGEOLink:active {
 
 
 /* Leaflet */
-.my-label {
+.zbxe-label {
   background: rgb(235, 235, 235);
 	background: rgba(235, 235, 235, 0.81);
 	background-clip: padding-box;
@@ -143,3 +143,72 @@ A.everyzGEOLink:active {
 	white-space: nowrap;
 	z-index: 6;
 }
+
+
+.zbxe_button, .zbxe_button_warning, .zbxe_button_red{
+    border: none;
+    color: white;
+    padding: 5px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 12px;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+
+.zbxe_button {
+    background-color: #4CAF50;
+}
+
+.zbxe_button_warning {
+    background-color: #FFCC00;
+    color: black;
+}
+
+.zbxe_button_red {
+    background-color: #FF3333;
+}
+
+.everyz-color-picker {
+  margin: 0px 1px;
+  display: block;
+  background-image:none;
+}
+
+.everyz-new-link {
+  background-image: url("../images/icon_connection_20.png") no-repeat;
+}
+.icon-green {
+  color: green;
+}
+.icon-yellow {
+  color: yellow;
+}
+.icon-red {
+  color: red;
+}
+
+.leaflet-popup-content {
+  width:auto !important;
+}
+/*
+.ui-tabs-nav .filter-trigger li a:hover {
+  text-decoration: none;
+  color: #000000;
+  background-color: #33B5E5;
+  padding: 1px 34px 7px 10px;
+}
+
+.filter-btn-container{
+  position: relative;
+  text-align: left;
+  width: 22px;
+  margin-left: -10px;
+}
+
+#ui-id-1{
+  padding: 6px 35px 0px 0px;
+}
+/*
+ */

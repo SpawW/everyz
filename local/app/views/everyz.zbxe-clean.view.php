@@ -23,7 +23,7 @@
 // script opcional
 //require_once 'include/views/js/monitoring.latest.js.php';
 // Definitions -----------------------------------------------------------------
-// Module Functions 
+// Module Functions
 // Configuration variables =====================================================
 $moduleName = "zbxe-clean";
 $baseProfile .= $moduleName;
@@ -36,6 +36,7 @@ addFilterActions();
 // Specific fields
 // Mode of report
 addFilterParameter("mode", T_ZBX_STR, "", false, false, false);
+//addIdFilterParameter("hostids");
 
 check_fields($fields);
 

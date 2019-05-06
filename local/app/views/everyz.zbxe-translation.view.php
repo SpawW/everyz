@@ -94,7 +94,7 @@ if (isset($httpParams['stringTranslation'])) {
     }
 }
 if ($dml) {
-    show_message('Strings de tradução atualiadas!');
+    show_message(_zeT('Translation strings updated!')); 
 }
 
 /* * ***************************************************************************
@@ -141,9 +141,8 @@ if ($lang !== "en_GB") {
 }
 
 /* * ***************************************************************************
- * Display Footer 
+ * Display Footer
  * ************************************************************************** */
 
 $form->addItem([$dataTab]);
 $dashboard->addItem($form)->show();
-

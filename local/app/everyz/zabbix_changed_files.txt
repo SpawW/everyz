@@ -1,23 +1,19 @@
-menu.inc.php
-main.js
+app/views/layout.htmlpage.menu.php
+app/views/monitoring.dashboard.view.php
+include/blocks.inc.php
+include/classes/sysmaps/CCanvas.php
+include/classes/sysmaps/CMapPainter.php
+include/func.inc.php
+include/menu.inc.php
+include/page_footer.php
+include/views/general.login.php
+local/app/everyz/include/lockEverys.php
 popup.php
 
 Wizard para agendamento de coletas (javascript)
 
 Arquivo para registrar a API do everyz
 include/classes/api/CApiServiceFactory.php
-
-Gerenciador de imagens customizado
-  -- Pesquisa (nome, largura, altura, mapeamento de valores, em uso)
-  -- Listagem exibir (nome, altura, largura)
-  -- Listagem exibir - definição de tamanho máximo (x para icones, y para planos de fundo)
-  -- Listagem exportar / importar
-  -- Listagem / paginação
-  -- Listagem agrupar imagens com mesmo nome e diferença de tamanho
-  --- icones para x24,x48,x64...
-  -- Multiplo upload usando DHTML
-  --- Upload de imagem kit (1 padrao de nome terminando _24, _48, _64, _96, _128
-  --- Multiplo delete de imagens
 
 Background padrao para novos mapas
 Mapeamento de imagens padrão para novos mapas

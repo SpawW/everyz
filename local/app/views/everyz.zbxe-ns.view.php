@@ -17,13 +17,11 @@
  * * You should have received a copy of the GNU General Public License
  * * along with this program; if not, write to the Free Software
  * * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- * Date     * Objective                                                         *
- * 20170917 * Add easy link to host                                             *
  */
-/* */
 /* * ***************************************************************************
  * Module Variables
  * ************************************************************************** */
+
 $moduleName = "zbxe-ns";
 $baseProfile .= $moduleName;
 $moduleTitle = 'Not Supported Items';
@@ -33,21 +31,22 @@ addFilterParameter("format", T_ZBX_INT);
 addFilterActions();
 
 // Specific fields
-addFilterParameter("hostids", PROFILE_TYPE_STR, [], true, true);
+//addFilterParameter("hostids", T_ZBX_INT, [], true, false);
+//addFilterParameter("groupids", T_ZBX_INT, [], true, false);
+addIdFilterParameter("hostids");
+addIdFilterParameter("groupids");
 addFilterParameter("item", T_ZBX_STR);
 addFilterParameter("inactiveHosts", T_ZBX_INT, 1);
-addFilterParameter("groupids", PROFILE_TYPE_STR, [], true, true);
 
 check_fields($fields);
-// Indicated area for external files -------------------------------------------
-?>
-<?php
 
 /* * ***************************************************************************
  * Access Control
  * ************************************************************************** */
+
 checkAccessHost('hostids');
 checkAccessGroup('groupids');
+
 /* * ***************************************************************************
  * Module Functions
  * ************************************************************************** */
@@ -55,7 +54,7 @@ checkAccessGroup('groupids');
 /* * ***************************************************************************
  * Get Data
  * ************************************************************************** */
-if (hasRequest('filter_rst')) { // Clean the filter parameters
+if (hasRequest('filter_rst')) {
     resetProfile('hostids', true);
     resetProfile('groupids', true);
     resetProfile('item');
@@ -63,19 +62,22 @@ if (hasRequest('filter_rst')) { // Clean the filter parameters
     $filter['filter_rst'] = NULL;
     $filter['filter_set'] = NULL;
 }
+
+
 $finalReport = Array();
 switch ($filter["format"]) {
     case PAGE_TYPE_CSV:
         break;
     case PAGE_TYPE_JSON:
-        $jsonResult = []; // Array for JSON Export
+        $jsonResult = [];
         break;
-    default: // HTML
+    default:
         break;
 }
 
 $report = Array();
 $hostCont = Array();
+
 // Get data for report ---------------------------------------------------------
 if (hasRequest('filter_set')) {
 
@@ -95,7 +97,6 @@ if (hasRequest('filter_set')) {
             . ($filter["item"] == "" ? "" : ' AND ite.key_ like ' . quotestr($filter["item"] . "%"))
             . ' order by hos.host, ite.name'
     ;
-    //var_dump($query);
     // Build a list of items with required key ---------------------------------
     $result = DBselect($query);
     $cont = 0;
@@ -124,34 +125,23 @@ switch ($filter["format"]) {
     default:
         require_once 'include/views/js/monitoring.latest.js.php';
         commonModuleHeader($moduleName, $moduleTitle, true);
-        // Filtros =====================================================================
-        // Get the multiselect hosts
         $multiSelectHostData = selectedHosts($filter['hostids']);
-        // Get the multiselect hosts
         $multiSelectHostGroupData = selectedHostGroups($filter['groupids']);
-        $widget = newFilterWidget($moduleName);
 
-// Source data filter
-        $tmpColumn = new CFormList();
-        $tmpColumn->addRow(_('Host Groups'), multiSelectHostGroups($multiSelectHostGroupData))
-                ->addRow(_('Key'), [ (new CTextBox('item', $filter['item']))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH),
-                    (new CDiv())->addClass(ZBX_STYLE_FORM_INPUT_MARGIN),
-                    (new CButton('item_name', _('Select')))
-                    ->addClass(ZBX_STYLE_BTN_GREY)
-                    ->onClick('return PopUp("popup.php?srctbl=items&srcfld1=key_&real_hosts=1&dstfld1=item' .
-                            '&with_items=1&dstfrm=zbx_filter");')
-        ]);
-        $tmpColumn->addItem(new CInput('hidden', 'action', $filter["action"]));
-        $widget->addColumn($tmpColumn);
-
-        $tmpColumn = (new CFormList())
-                ->addRow(_('Hosts'), multiSelectHosts($multiSelectHostData))
-//                ->addRow(_zeT('Output format'), (new CRadioButtonList('format', (int) $filter['format']))->addValue('HTML', 0)->addValue('CSV', 1)->setModern(true))
-                ->addRow(_zeT('Output format'), buttonOutputFormat('format', (int) $filter['format']))
-                ->addRow(bold(_zeT('Inactive hosts')), buttonOptions("inactiveHosts", $filter["inactiveHosts"], [_('Show'), _('Hide')]))
+        $leftFilter = (new CFormList())
+          ->addRow(_('Host Groups'), multiSelectHostGroups($multiSelectHostGroupData))
+          ->addRow(_('Key'), [ (new CTextBox('item', $filter['item']))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH)])
         ;
-        $widget->addColumn($tmpColumn);
-        $dashboard->addItem($widget);
+        $leftFilter->addItem(new CInput('hidden', 'action', $filter["action"]));
+
+        $rightFilter = (new CFormList())
+                ->addRow(_('Hosts'), multiSelectHosts($multiSelectHostData))
+                ->addRow(_zeT('Output format'), buttonOutputFormat('format', (int) $filter['format']))
+                ->addRow(bold(_zeT('Inactive hosts')), buttonOptions("inactiveHosts", (int) $filter["inactiveHosts"], [_('Show'), _('Hide')]))
+        ;
+
+        $dashboard->addItem(newFilterTab($moduleName,[$leftFilter, $rightFilter]));
+
         $table->setHeader(array($toggle_all, (new CColHeader(_('Host')))
             , _('Item'), _('Key'), _('Error'), _('Actions')));
 
@@ -222,4 +212,3 @@ switch ($filter["format"]) {
         $dashboard->addItem($form)->show();
         break;
 }
-
