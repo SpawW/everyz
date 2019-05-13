@@ -16,7 +16,7 @@
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com";
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="2.0.0-2";
+VERSAO_INST="2.0.0";
 VERSAO_EZ="2.0.0";
 UPDATEBD="S";
 BRANCH="master";
@@ -746,7 +746,7 @@ configuraApache() {
             apacheDirectoryConf "images";
             apacheDirectoryConf "fonts";
             apacheDirectoryConf "css";
-            apacheDirectoryRPCConf ;
+            #apacheDirectoryRPCConf ;
             if [ -f "/etc/init.d/apache2" ]; then
                 /etc/init.d/apache2 reload ;
             elif [ -f "/etc/init.d/httpd" ]; then

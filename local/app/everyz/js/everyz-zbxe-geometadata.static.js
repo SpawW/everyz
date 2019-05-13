@@ -247,7 +247,8 @@ function loadHosts(ele) {
 function hostInventory (hostid) {
   $.ajax({
     type: "POST",
-    url: "local/app/views/everyzjsrpc.php?type=11&method=host.inventory.get&real_hosts=1&limit=1",
+    url: "everyzjsrpc.php?type=11&method=host.inventory.get&real_hosts=1&limit=1",
+//    url: "local/app/views/everyzjsrpc.php?type=11&method=host.inventory.get&real_hosts=1&limit=1",
     data:'hostid='+hostid,
     beforeSend: function(){
       $("#hostname").css("background","#FFF url(local/app/everyz/images/zbxeLoaderIcon.gif) no-repeat");
@@ -331,7 +332,8 @@ function updateHostInventory() {
   console.log(hostData);
   $.ajax({
     type: "POST",
-    url: "local/app/views/everyzjsrpc.php?type=11&method=host.inventory.update",
+    url: "everyzjsrpc.php?type=11&method=host.inventory.update",
+//    url: "local/app/views/everyzjsrpc.php?type=11&method=host.inventory.update",
     data: { hostid : hostData['hostid'] , 'inventory.notes': $('#newJSON').val() },
     beforeSend: function(){
       $("#controlJSON").css("background","#FFF url(local/app/everyz/images/zbxeLoaderIcon.gif) no-repeat");
