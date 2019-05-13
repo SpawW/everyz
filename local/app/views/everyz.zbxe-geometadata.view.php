@@ -112,6 +112,7 @@ currentHost = <?php echo $filter["sourceHostID"];?>;
 
 function validateHostJSON() {
   try {
+    // If JSON configuration is invalid removeIT
     json = JSON.parse(<?php echo json_encode(($hostData['inventory']['notes'] == "" ? "{}" : $hostData['inventory']['notes'])); ?>);
     txJson = document.getElementById('jsonResult');
     txJson.value = formatJSON();
@@ -298,7 +299,7 @@ function init() {
   $ = jQuery;
   $("<style type='text/css'> li { background-color: black;} li:nth-child(odd) { background-color: #f1f1f1;} li:nth-child(even) { background-color: white;} </style>").appendTo("head");
 
-  addDefaultMapTiles(); 
+  addDefaultMapTiles();
 
   everyzObj.map = L.map('mapid', everyzObj.layerList).setView([hostData['inventory']['location_lat'],hostData['inventory']['location_lon']], 15,
   editActions = [
@@ -347,7 +348,9 @@ function init() {
     {
       click: function(data)
       {
-        let sourceElement = data.explicitOriginalTarget.id;
+        //console.log(['aqui',data,data.srcElement.id]);
+        //let sourceElement = data.explicitOriginalTarget.id;
+        let sourceElement = data.srcElement.id;
         switch(sourceElement) {
           case 'zbxeNewLink':
           everyzObj.dialog.options.size = [420,220];

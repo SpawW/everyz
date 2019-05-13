@@ -502,8 +502,13 @@ function newLeafletLeftBar(id, content) {
 
 
 function addToolButton(id, customClass, title,onClick) {
+  if (typeof onClick !== 'undefined') {
+    onClick = ' onclick="'+onClick+'"';
+  } else {
+    onClick = "";
+  }
   return '<button id="'+id+'_btn" type="button" class="btn btn-info" style="width: 30px; height: 30px;">'+
-  '<a  id="'+id+'" class="fa '+customClass+' icon-green" style="width: 28px; height: 28px;" title="'+title+'" onclick="'+onClick+'"></a>'+
+  '<a  id="'+id+'" class="fa '+customClass+' icon-green" style="width: 28px; height: 28px;" title="'+title+'" '+onClick+'></a>'+
   '</button>';
 }
 
