@@ -16,7 +16,7 @@
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com";
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="2.0.0";
+VERSAO_INST="2.0.0-2";
 VERSAO_EZ="2.0.0";
 UPDATEBD="S";
 BRANCH="master";
@@ -716,6 +716,19 @@ apacheDirectoryConf() {
     echo "</Directory>" >> $APACHEROOT/everyz.conf;
 }
 
+apacheDirectoryRPCConf() {
+  echo "<Directory \"$CAMINHO_FRONTEND/local/app/views\">" >> $APACHEROOT/everyz.conf
+  echo "  Options FollowSymLinks" >> $APACHEROOT/everyz.conf
+  echo "  AllowOverride None" >> $APACHEROOT/everyz.conf
+  echo "  Order allow,deny" >> $APACHEROOT/everyz.conf
+  echo "  Allow from all" >> $APACHEROOT/everyz.conf
+  echo "  <files everyzjsrpc.php>" >> $APACHEROOT/everyz.conf
+  echo "      Order allow,deny" >> $APACHEROOT/everyz.conf
+  echo "      Allow from all" >> $APACHEROOT/everyz.conf
+  echo "  </files>" >> $APACHEROOT/everyz.conf
+  echo "</Directory>" >> $APACHEROOT/everyz.conf
+}
+
 configuraApache() {
     if [ "$RECONFAPACHE" = "S" ]; then
         # Localizar onde estão os arquivos de configuração do apache
@@ -733,6 +746,7 @@ configuraApache() {
             apacheDirectoryConf "images";
             apacheDirectoryConf "fonts";
             apacheDirectoryConf "css";
+            apacheDirectoryRPCConf ;
             if [ -f "/etc/init.d/apache2" ]; then
                 /etc/init.d/apache2 reload ;
             elif [ -f "/etc/init.d/httpd" ]; then
@@ -846,4 +860,4 @@ configuraApache;
 addSystemInformationLinkNS;
 updatePopUp;
 
-registra "Installed - [ $VERSAO_INST ]";
+registra "Installed - [ Installer version: $VERSAO_INST / EveryZ version: $VERSAO_EZ ]";
