@@ -211,9 +211,9 @@ if (hasRequest('filter_set')) {
           , "vps" => 0, "ubm" => 0, "money" => 0];
         }
         $hostsReport[$row["hostid"]]["item"] += 1;
-        $hostsReport[$row["hostid"]]["delay"] += $row["delay"];
-        $hostsReport[$row["hostid"]]["history"] += $row["history"];
-        $hostsReport[$row["hostid"]]["trends"] += $row["trends"];
+        $hostsReport[$row["hostid"]]["delay"] += zbxeKeyValue($row, "delay", 0);
+        $hostsReport[$row["hostid"]]["history"] +=  zbxeKeyValue($row, "history", 0);
+        $hostsReport[$row["hostid"]]["trends"] +=  zbxeKeyValue($row, "trends", 0);
         $hostsReport[$row["hostid"]]["rowHistory"] += $historyRows;
         $hostsReport[$row["hostid"]]["rowTrend"] += $trendRows;
         $hostsReport[$row["hostid"]]["storage"] += $totalSize;

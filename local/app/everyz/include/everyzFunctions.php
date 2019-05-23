@@ -26,7 +26,7 @@ define("EZ_TITLE", 'EveryZ - ');
 define("ZE_COPY", ", ZE " . ZE_VER);
 define("EVERYZVERSION", "2.0.0");
 
-define("EVERYZBUILD", "281");
+define("EVERYZBUILD", "282");
 //define("EVERYZBUILD", 9);
 if (file_exists("lockEverys.php")) {
   $VG_INSTALL = true;
@@ -44,6 +44,14 @@ $VG_DEBUG = (isset($_REQUEST['p_debug']) && $_REQUEST['p_debug'] == 'S' ? true :
 
 // End of define and global variables
 // Functions required ==========================================================
+
+function zbxeKeyValue ($array, $key, $default = "") {
+  if (isset($array[$key])) {
+    return $array[$key];
+  }
+  return $default;
+}
+
 # Zabbix-Extras - Global Variables Start
 function zbxeFieldValue($p_query, $p_field)
 {
