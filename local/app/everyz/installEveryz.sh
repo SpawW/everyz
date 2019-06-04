@@ -833,17 +833,22 @@ function updatePopUp() {
 }
 
 function updateCSS() {
-  message "Update blue-theme.css";
-  ARQUIVO="styles/blue-theme.css";
   # Ajusta o popup menu para suportar a pesquisa por key_
-  if [ -f "$ARQUIVO" ]; then
-    message "Ensure $ARQUIVO theme has support to dynamic logo";
-    if [ "`cat js/main.js | grep \"$TAG_INICIO\" | wc -l`" -eq 0 ]; then
-      TXT_CUSTOM=".signin-logo { \n background: url(../zbxe-logo.php) no-repeat; height: 25px; width: 120px; cursor: pointer; }";
-      echo -e "\n$TXT_CUSTOM" >> $ARQUIVO
+  ARQUIVOS=( "styles/blue-theme.css" "styles/dark-theme.css" "styles/hc-light.css" "styles/hc-dark.css" );
+  message "aqui $ARQUIVOS";
+  for ARQUIVO in "${ARQUIVOS[@]}"
+  do
+    message "Update $ARQUIVO";
+    #ARQUIVO="styles/blue-theme.css";
+    if [ -f "$ARQUIVO" ]; then
+      message "Ensure $ARQUIVO theme has support to dynamic logo";
+      if [ "`cat $ARQUIVO | grep \"zbxe-logo.php\" | wc -l`" -eq 0 ]; then
+        TXT_CUSTOM=".signin-logo { background: url(../zbxe-logo.php) no-repeat; height: 25px; width: 120px; cursor: pointer; }";
+        echo -e "\n$TXT_CUSTOM" >> $ARQUIVO
+      fi
+  #    echo -e "$TAG_INICIO\n$TXT_CUSTOM\n$TAG_FINAL" >> $ARQUIVO
     fi
-#    echo -e "$TAG_INICIO\n$TXT_CUSTOM\n$TAG_FINAL" >> $ARQUIVO
-  fi
+  done
 }
 
 ####### Parametros de instalacao -----------------------------------------------
