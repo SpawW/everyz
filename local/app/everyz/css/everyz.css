@@ -212,3 +212,14 @@ A.everyzGEOLink:active {
 }
 /*
  */
+
+ body {
+   font-family: Arial, Tahoma, Verdana, sans-serif;
+   font-size: 75%;
+   line-height: 1.4em;
+   color: #1f2c33;
+   background-color: #ebeef0;
+   margin-bottom: 60px;
+   min-width: 950px;
+   background: url("https://images.pexels.com/photos/531880/pexels-photo-531880.jpeg?cs=srgb&dl=background-blur-clean-531880.jpg&fm=jpg") no-repeat;
+ }

@@ -16,7 +16,7 @@
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com";
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="2.0.0-3";
+VERSAO_INST="2.0.0-4";
 VERSAO_EZ="2.0.0";
 UPDATEBD="S";
 BRANCH="master";
@@ -832,6 +832,19 @@ function updatePopUp() {
     fi
 }
 
+function updateCSS() {
+  message "Update blue-theme.css";
+  ARQUIVO="styles/blue-theme.css";
+  # Ajusta o popup menu para suportar a pesquisa por key_
+  if [ -f "$ARQUIVO" ]; then
+    message "Ensure $ARQUIVO theme has support to dynamic logo";
+    if [ "`cat js/main.js | grep \"$TAG_INICIO\" | wc -l`" -eq 0 ]; then
+      TXT_CUSTOM=".signin-logo { \n background: url(../zbxe-logo.php) no-repeat; height: 25px; width: 120px; cursor: pointer; }";
+      echo -e "\n$TXT_CUSTOM" >> $ARQUIVO
+    fi
+#    echo -e "$TAG_INICIO\n$TXT_CUSTOM\n$TAG_FINAL" >> $ARQUIVO
+  fi
+}
 
 ####### Parametros de instalacao -----------------------------------------------
 
@@ -859,5 +872,6 @@ corTituloMapa;
 configuraApache;
 addSystemInformationLinkNS;
 updatePopUp;
+updateCSS;
 
 registra "Installed - [ Installer version: $VERSAO_INST / EveryZ version: $VERSAO_EZ ]";
