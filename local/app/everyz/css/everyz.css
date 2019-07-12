@@ -1,6 +1,6 @@
 /*
-    Created on : 14/12/2016, 09:23:27
-    Author     : spaww
+Created on : 14/12/2016, 09:23:27
+Author     : spaww
 */
 
 #listButton li {
@@ -122,52 +122,52 @@ A.everyzGEOLink:active {
 /* Leaflet */
 .zbxe-label {
   background: rgb(235, 235, 235);
-	background: rgba(235, 235, 235, 0.81);
-	background-clip: padding-box;
-	border-color: #777;
-	border-color: rgba(0,0,0,0.25);
-	border-radius: 4px;
-	border-style: solid;
-	border-width: 4px;
-	color: #111;
-	display: block;
-	font: 12px/20px "Helvetica Neue", Arial, Helvetica, sans-serif;
-	font-weight: bold;
-	padding: 1px 6px;
-	position: absolute;
-	-webkit-user-select: none;
-	   -moz-user-select: none;
-	    -ms-user-select: none;
-	        user-select: none;
-	pointer-events: none;
-	white-space: nowrap;
-	z-index: 6;
+  background: rgba(235, 235, 235, 0.81);
+  background-clip: padding-box;
+  border-color: #777;
+  border-color: rgba(0,0,0,0.25);
+  border-radius: 4px;
+  border-style: solid;
+  border-width: 4px;
+  color: #111;
+  display: block;
+  font: 12px/20px "Helvetica Neue", Arial, Helvetica, sans-serif;
+  font-weight: bold;
+  padding: 1px 6px;
+  position: absolute;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 6;
 }
 
 
 .zbxe_button, .zbxe_button_warning, .zbxe_button_red{
-    border: none;
-    color: white;
-    padding: 5px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 12px;
-    margin: 4px 2px;
-    cursor: pointer;
+  border: none;
+  color: white;
+  padding: 5px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 12px;
+  margin: 4px 2px;
+  cursor: pointer;
 }
 
 .zbxe_button {
-    background-color: #4CAF50;
+  background-color: #4CAF50;
 }
 
 .zbxe_button_warning {
-    background-color: #FFCC00;
-    color: black;
+  background-color: #FFCC00;
+  color: black;
 }
 
 .zbxe_button_red {
-    background-color: #FF3333;
+  background-color: #FF3333;
 }
 
 .everyz-color-picker {
@@ -192,34 +192,18 @@ A.everyzGEOLink:active {
 .leaflet-popup-content {
   width:auto !important;
 }
-/*
-.ui-tabs-nav .filter-trigger li a:hover {
-  text-decoration: none;
-  color: #000000;
-  background-color: #33B5E5;
-  padding: 1px 34px 7px 10px;
-}
 
-.filter-btn-container{
-  position: relative;
-  text-align: left;
-  width: 22px;
-  margin-left: -10px;
+/* Patch para modificar o plano de fundo do Zabbix
+body {
+font-family: Arial, Tahoma, Verdana, sans-serif;
+font-size: 75%;
+line-height: 1.4em;
+color: #1f2c33;
+background-color: #ebeef0;
+margin-bottom: 60px;
+min-width: 950px;
+background: url("https://images.pexels.com/photos/531880/pexels-photo-531880.jpeg?cs=srgb&dl=background-blur-clean-531880.jpg&fm=jpg") no-repeat;
 }
-
-#ui-id-1{
-  padding: 6px 35px 0px 0px;
-}
-/*
- */
-
- body {
-   font-family: Arial, Tahoma, Verdana, sans-serif;
-   font-size: 75%;
-   line-height: 1.4em;
-   color: #1f2c33;
-   background-color: #ebeef0;
-   margin-bottom: 60px;
-   min-width: 950px;
-   background: url("https://images.pexels.com/photos/531880/pexels-photo-531880.jpeg?cs=srgb&dl=background-blur-clean-531880.jpg&fm=jpg") no-repeat;
- }
+body {
+  background: url("https://images.pexels.com/photos/531880/pexels-photo-531880.jpeg?cs=srgb&dl=background-blur-clean-531880.jpg&fm=jpg") no-repeat;
+} */

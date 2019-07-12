@@ -835,7 +835,7 @@ function updatePopUp() {
 function updateCSS() {
   # Ajusta o popup menu para suportar a pesquisa por key_
   ARQUIVOS=( "styles/blue-theme.css" "styles/dark-theme.css" "styles/hc-light.css" "styles/hc-dark.css" );
-  message "aqui $ARQUIVOS";
+  #message "==> $ARQUIVOS";
   for ARQUIVO in "${ARQUIVOS[@]}"
   do
     message "Update $ARQUIVO";
