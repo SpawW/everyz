@@ -843,7 +843,7 @@ function updateCSS() {
     if [ -f "$ARQUIVO" ]; then
       message "Ensure $ARQUIVO theme has support to dynamic logo";
       if [ "`cat $ARQUIVO | grep \"zbxe-logo.php\" | wc -l`" -eq 0 ]; then
-        TXT_CUSTOM=".signin-logo { background: url(../zbxe-logo.php) no-repeat; height: 25px; width: 120px; cursor: pointer; }";
+        TXT_CUSTOM=".signin-logo { background: url(../zbxe-logo.php?mode=login) no-repeat; height: 25px; width: 120px; cursor: pointer; }";
         echo -e "\n$TXT_CUSTOM" >> $ARQUIVO
       fi
   #    echo -e "$TAG_INICIO\n$TXT_CUSTOM\n$TAG_FINAL" >> $ARQUIVO
