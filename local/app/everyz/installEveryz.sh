@@ -879,4 +879,4 @@ addSystemInformationLinkNS;
 updatePopUp;
 updateCSS;
 
-registra "Installed - [ Installer version: $VERSAO_INST / EveryZ version: $VERSAO_EZ ]";
+registra "Installed - [ Installer version: $VERSAO_INST / EveryZ version: $VERSAO_EZ / Branch: $BRANCH ]";
