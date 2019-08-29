@@ -16,7 +16,7 @@
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com";
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="2.0.0-6";
+VERSAO_INST="2.0.0-12";
 VERSAO_EZ="2.0.0";
 UPDATEBD="S";
 BRANCH="master";
@@ -396,6 +396,7 @@ caminhoFrontend() {
     fi
     cd $CAMINHO_FRONTEND;
     ZABBIX_VERSION=$(cat "$CAMINHO_FRONTEND/include/defines.inc.php" | grep "ZABBIX_API_VERSION" | awk -F"'" '{print $4}' | awk -F"." '{print $1$2}');
+    ZABBIX_BUILD=$(cat "$CAMINHO_FRONTEND/include/defines.inc.php" | grep "ZABBIX_API_VERSION" | awk -F"'" '{print $4}' | awk -F"." '{print $3}');
 
 }
 
@@ -515,8 +516,20 @@ customLogo() {
       sed -i "$INIINST,$FIMINST d" $ARQUIVO;
     else
       message "Fresh install - Logo ==========";
-      sed -i '90,96 {s/^/#/}' $ARQUIVO
-      sed -i "97 i $TAG1" $ARQUIVO
+      # message " DEBUG: $ZABBIX_VERSION $ZABBIX_BUILD "
+      if [ "$ZABBIX_VERSION" == 40 ] && [ "$ZABBIX_BUILD" -ge 12 ]; then
+        INI_LINE=86;
+        LAST_LINE=92;
+        INSERT_LINE=93;
+      else
+        INI_LINE=90;
+        LAST_LINE=96;
+        INSERT_LINE=97;
+      fi
+      sed -i "$INI_LINE,$LAST_LINE {s/^/#/}" $ARQUIVO
+      sed -i "$INSERT_LINE i $TAG1" $ARQUIVO
+      # sed -i '90,96 {s/^/#/}' $ARQUIVO
+      # sed -i "97 i $TAG1" $ARQUIVO
     fi
     sed -i "s/$TAG1/$NOVO/" $ARQUIVO
 
