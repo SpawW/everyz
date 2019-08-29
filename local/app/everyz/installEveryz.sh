@@ -21,7 +21,8 @@ TMP_DIR="/tmp/upgZabbix";
 VERSAO_INST="1.1.6";
 VERSAO_EZ="1.1.6";
 UPDATEBD="S";
-BRANCH="master";
+#https://github.com/SpawW/everyz/archive/master-34.zip
+BRANCH="master-34";
 NOME_PLUGIN="EVERYZ";
 HORARIO_BKP=$(date +"%Y_%d_%m_%H-%M");
 BKP_FILE="/tmp/zeBackup$HORARIO_BKP.tgz";
