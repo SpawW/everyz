@@ -16,7 +16,7 @@
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com";
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="2.0.0-12";
+VERSAO_INST="2.0.0-15";
 VERSAO_EZ="2.0.0";
 UPDATEBD="S";
 BRANCH="master";
@@ -517,7 +517,11 @@ customLogo() {
     else
       message "Fresh install - Logo ==========";
       # message " DEBUG: $ZABBIX_VERSION $ZABBIX_BUILD "
-      if [ "$ZABBIX_VERSION" == 40 ] && [ "$ZABBIX_BUILD" -ge 12 ]; then
+      if [ "$ZABBIX_VERSION" == 40 ] && [ "$ZABBIX_BUILD" -ge 15 ]; then
+        INI_LINE=85;
+        LAST_LINE=91;
+        INSERT_LINE=92;
+      elif [ "$ZABBIX_VERSION" == 40 ] && [ "$ZABBIX_BUILD" -ge 12 ]; then
         INI_LINE=86;
         LAST_LINE=92;
         INSERT_LINE=93;
