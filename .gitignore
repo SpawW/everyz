@@ -12,6 +12,7 @@ local/views/everyz.priv.*.php
 local/everyz/js/everyz.priv.*.php
 local/everyz/js/everyz.priv.*.js
 .vscode
+.vscode/*
 # Arquivos a ignorar o comando de ignore
 !everyz.php
 !zbxe-logo.php
