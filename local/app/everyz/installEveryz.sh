@@ -1,12 +1,8 @@
 #!/bin/bash
 #-------------------------------------------------------
 # Author:       Adail Spinola <everyz@everyz.org>
-# Date:         21-Mar-2018
-# Objective:    Install EveryZ
-# Update Log:
-# 20180321 - Add examples of use
-# 20180213 - Upgrade to 4.0.0 alfa
-# 20170918 - Update for change popup.php and validation of files for multiple zabbix versions
+# Date:         19-Jan-2020
+# Objective:    Install EveryZ over Zabbix 4.0
 #-------------------------------------------------------
 ## bash /var/www/html/4.0/local/app/everyz/installEveryz.sh -a=S -f=/var/www/html/4.0 -d=N -l=pt -i=redhat
 ## bash /var/www/html/4.0/local/app/everyz/installEveryz.sh -a=S -f=/var/www/html/4.0 -d=N -l=pt -i=redhat --onlypatch
@@ -19,7 +15,7 @@ TMP_DIR="/tmp/upgZabbix";
 VERSAO_INST="2.0.0-15";
 VERSAO_EZ="2.0.0";
 UPDATEBD="S";
-BRANCH="master";
+BRANCH="4.0";
 NOME_PLUGIN="EVERYZ";
 HORARIO_BKP=$(date +"%Y_%d_%m_%H-%M");
 BKP_FILE="/tmp/zeBackup$HORARIO_BKP.tgz";
