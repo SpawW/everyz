@@ -12,8 +12,9 @@
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com";
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="2.0.0-15";
+VERSAO_INST="2.0.0-16";
 VERSAO_EZ="2.0.0";
+VERSAO_ZABBIX="4.0.*"
 UPDATEBD="S";
 BRANCH="4.0";
 NOME_PLUGIN="EVERYZ";
@@ -36,11 +37,24 @@ message() {
     echo -e "\e[36m==>\e[37m $1 \e[39m";
 }
 
+# Avoid errors when user try to run without root permission ====================
+if [[ $EUID -ne 0 ]]; then
+   infoError "This script must be run as root, on Zabbix Frontend in version $VERSAO_ZABBIX. Script aborted!" 
+   exit 1
+fi
+
 # Parametros de configuração para automatização ================================
 if [ $# -gt 0 ]; then
     for i in "$@"
     do
         case $i in
+            --version)
+               message "EveryZ Installer Version: $VERSAO_INST"
+               message "EveryZ Version: $VERSAO_EZ"
+               message "Zabbix Version: $VERSAO_ZABBIX"
+               message "Branch: $BRANCH"
+               exit 0;
+            ;;
             --onlypatch)
                ONLYPATCH="S";
             ;;
