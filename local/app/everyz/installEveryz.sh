@@ -12,11 +12,11 @@
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com";
 TMP_DIR="/tmp/upgZabbix";
-VERSAO_INST="2.0.0-16";
+VERSAO_INST="2.0.0-17";
 VERSAO_EZ="2.0.0";
-VERSAO_ZABBIX="4.0.*"
+VERSAO_ZABBIX="4.4.*"
 UPDATEBD="S";
-BRANCH="4.0";
+BRANCH="4.4";
 NOME_PLUGIN="EVERYZ";
 HORARIO_BKP=$(date +"%Y_%d_%m_%H-%M");
 BKP_FILE="/tmp/zeBackup$HORARIO_BKP.tgz";
