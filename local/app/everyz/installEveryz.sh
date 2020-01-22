@@ -1,12 +1,10 @@
 #!/bin/bash
 #-------------------------------------------------------
 # Author:       Adail Spinola <everyz@everyz.org>
-# Date:         19-Jan-2020
-# Objective:    Install EveryZ over Zabbix 4.0
+# Date:         21-Jan-2020
+# Objective:    Install EveryZ over Zabbix 4.4
 #-------------------------------------------------------
-## bash /var/www/html/4.0/local/app/everyz/installEveryz.sh -a=S -f=/var/www/html/4.0 -d=N -l=pt -i=redhat
-## bash /var/www/html/4.0/local/app/everyz/installEveryz.sh -a=S -f=/var/www/html/4.0 -d=N -l=pt -i=redhat --onlypatch
-## ./installZabbix.sh -v=4.0.0 -beta -s -db=zbx400 -dbup=ze123456 -dbrp=ze123456r -dbu=zbx400 -name=4.0 -epath=4.0 -dtu
+# bash /var/www/html/4.4/local/app/everyz/installEveryz.sh -a=S -f=/var/www/html/4.4 -d=S -l=pt -i=centos && service httpd restart
 
 
 INSTALAR="N";
@@ -21,9 +19,9 @@ NOME_PLUGIN="EVERYZ";
 HORARIO_BKP=$(date +"%Y_%d_%m_%H-%M");
 BKP_FILE="/tmp/zeBackup$HORARIO_BKP.tgz";
 ONLYPATCH="N";
-
+ 
 paramValue() {
-    echo $(echo $1 | awk -F'=' '{print $2}' );
+    echo $(echo $1 | awk -F'=' '{print $2}' ); 
 }
 infoOk() {
     echo -e "\e[36m==>\e[32m $1 \e[39m";
@@ -527,19 +525,24 @@ customLogo() {
     else
       message "Fresh install - Logo ==========";
       # message " DEBUG: $ZABBIX_VERSION $ZABBIX_BUILD "
-      if [ "$ZABBIX_VERSION" == 40 ] && [ "$ZABBIX_BUILD" -ge 15 ]; then
-        INI_LINE=85;
-        LAST_LINE=91;
-        INSERT_LINE=92;
-      elif [ "$ZABBIX_VERSION" == 40 ] && [ "$ZABBIX_BUILD" -ge 12 ]; then
-        INI_LINE=86;
-        LAST_LINE=92;
-        INSERT_LINE=93;
-      else
-        INI_LINE=90;
-        LAST_LINE=96;
-        INSERT_LINE=97;
-      fi
+    #   if [ "$ZABBIX_VERSION" == 40 ] && [ "$ZABBIX_BUILD" -ge 15 ]; then
+    #     INI_LINE=85;
+    #     LAST_LINE=91;
+    #     INSERT_LINE=92;
+    #   elif [ "$ZABBIX_VERSION" == 40 ] && [ "$ZABBIX_BUILD" -ge 12 ]; then
+    #     INI_LINE=86;
+    #     LAST_LINE=92;
+    #     INSERT_LINE=93;
+    #   else
+    #     INI_LINE=90;
+    #     LAST_LINE=96;
+    #     INSERT_LINE=97;
+    #   fi 
+
+      INI_LINE=89;
+      LAST_LINE=95;
+      INSERT_LINE=96;
+
       sed -i "$INI_LINE,$LAST_LINE {s/^/#/}" $ARQUIVO
       sed -i "$INSERT_LINE i $TAG1" $ARQUIVO
       # sed -i '90,96 {s/^/#/}' $ARQUIVO
