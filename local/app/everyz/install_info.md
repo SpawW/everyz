@@ -4,9 +4,9 @@ A instalação do Everyz é feita através do script *installEveryz.sh*. Existin
 
 [Eng: The EveryZ installation can be done using a script called *installEveryz.sh*. For each major Zabbix version exists a branch for him]
 
-Este guia define três variáveis que só serão utilizadas durante o processo de instalação. Todos os passos aqui definidos devem ser **executados como root**.
+Este guia define quatro variáveis que só serão utilizadas durante o processo de instalação. Todos os passos aqui definidos devem ser **executados como root**.
 
-[Eng: This guide defines three variables and these variables are used only for the installation process. All steps here defined **need to be run using a root privilege account**. ]
+[Eng: This guide defines four variables and these variables are used only for the installation process. All steps here defined **need to be run using a root privilege account**. ]
 
 ## Zabbix 3.4.x
 
@@ -17,6 +17,7 @@ Definir o valor da variável **BRANCH** com o valor **3.x**
 ```
 export BRANCH="3.x"
 ```
+
 
 ## Zabbix 4.0
 
@@ -98,10 +99,18 @@ export WEBSERVER="apache";
 export WEBSERVER="NGINX";
 ```
 
+## Localização dos arquivos do Zabbix-Web / Zabbix-web location
+
+Este caminho muda em cada distribuição, o **exemplo** abaixo é para o Centos 7 sem customizações.
+
+```
+export ZABBIXWEB_PATH="/usr/share/zabbix"
+```
+
 ### Download
 
 wget https://raw.githubusercontent.com/SpawW/everyz/$BRANCH/local/app/everyz/installEveryz.sh -O /tmp/installEveryz.sh
 
 ### Instalação / Install
 
-bash /tmp/installEveryz.sh -a=S -f=/usr/share/zabbix -d=S -l=pt -i=$DISTRO -b="$BRANCH" && service $WEBSERVER restart 
+bash /tmp/installEveryz.sh -a=S -f="$ZABBIXWEB_PATH" -d=S -l=pt -i=$DISTRO -b="$BRANCH" && service $WEBSERVER restart 
