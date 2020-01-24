@@ -7,7 +7,7 @@
 # bash /var/www/html/4.4/local/app/everyz/installEveryz.sh -a=S -f=/var/www/html/4.4 -d=S -l=pt -i=centos && service httpd restart
 
 # Não alterar o número da linha, usado no pre-commit
-VERSAO_EZ="2.0.22-4.4";
+VERSAO_EZ="2.0.23-4.4";
 
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com";
