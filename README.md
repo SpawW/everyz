@@ -1,4 +1,4 @@
-# EveryZ 2.0.17-4.4
+# EveryZ 2.0.18-4.4
 
 Hack for plugin support on Zabbix web interface.
 
