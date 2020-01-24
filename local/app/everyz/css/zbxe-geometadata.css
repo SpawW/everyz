@@ -1,0 +1,33 @@
+/*
+Created on : 24/01/2020
+Author     : spaww
+*/
+
+#mapid {
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 1140px) {
+  body {
+    min-width: 730px;
+    height: 500px;
+  }
+  #mapid {
+    min-height: 730px;
+  }
+}
+
+@media (min-width: 1200px) {
+  body {
+    min-width: 1200px;
+    min-height: 800px;
+  }
+  #mapid {
+    min-height: 990px;
+  }
+}
+
+.btn-kiosk {
+  visibility: hidden;
+}
