@@ -57,7 +57,7 @@ zbxeJSLoad( [
   , 'leaflet/leaflet.Control.Custom.js', 'leaflet/Leaflet-Dialog.js'
 ]);
 zbxeCSSLoad(['font-awesome.min.css', 'leaflet.css','leaflet-control-credits.css', 'L.Icon.Pulse.css','leaflet-draw.css'
-, 'leaflet-sidebar.css', 'leaflet-toolbar.css', 'leaflet-draw-toolbar.css', 'Leaflet.Dialog.css'
+, 'leaflet-sidebar.css', 'leaflet-toolbar.css', 'leaflet-draw-toolbar.css', 'Leaflet.Dialog.css', 'zbxe-geometadata.css'
 ]);
 
 function addTab($key, $desc)
@@ -203,7 +203,8 @@ commonModuleHeader($moduleName, $moduleTitle, true);
 
 $table->addRow([(new CDiv())
 ->setAttribute('id', "mapid")
-->setAttribute('style', "width:100%; height: 100%; min-height: 730px;")]);
+// ->setAttribute('style', "width: 100%; height: 100%; min-height: 730px;")
+]);
 
 /* * ***************************************************************************
 * Display Footer
@@ -298,6 +299,8 @@ function drawCreated(e) {
 function init() {
   $ = jQuery;
   $("<style type='text/css'> li { background-color: black;} li:nth-child(odd) { background-color: #f1f1f1;} li:nth-child(even) { background-color: white;} </style>").appendTo("head");
+
+  // $("<style type='text/css'>body {  min-width: 730px;}</style>").appendTo("head");
 
   addDefaultMapTiles();
 
