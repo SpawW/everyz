@@ -1,4 +1,4 @@
-#!/bin/bash
+VERSAO_EZ="2.0.20-4.4";
 #-------------------------------------------------------
 # Author:       Adail Spinola <everyz@everyz.org>
 # Date:         21-Jan-2020
