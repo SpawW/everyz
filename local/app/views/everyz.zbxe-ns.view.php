@@ -86,14 +86,16 @@ if (hasRequest('filter_set')) {
     if ($hostGroupFilter !== "") {
         $hostGroupFilter = "\n inner join hosts_groups hg \n on (hg.hostid = ite.hostid) AND " . $hostGroupFilter;
     }
-    $query = 'select hos.host, hos.name as visible_name, ite.name, ite.itemid, hos.hostid, ite.error, ite.key_ ' .
+    $query = 'select hos.host, hos.name as visible_name, ite.name, ite.itemid, hos.hostid, itrt.error, ite.key_ ' .
             '  from items ite ' .
+            '  inner join item_rtdata itrt' .
+            '     on (itrt.itemid = ite.itemid) ' . 
             '  inner join hosts hos ' .
             '     on (hos.hostid = ite.hostid) '
             . ($hostFilter == "" ? "" : " AND ") . $hostFilter
             . $hostGroupFilter
             . ($filter['inactiveHosts'] == 1 ? "and hos.status = 0" : "")
-            . ' where ite.state = 1 AND ite.status = 0 '
+            . ' where itrt.state = 1 AND ite.status = 0 '
             . ($filter["item"] == "" ? "" : ' AND ite.key_ like ' . quotestr($filter["item"] . "%"))
             . ' order by hos.host, ite.name'
     ;
@@ -153,8 +155,10 @@ foreach ($report as $row) {
     $item = getItem($row['itemid']);
     $state_css = ($item['state'] == ITEM_STATE_NOTSUPPORTED) ? ZBX_STYLE_GREY : null;
     if ($filter["format"] == PAGE_TYPE_HTML && $row['hostid'] !== $lastHostID) {
-        $resumo = zbxeFieldValue("select count(*) as total from items ite "
-                . "where ite.state = 1 and ite.status = 0 and ite.hostid = " . $row['hostid']
+        $resumo = zbxeFieldValue("select count(*) as total from items ite " 
+                . '  inner join item_rtdata itrt'
+                . '     on (itrt.itemid = ite.itemid) ' 
+                . "where itrt.state = 1 and ite.status = 0 and ite.hostid = " . $row['hostid']
                 . ($filter["item"] == "" ? "" : ' AND ite.name like ' . quotestr($filter["item"] . "%"))
                 , 'total'
         );
