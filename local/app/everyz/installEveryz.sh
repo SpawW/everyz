@@ -1,4 +1,4 @@
-VERSAO_EZ="2.0.20-4.4";
+#!/bin/bash
 #-------------------------------------------------------
 # Author:       Adail Spinola <everyz@everyz.org>
 # Date:         21-Jan-2020
@@ -8,7 +8,6 @@ VERSAO_EZ="2.0.20-4.4";
 
 # Não alterar o número da linha, usado no pre-commit
 VERSAO_EZ="2.0.1";
-
 
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com";
