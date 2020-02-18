@@ -7,13 +7,13 @@
 # bash /var/www/html/4.4/local/app/everyz/installEveryz.sh -a=S -f=/var/www/html/4.4 -d=S -l=pt -i=centos && service httpd restart
 
 # Não alterar o número da linha, usado no pre-commit
-VERSAO_EZ="2.0.23-4.4";
+VERSAO_EZ="2.0.25-4.4";
 
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com";
 TMP_DIR="/tmp/upgZabbix";
 VERSAO_INST="2.0.0-18";
-VERSAO_EZ="2.0.1";
+VERSAO_EZ="2.0.2";
 VERSAO_ZABBIX="4.4.*"
 UPDATEBD="S";
 BRANCH="4.4";

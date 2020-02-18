@@ -50,6 +50,11 @@ function addDefaultMapTiles () {
   addMapTile("Esri.WorldTopo",   'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community');
   addMapTile("Esri.WorldImagery",   'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community');
 
+  // Google URL provided by Roberto almeida - thanks ! 
+  addMapTile("Google.Street", 'http://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&s=Ga', 'Google - Street');
+  addMapTile("Google.Satelite", 'http://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}&s=Ga','Google - Satelite');
+  addMapTile("Google.Mix", 'http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}&s=Ga','Google - Mix');
+
   // var Stamen_Toner = L.tileLayer('', {
   //   attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
   //   subdomains: 'abcd',

@@ -242,7 +242,8 @@ if (zbxeConfigValue("geo_token", 0, '') !== "") {
     )]);
   } else {
     $leftColumn->addRow(_zeT('Default tile'), [newComboFilterArray(
-      ["OSM", "OpenTopo", "Esri.WorldGrayCanvas", "OpenStreet_Grayscale", "Stamen.Toner", "CartoDB_DarkMatter", "Esri.WorldTopo", "Esri.WorldImagery"],
+      ["OSM", "OpenTopo", "Esri.WorldGrayCanvas", "OpenStreet_Grayscale", "Stamen.Toner", "CartoDB_DarkMatter", "Esri.WorldTopo", "Esri.WorldImagery"
+    , "Google.Street","Google.Satelite","Google.Mix"],
       "map", $filter['map'], false, false
       )]);
     }
