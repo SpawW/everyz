@@ -258,8 +258,8 @@ function zbxImage(iconid, width, height) {
   height = height || 32;
   iconURL =
     iconid == parseInt(iconid, 0)
-      ? "imgstore.php?iconid=" + iconid
-      : "local/app/everyz/images/zpoi_" + iconid + ".png";
+      ? `imgstore.php?iconid=${iconid}`
+      : `local/app/everyz/images/zpoi_${iconid}.png`;
   return L.icon({
     iconUrl: iconURL,
     iconSize: [width, height],
@@ -332,8 +332,6 @@ function addLine(from, to, popup, fillColor, weight, opacity, text) {
     );
 
     if (popup !== "") {
-      //tmp.bindPopup(popup);
-      //dynamicPopUp(tmp);
       tmp
         .bindTooltip(popup, {
           permanent: false,
@@ -352,7 +350,7 @@ function addLine(from, to, popup, fillColor, weight, opacity, text) {
 
 function parse_html(html, args) {
   for (var key in args) {
-    var re = new RegExp("<" + key + ">", "g");
+    var re = new RegExp(`<${key}>`, "g");
     html = html.replace(re, args[key]);
   }
   return html;
@@ -362,17 +360,7 @@ function actionButton(title, img, onclick, className) {
   if (className === undefined) {
     className = "everyzShortcutIMG";
   }
-  return (
-    '<img class="' +
-    className +
-    '" hspace=10 vspace=10  title="' +
-    title +
-    '" src="local/app/everyz/images/' +
-    img +
-    "\" onclick='" +
-    onclick +
-    "'/>&nbsp;"
-  );
+  return `<img class="${className}" hspace=10 vspace=10  title="${title}" src="local/app/everyz/images/${img}" onclick='${onclick}'/>&nbsp;`;
 }
 
 function popupHost(hostid, hostname, events, hostConn, extraButtons) {
@@ -381,12 +369,12 @@ function popupHost(hostid, hostname, events, hostConn, extraButtons) {
     actionButton(
       geoTitleLatest,
       "zbxe-latest.png",
-      "javascript:hostLatest(" + hostid + ");"
+      `javascript:hostLatest(${hostid});`
     ) +
     actionButton(
       geoTitleTriggers,
-      "zbxe-" + (hasEvent ? "incident" : "ok") + ".png",
-      "javascript:hostIncidents(" + hostid + ");"
+      `zbxe-${hasEvent ? "incident" : "ok"}.png`,
+      `javascript:hostIncidents(${hostid});`
     );
   var extraButtons = typeof extraButtons !== "undefined" ? extraButtons : "";
 
@@ -403,7 +391,7 @@ function popupHost(hostid, hostname, events, hostConn, extraButtons) {
     editbutton: actionButton(
       geoTitleMetadata,
       "zbxe-geometadata.png",
-      "javascript:editHostMetadata(" + hostid + ");",
+      `javascript:editHostMetadata(${hostid});`,
       "everyzEditIMG"
     ),
     eventsList: events
@@ -412,16 +400,8 @@ function popupHost(hostid, hostname, events, hostConn, extraButtons) {
 
 function easterEgg(type, name, extra) {
   return (
-    '<div class="popUpEgg"><table><tr><td><img width="60px" height="60px" src="local/app/everyz/images/icon_' +
-    type +
-    '.png"/></td>' +
-    '<td class="tdEgg">' +
-    "<b>" +
-    name +
-    "</b>, very thank you!" +
-    extra +
-    "</td>" +
-    "</tr></table></div>"
+    `<div class="popUpEgg"><table><tr><td><img width="60px" height="60px" src="local/app/everyz/images/icon_${type}.png"/></td>` +
+    `<td class="tdEgg"><b>${name}</b>, very thank you!${extra}</td></tr></table></div>`
   );
 }
 
@@ -563,7 +543,7 @@ function easterEggAnimated() {
       L.controlCredits({
         image: "local/app/everyz/images/zpoi_whynotwork.png",
         link: "http://www.everyz.org/docs",
-        text: '<div id="everyzTopMenuInfo">' + easterEggInfo + "</div>",
+        text: `<div id="everyzTopMenuInfo">${easterEggInfo}</div>`,
         height: "64",
         width: "103"
       })
@@ -602,11 +582,8 @@ function getShapes(drawnItems) {
   shapes["marker"] = [];
 
   drawnItems.eachLayer(function(layer) {
-    // Note: Rectangle extends Polygon. Polygon extends Polyline.
-    // Therefore, all of them are instances of Polyline
     if (layer instanceof L.Polyline) {
       shapes["polyline"].push(layer.getLatLngs());
-      //alert(shapes);
     }
 
     if (layer instanceof L.Circle) {
@@ -655,17 +632,8 @@ function zbxeEditInteger(id, value, width, args) {
   var extra = htmlExtra(args);
   position = typeof position !== "undefined" ? position : "topleft";
   return (
-    '<input id="' +
-    id +
-    '" name="' +
-    id +
-    '" value="' +
-    value +
-    '" style="text-align: right;width: ' +
-    width +
-    'px;" onchange="validateNumericBox(this, false, true);" type="text" ' +
-    extra +
-    ">"
+    `<input id="${id}" name="${id}" value="${value}" style="text-align: right;width: ${width}px;"` +
+    ` onchange="validateNumericBox(this, false, true);" type="text" ${extra}>"`
   );
 }
 
@@ -681,26 +649,11 @@ function zbxeSelect(id, value, options, args) {
   var extra = htmlExtra(args);
   var select_options = "";
   for (var key in options) {
-    select_options +=
-      ' <option value="' +
-      key +
-      '" ' +
-      (value === key ? "selected" : "") +
-      ">" +
-      options[key] +
-      "</option>";
+    select_options += ` <option value="${key}" ${
+      value === key ? "selected" : ""
+    }>${options[key]}</option>`;
   }
-  return (
-    '<select id="' +
-    id +
-    '" name="' +
-    id +
-    '" ' +
-    extra +
-    ">" +
-    select_options +
-    "</select>"
-  );
+  return `<select id="${id}" name="${id}" ${extra}>${select_options}</select>"`;
 }
 
 /**
@@ -740,13 +693,6 @@ function zbxeInitHostSelect(id, data, args, zbxeTranslation) {
   for (var key in args) {
     params[key] = args[key];
   }
-  /*
-  console.log(jQuery("#"+id+"_"));
-  jQuery("#"+id+"_").multiSelect({"url":"jsrpc.php?type=11&method=multiselect.get&objectName=hosts",
-  "name":id+"[]", selectedLimit: 1,
-  "labels": translation,
-  "data": data,"popup":{"parameters":params}});
-  */
 }
 
 /**
@@ -785,43 +731,10 @@ function divColorPicker(value, width, id) {
   if (value.length === 7) {
     var tmp = hexToRgb(value);
     hexVal = value.substring(1, 7);
-    value =
-      "rgb(" +
-      tmp.r +
-      ", " +
-      tmp.g +
-      ", " +
-      tmp.b +
-      "); background: rgb(" +
-      tmp.r +
-      ", " +
-      tmp.g +
-      ", " +
-      tmp.b +
-      ")";
+    value = `rgb(${tmp.r}, ${tmp.g}, ${tmp.b}); background: rgb(${tmp.r}, ${tmp.g}, ${tmp.b})`;
   }
   var type = width > 0 ? "text" : "hidden";
-  return (
-    '<input type="color" id="' +
-    id +
-    '" name="' +
-    id +
-    '" value="' +
-    value +
-    '" pattern="^#+([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$"> '
-  );
-  //return '<input type="color" id="'+id+'" name="'+id+'" value="'+value+'">';
-  /*
-  return '<div class="input-color-picker"><input type="text" id="'+id+'" name="'
-  +id+'" value="'+hexVal+'" maxlength="6" style="width: '+width
-  +'px;"></div><script type="text/javascript">jQuery("#'+id+'").colorpicker()</script>';
-  /*
-  return '<div class="input-color-picker everyz-color-picker"><div name="lbl_'+id+'" id="lbl_'+id+
-  '" style="color: '+value+' none repeat scroll 0% 0%;" title="#'+
-  hexVal+'" onclick="javascript: show_color_picker(&quot;'+id+'&quot;, this)"></div>'+
-  '&nbsp;<input value="'+hexVal+'" id="'+id+'" name="'+id+'" maxlength="6" style="width: '+
-  width+'px;" onchange="set_color_by_name(&quot;'+id+'&quot;, this.value);" type="'+type+'"></div>' ;
-  */
+  return `<input type="color" id="${id}" name="${id}" value="${value}" pattern="^#+([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$"> `;
 }
 
 function addColorPicker(map, position) {
@@ -839,10 +752,7 @@ function addColorPicker(map, position) {
 
 function newLeafletLeftBar(id, content) {
   var div = L.DomUtil.create("div", "leaflet-bar leaflet-draw-toolbar-top");
-  div.innerHTML =
-    '<a class="everyz-color-picker" title="Select default color">' +
-    content +
-    "</a>";
+  div.innerHTML = `<a class="everyz-color-picker" title="Select default color">${content}</a>`;
   div.id = id;
   div.firstChild.onmousedown = div.firstChild.ondblclick = div.firstChild.onpointerdown =
     L.DomEvent.stopPropagation;
@@ -851,24 +761,14 @@ function newLeafletLeftBar(id, content) {
 
 function addToolButton(id, customClass, title, onClick) {
   if (typeof onClick !== "undefined") {
-    onClick = ' onclick="' + onClick + '"';
+    onClick = ` onclick="${onClick}"`;
   } else {
     onClick = "";
   }
   return (
-    '<button id="' +
-    id +
-    '_btn" type="button" class="btn btn-info" style="width: 30px; height: 30px;">' +
-    '<a  id="' +
-    id +
-    '" class="fa ' +
-    customClass +
-    ' icon-green" style="width: 28px; height: 28px;" title="' +
-    title +
-    '" ' +
-    onClick +
-    "></a>" +
-    "</button>"
+    `<button id="${id}_btn" type="button" class="btn btn-info" style="width: 30px; height: 30px;">` +
+    `<a id="${id}" class="fa ${customClass} icon-green" style="width: 28px; height: 28px;" title="${title}" ${onClick}></a>` +
+    `</button>`
   );
 }
 
@@ -980,11 +880,5 @@ function addInfoPopup(element) {
   if (element.zbxe.popup !== "") {
     //console.log([element.zbxe]);
     element.bindPopup(element.zbxe.popup, { maxWidth: 500 });
-    /*    element.bindTooltip(element.zbxe.popup, {
-    permanent: false,
-    className: "zbxe-label",
-    offset: [0, 0]
-  });//.bindPopup(element);
-  */
   }
 }
