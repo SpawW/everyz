@@ -91,11 +91,6 @@ oms.addListener('click', function (marker) {
   everyzObj.map.openPopup(popup);
 });
 
-function onMapClick(e) {
-  popup.setLatLng(e.latlng)
-  .setContent("You selected here: " + e.latlng.toString())
-  .openOn(everyzObj.map);
-}
 // ------------------- OverLapping Layer end -----------------------------------
 
 everyzObj.map.on('contextmenu', onMapClick);

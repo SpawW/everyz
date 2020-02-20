@@ -30,11 +30,10 @@ function zbxeConsole(msg) {
   console.log("EveryZ - " + msg);
 }
 
-function drawControler() {
-  var toolbar = L.Toolbar();
-  toolbar.addToolbar(map);
-}
-
+// function drawControler() {
+//   var toolbar = L.Toolbar();
+//   toolbar.addToolbar(map);
+// }
 function addDefaultMapTiles() {
   addMapTile(
     "OSM",
@@ -102,16 +101,15 @@ function addDefaultMapTiles() {
     "http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}&s=Ga",
     "Google - Mix"
   );
-
-  // var Stamen_Toner = L.tileLayer('', {
-  //   attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-  //   subdomains: 'abcd',
-  //   minZoom: 0,
-  //   maxZoom: 20,
-  //   ext: 'png'
-  // });
 }
-
+/**
+ * Add a tile to a zabgeo
+ * @param  {string} description
+ * @param  {string} url
+ * @param  {string} attribution
+ * @param  {integer} maxZoom
+ * @param  {string} ext
+ */
 function addMapTile(description, url, attribution, maxZoom, ext) {
   maxZoom = maxZoom || 20;
   ext = ext || "";
@@ -169,60 +167,72 @@ function addErrorHost(lat, lon, hostid, popUpContent, severityLevel) {
   oms.addMarker(marker);
 }
 
+/**
+ * Open metadata editor
+ * @param  {integer} hostid
+ */
 function editHostMetadata(hostid) {
   zbxePopUp(
-    "everyz.php?action=zbxe-geometadata&hidetitle=1&sourceHostID=" + hostid
+    `everyz.php?action=zbxe-geometadata&hidetitle=1&sourceHostID=${hostid}`
   );
 }
 
+/**
+ * Show latest data for selected host
+ * @param  {integer} hostid
+ */
 function hostLatest(hostid) {
   zbxePopUp(
-    "latest.php?fullscreen=0&hostids[]=" +
-      hostid +
-      "&application=&select=&show_without_data=1&fullscreen=1&filter_set=Filter"
+    `latest.php?fullscreen=0&hostids[]=${hostid}&application=&select=&show_without_data=1&fullscreen=1&filter_set=Filter`
   );
 }
 
+/**
+ * Show recent problems for selected host
+ * @param  {integer} hostid
+ */
 function hostIncidents(hostid) {
-  if (zbxeZabbixVersion >= 400) {
-    zbxePopUp(
-      "zabbix.php?action=problem.view&fullscreen=1&page=1&filter_show=1&filter_hostids[]=" +
-        hostid +
-        "&filter_application=&filter_name=&filter_severity=0&filter_inventory[0][field]=type" +
-        "&filter_inventory[0][value]=&filter_evaltype=0&filter_maintenance=1&filter_set=1&kioskmode=1"
-    );
-  } else {
-    zbxePopUp(
-      "tr_status.php?fullscreen=1&groupid=0&hostid=" +
-        hostid +
-        "&show_triggers=1&ack_status=1&show_events=1&show_severity=0&filter_set=Filter"
-    );
-  }
+  zbxePopUp(
+    `zabbix.php?action=problem.view&fullscreen=1&page=1&filter_show=1&filter_hostids[]=${hostid}&filter_application=&filter_name=&filter_severity=0&filter_inventory[0][field]=type&filter_inventory[0][value]=&filter_evaltype=0&filter_maintenance=1&filter_set=1&kioskmode=1`
+  );
 }
-
+/**
+ * Show availability report for selected host
+ * @param  {integer} hostid
+ */
 function hostAvailability(hostid) {
   zbxePopUp(
-    `report2.php?config=0&from=now-1h&to=now&filter_groupid=0&filter_hostid=10318&filter_set=1${hostid}`
+    `report2.php?config=0&from=now-1h&to=now&filter_groupid=0&filter_hostid=10318&filter_set=1${hostid}&kioskmode=1`
   );
-
   // zbxePopUp("report2.php?config=0&from=now-1M%2FM&to=now-1M%2FM&filter_groupid=20&filter_hostid="+hostid);
-  //zbxePopUp("report2.php?config=0&from=now-1M%2FM&to=now-1M%2FM&filter_groupid=0&filter_hostid=" + hostid + "&filter_set=1");
-  //report2.php?config=0&from=now-1M%2FM&to=now-1M%2FM&filter_groupid=0&filter_hostid=10264
-  //http://localhost:8280/4.0/report2.php?config=0&from=now-1M%2FM&to=now-1M%2FM&filter_groupid=20&filter_hostid=10293
 }
 
 function addTileLayer(name) {
   return L.tileLayer(mbUrl, {
-    id: "mapbox." + name,
+    id: `mapbox.${name}`,
     attribution: mbAttr
   });
 }
 
+function copyToClipboard(coordenates) {
+  zbxeConsole(`Coordenates: ${coordenates}`);
+  const el = document.createElement("textarea");
+  el.value = coordenates;
+  el.setAttribute("readonly", "");
+  el.style.position = "absolute";
+  el.style.left = "-9999px";
+  document.body.appendChild(el);
+  el.select();
+  document.execCommand("copy");
+  document.body.removeChild(el);
+}
+
 function onMapClick(e) {
+  let img = `<img style="cursor: pointer;" src="local/app/everyz/images/zbxe-copy-icon.png" onclick="copyToClipboard('${e.latlng.toString()}');" title="Copy coordenates"></img>`;
   popup
     .setLatLng(e.latlng)
-    .setContent("You selected here: " + e.latlng.toString())
-    .openOn(ZabGeomap);
+    .setContent(`You selected here: ${e.latlng.toString()} ${img}`)
+    .openOn(everyzObj.map);
 }
 
 function onEachFeature(feature, layer) {
