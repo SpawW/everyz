@@ -55,37 +55,21 @@ if ($easterMode) { // Clean the filter parameters
 ?>
 
 
-/*
-vDiv = document.getElementById("mapid");
-if (location.search.split('fullscreen=1')[1] !== undefined) {
-vDiv.style.height = (window.innerHeight - 10)+'px';
-if (location.search.split('hidetitle=1')[1] !== undefined) {
-vDiv.style.width = (window.innerWidth - 10)+'px';
-document.getElementsByTagName("body")[0].style.overflow = "hidden";
-document.getElementsByClassName("article")[0].style.padding = "0px 0px 0px 0px";
-} else {
-vDiv.style.width = (window.innerWidth - 50)+'px';
-vDiv.style.height = (window.innerHeight - 70)+'px';
-}
-} else {
-vDiv.style.height = (window.innerHeight - 140)+'px';
-vDiv.style.width = (window.innerWidth - 50)+'px';
-}
-*/
 //Define area for Map (setup this data in database ZabbixExtras)
 zbxeConfigureDivMap('mapid');
-
-//everyzObj.map = L.map('mapid').setView([setViewLat, setViewLong], setViewZoom);
 
 addDefaultMapTiles();
 everyzObj.map = L.map('mapid', everyzObj.layerList).setView([setViewLat, setViewLong], setViewZoom);
 L.control.layers(everyzObj.baseMaps).addTo(everyzObj.map);
 everyzObj.layerList[<?php echo $filter['map'];?>].addTo(everyzObj.map);
 
-//L.tileLayer(everyzObj.layerList[0].url, everyzObj.layerList[0].options).addTo(everyzObj.map);
+// Auto-center map when show popup
+everyzObj.map.on('popupopen', function(e) {
+    var px = everyzObj.map.project(e.target._popup._latlng); 
+    px.y -= e.target._popup._container.clientHeight/2; 
+    everyzObj.map.panTo(everyzObj.map.unproject(px),{animate: true}); 
+});
 
-//.bindTooltip("My Label", {permanent: true, className: "my-label", offset: [0, 0] }).addTo(everyzObj.map);
-//,{drawControl: true}
 //Create layerGroup Circle
 var ZabGeocircle = new L.LayerGroup();
 //Create layerGroup Lines

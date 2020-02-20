@@ -398,9 +398,9 @@ function init() {
     }
   }
 
-  jQuery(window).ready(function() {
-    initMessages({});
-  });
+  // jQuery(window).ready(function() {
+  //   initMessages({});
+  // }); 
   templatePopUp['mainhost'] = '<?php echo zbxeLoadTemplate('templates/geolocation.hostCurrent.htm',$hostData) ?>'
   + '<table width="100%"><tr><td>'+htmlButton('updateJSON', zbxeTranslation['Update'], "updateHostInventory()","zbxe_button")+'</td><td id="controlJSON"></td></tr></table>'
   //+ htmlButton('revertJSON', zbxeTranslation['Revert'], "revertJSON()","zbxe_button_warning")
@@ -414,7 +414,7 @@ function savePolyLine() {
   let ele = everyzObj.currentElement;
   console.log('init - save polyline ['+ele.zbxe.uid+']');
   ele.zbxe.color = document.getElementById('line_color').value;
-  ele.zbxe.description = document.getElementById('line_description').value;
+  ele.zbxe.popup = document.getElementById('line_description').value;
   ele.zbxe.weight = document.getElementById('line_weight').value;
   ele.zbxe.dasharray = document.getElementById('line_dasharray').value;
   ele.zbxe.opacity = document.getElementById('line_opacity').value;

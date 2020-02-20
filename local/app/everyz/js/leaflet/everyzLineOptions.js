@@ -18,7 +18,7 @@ L.everyzLineOptions = LeafletToolbar.ToolbarAction.extend({
 
     everyzObj.currentElement = shape;
     everyzObj.map.removeLayer(this.toolbar);
-    everyzObj.dialog.options.size = [420, 320];
+    everyzObj.dialog.options.size = [450, 320];
     everyzObj.dialog.setContent(templatePopUp["polyline"]);
     function waitForElementToDisplay(selector, time, loadTriggers) {
       objSelector = document.querySelector(selector);
@@ -43,7 +43,7 @@ L.everyzLineOptions = LeafletToolbar.ToolbarAction.extend({
           // console.clear();
           let JSONObj = JSON.parse(obj);
           let newOption = [];
-					// console.log(everyzObj.currentElement.zbxe);
+					console.log(everyzObj.currentElement.zbxe);
 
 					selector.options[0] = new Option("", "");
           JSONObj.result.forEach(el => {

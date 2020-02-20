@@ -301,7 +301,7 @@ function buildJSON(){
         everyzObj.json[layer.zbxe.type] = [];
       }
       let element = {coordenates: layer._latlngs || layer._latlng, width: layer.zbxe.weight, color: layer.zbxe.color
-        , popup: layer.zbxe.description, uid: layer.zbxe.uid, dasharray: layer.zbxe.dasharray, opacity: layer.zbxe.opacity
+        , popup: layer.zbxe.popup, uid: layer.zbxe.uid, dasharray: layer.zbxe.dasharray, opacity: layer.zbxe.opacity
         , trigger: layer.zbxe.trigger
       };
       switch (layer.zbxe.type) {

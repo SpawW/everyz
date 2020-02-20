@@ -558,7 +558,7 @@ function initCurrentElement(currentElement, type, options) {
   options = options || [];
   currentElement.zbxe = {uid: options.uid || generateUID()
     , color: options.color || everyzObj.default.polyline.color
-    , description: options.description || '', weight: options.weight || 5
+    , popup: options.popup || '', weight: options.weight || 5
     , dasharray: options.dasharray || '', opacity: options.opacity || 0.8
     , size: options.size || 500
     , trigger: options.trigger || ''
