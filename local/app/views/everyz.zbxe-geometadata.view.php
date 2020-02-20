@@ -53,7 +53,9 @@ zbxeJSLoad( [
   'leaflet/leaflet.lineextremities.js', 'leaflet/leaflet-control-credits.js',
   'leaflet/leaflet-control-credits-src.js', 'leaflet/leaflet.oms.min.js', 'leaflet/leaflet.draw.js',
   'leaflet/leaflet-sidebar.js','leaflet/leaflet.toolbar-src.js', 'leaflet/leaflet.draw-toolbar.js',
-  'leaflet/ColorPicker.js', 'leaflet/everyzLineOptions.js'
+  'leaflet/ColorPicker.js', 
+  // Controls ornaments properties
+  'leaflet/everyzLineOptions.js'
   , 'leaflet/leaflet.Control.Custom.js', 'leaflet/Leaflet-Dialog.js'
 ]);
 zbxeCSSLoad(['font-awesome.min.css', 'leaflet.css','leaflet-control-credits.css', 'L.Icon.Pulse.css','leaflet-draw.css'
@@ -109,6 +111,11 @@ echo jsTranslations(['Update','Description','Width','Decorator','Color','Delete'
 ?>
 
 currentHost = <?php echo $filter["sourceHostID"];?>;
+severityColors = [<?php
+for ($i = 0; $i < 6; $i++) {
+  echo($i == 0 ? "" : ","). "'#".getSeverityColor($i, [$config])."'";
+}
+?>];
 
 function validateHostJSON() {
   try {
@@ -201,10 +208,8 @@ function addLink() {
 
 commonModuleHeader($moduleName, $moduleTitle, true);
 
-$table->addRow([(new CDiv())
-->setAttribute('id', "mapid")
+$table->addRow([(new CDiv())->setAttribute('id', "mapid")]);
 // ->setAttribute('style', "width: 100%; height: 100%; min-height: 730px;")
-]);
 
 /* * ***************************************************************************
 * Display Footer
@@ -213,40 +218,6 @@ $form->addItem([$table]);
 $dashboard->addItem($form)->show();
 ?>
 <script language="JavaScript">
-
-/*
-
-function onPolyLineClick(e) {
-var layer = e.target;
-var popup = layer.getPopup();
-var html = parse_html(templatePopUp['polyline'],  htmlLineValues (layer));
-popup.setContent(html);
-updateLineOptions(layer);
-}
-
-
-function newPolyLine() {
-new L.Draw.Polyline(everyzObj.map, everyzObj.drawControl.options.polyline).enable();
-}
-
-function addEditToolBar(){
-var sidebar = L.control.sidebar().addTo(everyzObj.map);
-
-sidebar.addPanel({
-id:   'settings',
-tab:  '<i class="fa fa-gear"></i>',
-title: 'Settings',
-pane: templatePopUp['mainhost']
-});
-sidebar.addPanel({
-id: 'cnf-link',
-tab: '<i class="fa fa-link icon-green"></i>',
-title: 'Link',
-pane: templatePopUp['marker']
-});
-}
-*/
-
 
 function onLinkClick(e) {
   var layer = e.target;
@@ -334,8 +305,7 @@ function init() {
     addToolButton ('zbxeNewLink','fa-link',zbxeTranslation['New host link'])+"<br>"+
     addToolButton('zbxeConfig','fa-gear',zbxeTranslation['Configuration']),
     classes : 'btn-group-vertical btn-group-sm leaflet-touch leaflet-bar',
-    style   :
-    {
+    style   : {
       padding: '0px 0 0 0',
       cursor: 'pointer',
       width: '30px',
@@ -390,7 +360,7 @@ function init() {
   var hostMaker = addMarkerClick(iconid,hostData['inventory']['location_lat'],hostData['inventory']['location_lon'],hostData['name'] + ' - Main');
   everyzObj.map.setView(hostMaker.getLatLng(),10);
 
-  // Load current objects ======================================================
+  // Load current artefacts ======================================================
   if (isValidJSON(hostData.inventory.notes)) {
     everyzObj.json = JSON.parse(hostData.inventory.notes);
     if (typeof everyzObj.json['polygon'] !== 'undefined') {
@@ -448,6 +418,7 @@ function savePolyLine() {
   ele.zbxe.weight = document.getElementById('line_weight').value;
   ele.zbxe.dasharray = document.getElementById('line_dasharray').value;
   ele.zbxe.opacity = document.getElementById('line_opacity').value;
+  ele.zbxe.trigger = document.getElementById('linkTrigger').value;
   ele.setStyle({
     color: ele.zbxe.color,
     weight: ele.zbxe.weight,

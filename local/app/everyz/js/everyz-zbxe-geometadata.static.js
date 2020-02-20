@@ -112,7 +112,11 @@ function htmlLineParams() {
   '<td>'+zbxeSelect('line_opacity','<opacity>',
   {'1': 'Solid','0.9': '90%','0.8': '80%','0.7': '70%','0.6': '60%',
   '0.5': '50%','0.4': '40%','0.3': '30%','0.2': '20%','0.1': '10%'})+
-  '</td></tr></tbody></table>';
+  '</td></tr>'
+  // Trigger connection
+  +'<tr><td colspan="4">Trigger</td></tr>'
+  +'<tr><td colspan="4"><select id="linkTrigger" style="width:380px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;"><option value="">Loading...</option></select></td></tr>'
+  +'</tbody></table>';
 }
 
 function htmlLinkParams() {
@@ -298,6 +302,7 @@ function buildJSON(){
       }
       let element = {coordenates: layer._latlngs || layer._latlng, width: layer.zbxe.weight, color: layer.zbxe.color
         , popup: layer.zbxe.description, uid: layer.zbxe.uid, dasharray: layer.zbxe.dasharray, opacity: layer.zbxe.opacity
+        , trigger: layer.zbxe.trigger
       };
       switch (layer.zbxe.type) {
         case 'link':

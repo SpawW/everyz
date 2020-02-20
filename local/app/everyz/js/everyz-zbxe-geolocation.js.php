@@ -273,7 +273,7 @@ hostsData.forEach(function(host) {
           refreshHostData = setInterval(function() {
             //console.log(host);
 
-            jQuery  .ajax({
+            jQuery.ajax({
               type: "POST",
               url: "everyzjsrpc.php?type=11&method=host.inventory.get&real_hosts=1&limit=1",
 //              url: "local/app/views/everyzjsrpc.php?type=11&method=host.inventory.get&real_hosts=1&limit=1",

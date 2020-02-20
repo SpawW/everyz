@@ -542,12 +542,18 @@ function isValidJSON(str) {
 function addEditPopUp(element) {
   element.on('click', function(event) {
     new LeafletToolbar.EditToolbar.Popup(event.latlng, {
-      actions: editActions
+      actions: editActions,
+      maxWidth: "auto",
     }).addTo(everyzObj.map, element);
   });
   return element;
 }
-
+/**
+ * Init properties for a new element in map
+ * @param  {} currentElement
+ * @param  {} type
+ * @param  {} options
+ */
 function initCurrentElement(currentElement, type, options) {
   options = options || [];
   currentElement.zbxe = {uid: options.uid || generateUID()
@@ -555,6 +561,7 @@ function initCurrentElement(currentElement, type, options) {
     , description: options.description || '', weight: options.weight || 5
     , dasharray: options.dasharray || '', opacity: options.opacity || 0.8
     , size: options.size || 500
+    , trigger: options.trigger || ''
   };
   if (typeof type !== 'undefined') {
     currentElement.zbxe.type = type;
@@ -568,13 +575,19 @@ function initCurrentElement(currentElement, type, options) {
   });
 }
 
+/**
+ * Set element properties from zabbix inventory / JSON
+ * @param  {array} item - Array with metadata
+ */
 function itemOptions (item) {
-  return {
-    color: item.color, dasharray: item.dasharray, popup: item.popup, opacity: item.opacity, weight: item.width
-    , radius: item.size
+    return {
+    color: item.color, dasharray: item.dasharray, popup: item.popup||"", opacity: item.opacity, weight: item.width
+    , radius: item.size, trigger: item.trigger||""  
   };
 }
-
+/**
+ * Create a unique UID for element in map
+ */
 function generateUID() {
   var firstPart = (Math.random() * 46656) | 0;
   var secondPart = (Math.random() * 46656) | 0;
