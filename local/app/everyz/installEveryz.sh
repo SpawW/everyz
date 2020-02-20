@@ -1,13 +1,12 @@
 #!/bin/bash
 #-------------------------------------------------------
 # Author:       Adail Spinola <everyz@everyz.org>
-# Date:         21-Jan-2020
 # Objective:    Install EveryZ over Zabbix 4.4
 #-------------------------------------------------------
 # bash /var/www/html/4.4/local/app/everyz/installEveryz.sh -a=S -f=/var/www/html/4.4 -d=S -l=pt -i=centos && service httpd restart
 
 # Não alterar o número da linha, usado no pre-commit
-VERSAO_EZ="2.0.26-4.4";
+VERSAO_EZ="2.0.27-4.4";
 
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com";
