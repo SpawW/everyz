@@ -227,6 +227,10 @@ function copyToClipboard(coordenates) {
   document.body.removeChild(el);
 }
 
+/**
+ * Configure map onclick in unused areas to show coordenates
+ * @param  {object} e
+ */
 function onMapClick(e) {
   let img = `<img style="cursor: pointer;" src="local/app/everyz/images/zbxe-copy-icon.png" onclick="copyToClipboard('${e.latlng.toString()}');" title="Copy coordenates"></img>`;
   popup
