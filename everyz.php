@@ -33,11 +33,11 @@ $filter = $fields = [];
 $TINYPAGE = true;
 
 switch (getRequest('format')) {
-  case PAGE_TYPE_CSV:
+  case PAGE_TYPE_CSV || 10:
   $page['file'] = 'everyz_export.csv';
   $page['type'] = detect_page_type(PAGE_TYPE_CSV);
   break;
-  case PAGE_TYPE_JSON:
+  case PAGE_TYPE_JSON || 6:
   $page['file'] = 'everyz_export.json';
   $page['type'] = detect_page_type(PAGE_TYPE_CSV);
   break;
