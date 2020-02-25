@@ -830,7 +830,7 @@ function itemOptions(item) {
     dasharray: item.dasharray,
     popup: item.popup || "",
     opacity: item.opacity,
-    weight: item.width,
+    width: item.width,
     radius: item.size,
     trigger: item.trigger || ""
   };

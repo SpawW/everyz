@@ -313,7 +313,7 @@ function loadLiveLinks() {
 zbxeConsole(liveHosts.count)
 if (liveHosts.count > 0 && configEveryz.refresh > 0) {
   // console.log(['Automatic refresh enabled!',liveHosts]);
-  console.info(`Automatic refresh every ${configEveryz.refresh} seconds.`);
+  console.info(`EveryZ - Automatic refresh every ${configEveryz.refresh} seconds.`);
   // refreshData = 
   loadLiveLinks();
   setInterval(function() { loadLiveLinks(); },  configEveryz.refresh*1000);
