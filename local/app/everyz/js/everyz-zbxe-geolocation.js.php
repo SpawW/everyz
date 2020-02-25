@@ -308,21 +308,7 @@ L.control.scale().addTo(everyzObj.map);
 function addTileLayer(name) {
   return L.tileLayer(mbUrl, {id: 'mapbox.' + name, attribution: mbAttr});
 }
-//layerControl = L.control.layers(everyzObj.baseMaps).addTo(everyzObj.map).setPosition('topright');
 
-/*
-//If filter Circle Actived show Circles
-if (showCircles == 1) {
-everyzObj.map.addLayer(ZabGeocircle);
-layerControl.addOverlay(ZabGeocircle, "Circle");
-}
-
-//If filter Lines Actived show Lines
-if (showLines == 1) {
-everyzObj.map.addLayer(ZabGeolines);
-layerControl.addOverlay(ZabGeolines, "Lines");
-}
-*/
 //Active layer Alert
 everyzObj.map.addLayer(ZabGeoalert);
 

@@ -34,20 +34,20 @@ $TINYPAGE = true;
 
 switch (getRequest('format')) {
   case PAGE_TYPE_CSV || 10:
-  $page['file'] = 'everyz_export.csv';
-  $page['type'] = detect_page_type(PAGE_TYPE_CSV);
-  break;
+    $page['file'] = 'everyz_export.csv';
+    $page['type'] = detect_page_type(PAGE_TYPE_CSV);
+    break;
   case PAGE_TYPE_JSON || 6:
-  $page['file'] = 'everyz_export.json';
-  $page['type'] = detect_page_type(PAGE_TYPE_CSV);
-  break;
+    $page['file'] = 'everyz_export.json';
+    $page['type'] = detect_page_type(PAGE_TYPE_CSV);
+    break;
   default:
-  $page['type'] = detect_page_type(PAGE_TYPE_HTML);
-  if (getRequest('hidetitle') == 1) {
-    CView::$has_web_layout_mode = true;
-    $page['web_layout_mode'] = 2;
-  }
-  break;
+    $page['type'] = detect_page_type(PAGE_TYPE_HTML);
+    if (getRequest('hidetitle') == 1) {
+      CView::$has_web_layout_mode = true;
+      $page['web_layout_mode'] = 2;
+    }
+    break;
 }
 
 if (!(isset($_REQUEST['p_nojs']) && $_REQUEST['p_nojs'] == 'S')) {
