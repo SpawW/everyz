@@ -107,6 +107,8 @@ function zbxeConsole(msg) {
   console.log('EveryZ - ' + msg);
 }
 
+
+
 window.onload = function () {
   zbxeSetContentInfo();
   zbxeConsole('Loaded');

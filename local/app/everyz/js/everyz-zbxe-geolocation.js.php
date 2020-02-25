@@ -51,7 +51,10 @@ if ($easterMode) {
   echo "var setViewZoom = " . getRequest2("zoomLevel", 19) . ";";
   echo "var showCircles = " . (in_array($filter["layers"], [3, 99]) ? 1 : 0) . ";";
   echo "var showLines = " . (in_array($filter["layers"], [2, 99]) ? 1 : 0) . ";";
-  echo "configEveryz.refresh = " . (array_key_exists("refresh",$filter) ? $filter["refresh"] : 0) . ";";
+  // echo "console.log(getUrlVars()['refresh']);";
+  echo "configEveryz.refresh = parseInt(getUrlVars()['refresh']) || 0; ";
+  // echo "configEveryz.refresh = " . (array_key_exists("refresh",$filter) ? $filter["refresh"] : 0) . ";";
+  echo "console.info(`EveryZ - Automatic Refresh Interval: \${configEveryz.refresh}. `);";
   echo "var easterEggMode=0;";
 }
 ?>
@@ -289,7 +292,8 @@ hostsData.forEach(function(host) {
 // Enable live check in selected hosts
 zbxeConsole(liveHosts.count)
 if (liveHosts.count > 0 && configEveryz.refresh > 0) {
-  console.log(['Automatic refresh enabled!',liveHosts]);
+  // console.log(['Automatic refresh enabled!',liveHosts]);
+  console.info(`Automatic refresh every ${configEveryz.refresh} seconds.`);
   refreshData = setInterval(function() {
     jQuery.ajax({
       type: "POST",

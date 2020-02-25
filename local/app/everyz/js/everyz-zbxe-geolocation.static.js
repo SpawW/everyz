@@ -883,3 +883,12 @@ function addInfoPopup(element) {
     element.bindPopup(element.zbxe.popup, { maxWidth: 500 });
   }
 }
+
+// source: https://html-online.com/articles/get-url-parameters-javascript/
+function getUrlVars() {
+  var vars = {};
+  var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+      vars[key] = value;
+  });
+  return vars;
+}
