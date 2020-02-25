@@ -789,14 +789,14 @@ function selectHostsByGroup($groupids, $inventoryFields = null)
       'selectInterfaces' => ["ip","dns","main","useip"],
       'groupids' => $groupids
     ]);
-    //echo "---adail";        var_dump($filterHosts);
+    // echo "---adail";        var_dump($filterHosts);
     foreach ($filterHosts as $host) {
       $tmp = [
         'id' => $host['hostid'],
         'name' => $host['name']
       ];
       foreach ($inventoryFields as $Inv) {
-        $tmp[$Inv] = $host['inventory'][$Inv];
+        $tmp[$Inv] = (array_key_exists ($Inv,$host['inventory']) ? $host['inventory'][$Inv] : "");
       }
       foreach ($host['interfaces'] as $interface) {
         if ($interface['main'] === "1") {

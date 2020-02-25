@@ -121,6 +121,7 @@ if ($withIconMapping) {
 
 $eventData = selectEventsByGroup($filter["groupids"], 1);
 $hostData = selectHostsByGroup($filter["groupids"], $inventoryFields);
+$invalidHosts = [];
 
 $cont = 0;
 $imagesArray = [];
@@ -130,6 +131,9 @@ foreach ($hostData as $key => $host) {
   $hostData[$key]['location_lon'] = cleanPosition($host['location_lon']);
   // Check if host have a minimum usable data
   if ($host['location_lat'] == "" || $host['location_lon'] == "") {
+    // Populate array with invalid hosts
+    $host['error'] = 'Invalid Position';
+    array_push($invalidHosts,$host);
     unset($hostData[$key]);
   } else {
     if (strlen($hostData[$key]["notes"]) > 0) {
@@ -184,19 +188,6 @@ foreach ($hostData as $key => $host) {
   }
   $cont++;
 }
-/*            preg_match_all('/(?:last|avg|min|max)\(\{(?:.*)\}(?:(?:,.*?)*?)\)/', $links['popup'], $matchs, PREG_SET_ORDER, 0);
-foreach ($matchs as $match) {
-// Aplicar formula
-
-// Aplicar notação do item
-
-$hostData[$key]["notes"] = CMacrosResolverHelper::resolveMapLabelMacros($hostData[$key]["notes"]);
-//str_replace($match[0],'<b>achei</b>',$hostData[$key]["notes"]);
-echo "\n<br>\n";
-print_r($hostData[$key]["notes"]);
-//              print_r(["\n",$hostData[$key]["notes"]]);
-} */
-//print_r($hostData);
 // Ordenar hosts por existência de evento
 $tmp = [];
 foreach ($hostData as $key => $host) {

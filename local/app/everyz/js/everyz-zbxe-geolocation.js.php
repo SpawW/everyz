@@ -82,6 +82,8 @@ var ZabGeoalert = new L.LayerGroup();
 var mbToken = '<?php echo zbxeConfigValue('geo_token') ?>';
 //var baseMaps = {};
 var hostsData = <?php echo json_encode($hostData); ?>;
+var invalidHosts = <?php echo json_encode($invalidHosts); ?>;
+
 //console.log(['Host Data',hostsData]);
 // ------------------- OverLapping Layer ---------------------------------------
 var oms = new OverlappingMarkerSpiderfier(everyzObj.map);
@@ -96,6 +98,13 @@ oms.addListener('click', function (marker) {
 // ------------------- OverLapping Layer end -----------------------------------
 
 everyzObj.map.on('contextmenu', onMapClick);
+
+// DIV for invalid hosts in groups
+if (invalidHosts.length > 0) {
+  invalidHosts.forEach(function(host) {
+    console.warn(`EveryZ - Host with problem for geolocation ${host.name} / ${host.error}`)
+  });
+}
 
 // Adiciona o logotipo
 if (location.search.split('hidetitle=1')[1] !== undefined || easterEggMode === 1) {
@@ -198,8 +207,6 @@ function addLiveElement (host, element) {
 var liveHosts = {count: 0, hosts: [], triggerIDs: []};
 hostsData.forEach(function(host) {
   if (!isNaN(parseFloat(host.location_lat)) && !isNaN(parseFloat(host.location_lon))) {
-    //console.log(['Valid host',host.id, host.name]);
-    //console.log(host);
     // @todo Check if coordenates are in DMS and convert to DD
     // // https://stackoverflow.com/questions/1140189/converting-latitude-and-longitude-to-decimal-values
     // @todo Check if exist hosts without coordenates
@@ -239,6 +246,10 @@ hostsData.forEach(function(host) {
 
         });
       }
+    } else if (host.notes != "") {
+      console.warn(`EveryZ - Host with inventory note field invalid: "${host.name}". Current value: ${host.notes}`);
+    //console.log(host);
+    // console.log('notes invalido')
     }
     let hostevents = "";
     host['events'].forEach(function(item) {
