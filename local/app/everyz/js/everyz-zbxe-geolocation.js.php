@@ -251,8 +251,6 @@ hostsData.forEach(function(host) {
       }
     } else if (host.notes != "") {
       console.warn(`EveryZ - Host with inventory note field invalid: "${host.name}". Current value: ${host.notes}`);
-    //console.log(host);
-    // console.log('notes invalido')
     }
     let hostevents = "";
     host['events'].forEach(function(item) {
@@ -280,7 +278,6 @@ hostsData.forEach(function(host) {
         host.location_lat,host.location_lon,host.iconid
         ,popupHost(host.id, host.name, hostevents, host.conn,extraButtons(host))
       );
-      // realTimeHost.hostid = host.id;
       
     }
   } else {
@@ -289,33 +286,37 @@ hostsData.forEach(function(host) {
   }
 });
 
+function loadLiveLinks() {
+  jQuery.ajax({
+    type: "POST",
+    url: "everyzjsrpc.php?type=11&method=geoevents.get",
+    data: {triggerids: liveHosts.triggerIDs},
+    success: function(obj) {
+      let JSONObj = JSON.parse(obj).result;
+      let tmpHost = 0;
+      let newColor = 0;
+      JSONObj.forEach(function(item) {
+        for(let i = 0; i < liveHosts.hosts.length; i++){
+          tmpHost = liveHosts.hosts[i];
+          if (parseInt(tmpHost.zbxe.trigger) == item.triggerid) {
+            newColor = (item.value == 1 ? severityColors[item.priority] : tmpHost.zbxe.originalColor)
+            tmpHost.zbxe.color = newColor;
+            tmpHost.setStyle({ color: newColor, });
+          }
+        }
+      })
+    }
+  });
+}
+
 // Enable live check in selected hosts
 zbxeConsole(liveHosts.count)
 if (liveHosts.count > 0 && configEveryz.refresh > 0) {
   // console.log(['Automatic refresh enabled!',liveHosts]);
   console.info(`Automatic refresh every ${configEveryz.refresh} seconds.`);
-  refreshData = setInterval(function() {
-    jQuery.ajax({
-      type: "POST",
-      url: "everyzjsrpc.php?type=11&method=geoevents.get",
-      data: {triggerids: liveHosts.triggerIDs},
-      success: function(obj) {
-        let JSONObj = JSON.parse(obj).result;
-        let tmpHost = 0;
-        let newColor = 0;
-        JSONObj.forEach(function(item) {
-          for(let i = 0; i < liveHosts.hosts.length; i++){
-            tmpHost = liveHosts.hosts[i];
-            if (parseInt(tmpHost.zbxe.trigger) == item.triggerid) {
-              newColor = (item.value == 1 ? severityColors[item.priority] : tmpHost.zbxe.originalColor)
-              tmpHost.zbxe.color = newColor;
-              tmpHost.setStyle({ color: newColor, });
-            }
-          }
-        })
-      }
-    });
-  },  configEveryz.refresh*1000);
+  // refreshData = 
+  loadLiveLinks();
+  setInterval(function() { loadLiveLinks(); },  configEveryz.refresh*1000);
 }
 
 //Add Scale in maps

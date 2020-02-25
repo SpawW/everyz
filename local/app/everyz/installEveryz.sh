@@ -7,7 +7,7 @@
 
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com";
-VERSAO_EZ="2.0.36-4.4";
+VERSAO_EZ="2.0.37-4.4";
 
 # Não alterar o número da linha, usado no pre-commit
 VERSAO_EZ="2.0.35-4.4";
