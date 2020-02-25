@@ -32,7 +32,8 @@ for ($i = 0; $i < 6; $i++) {
 
 <?php
 $easterMode = hasRequest('showteam') || count($hostData) == 0;
-if ($easterMode) { // Clean the filter parameters
+echo "var configEveryz = {};\n";
+if ($easterMode) { 
   echo "var setViewLat = 24.43419;";
   echo "var setViewLong = -28.125;";
   echo "var setViewZoom = 3;";
@@ -50,6 +51,7 @@ if ($easterMode) { // Clean the filter parameters
   echo "var setViewZoom = " . getRequest2("zoomLevel", 19) . ";";
   echo "var showCircles = " . (in_array($filter["layers"], [3, 99]) ? 1 : 0) . ";";
   echo "var showLines = " . (in_array($filter["layers"], [2, 99]) ? 1 : 0) . ";";
+  echo "configEveryz.refresh = " . (array_key_exists("refresh",$filter) ? $filter["refresh"] : 0) . ";";
   echo "var easterEggMode=0;";
 }
 ?>
@@ -180,6 +182,20 @@ function reverseSortByKey(array, key) {
 };
 sortByKey(hostsData,'maxPriority');
 //reverseSortByKey(hostsData,'notes');
+
+function addLiveElement (host, element) {
+  if (element.zbxe.hasOwnProperty('trigger') && parseInt(element.zbxe.trigger) || 0 > 0) {
+    liveHosts.count++;
+    zbxeConsole(`Live Link ${host.name} - TriggerID: ${element.zbxe.trigger}`);
+    element.zbxe.originalColor = element.zbxe.color;
+    // console.log(element.zbxe);
+    liveHosts.hosts.push(element);
+    liveHosts.triggerIDs.push(element.zbxe.trigger);
+  }
+}
+
+// Hosts with "live elements"
+var liveHosts = {count: 0, hosts: [], triggerIDs: []};
 hostsData.forEach(function(host) {
   if (!isNaN(parseFloat(host.location_lat)) && !isNaN(parseFloat(host.location_lon))) {
     //console.log(['Valid host',host.id, host.name]);
@@ -209,6 +225,7 @@ hostsData.forEach(function(host) {
           var element = L.polyline(item.coordenates);
           element.addTo(everyzObj.map);
           initCurrentElement(element,'polyline',itemOptions (item));
+          addLiveElement(host,element);
         });
       }
       if (typeof notesJSON['link'] !== 'undefined') {
@@ -216,8 +233,10 @@ hostsData.forEach(function(host) {
           let lastCoordenate = item.coordenates[item.coordenates.length-1];
           let element = addLinkToHost(item.coordenates,{zbxe: {hostid: host.id}}, false);
           updateLinkConfig(element,itemOptions (item));
-          //console.log(item);
           addInfoPopup(element);
+          addLiveElement(host,element);
+          // console.log(item);
+
         });
       }
     }
@@ -234,6 +253,7 @@ hostsData.forEach(function(host) {
     }
     // @todo - Add hosts with events by last
     if (host.maxPriority > 0) {
+      // Add host with incident
       addErrorHost(
         host.location_lat,host.location_lon,errorImages[host.maxPriority]
         ,popupHost(host.id, host.name, hostevents, host.conn,extraButtons(host))
@@ -241,38 +261,47 @@ hostsData.forEach(function(host) {
       );
       //      console.log(host);
     } else {
+      // Add host without incident
       var realTimeHost = addHost(
         host.location_lat,host.location_lon,host.iconid
         ,popupHost(host.id, host.name, hostevents, host.conn,extraButtons(host))
       );
-      realTimeHost.hostid = host.id;
-      if (validJSON ) {
-        let notesJSON = JSON.parse(host["notes"])
-        if (typeof notesJSON.refresh !== 'undefined') {
-          refreshHostData = setInterval(function() {
-            //console.log(host);
-
-            jQuery.ajax({
-              type: "POST",
-              url: "everyzjsrpc.php?type=11&method=host.inventory.get&real_hosts=1&limit=1",
-//              url: "local/app/views/everyzjsrpc.php?type=11&method=host.inventory.get&real_hosts=1&limit=1",
-              data:'hostid='+realTimeHost.hostid,
-              beforeSend: function(){
-              },
-              success: function(obj) {
-                let JSONObj = JSON.parse(obj).result[0];
-                let newLatLng = new L.LatLng(JSONObj.inventory.location_lat, JSONObj.inventory.location_lon);
-                realTimeHost.setLatLng(newLatLng);
-              }
-            });
-          },  notesJSON.refresh);
-        }
-      }
+      // realTimeHost.hostid = host.id;
+      
     }
   } else {
+    // Host com coordenadas invalidas ou sem coordenadas
     console.log (['Host with invalid coordenates',host.id, host.name, host.location_lat,host.location_lon]);
   }
 });
+
+// Enable live check in selected hosts
+zbxeConsole(liveHosts.count)
+if (liveHosts.count > 0 && configEveryz.refresh > 0) {
+  console.log(['Automatic refresh enabled!',liveHosts]);
+  refreshData = setInterval(function() {
+    jQuery.ajax({
+      type: "POST",
+      url: "everyzjsrpc.php?type=11&method=geoevents.get",
+      data: {triggerids: liveHosts.triggerIDs},
+      success: function(obj) {
+        let JSONObj = JSON.parse(obj).result;
+        let tmpHost = 0;
+        let newColor = 0;
+        JSONObj.forEach(function(item) {
+          for(let i = 0; i < liveHosts.hosts.length; i++){
+            tmpHost = liveHosts.hosts[i];
+            if (parseInt(tmpHost.zbxe.trigger) == item.triggerid) {
+              newColor = (item.value == 1 ? severityColors[item.priority] : tmpHost.zbxe.originalColor)
+              tmpHost.zbxe.color = newColor;
+              tmpHost.setStyle({ color: newColor, });
+            }
+          }
+        })
+      }
+    });
+  },  configEveryz.refresh*1000);
+}
 
 //Add Scale in maps
 L.control.scale().addTo(everyzObj.map);

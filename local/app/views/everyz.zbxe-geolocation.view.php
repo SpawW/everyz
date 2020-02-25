@@ -50,6 +50,7 @@ addFilterParameter("centerLat", T_ZBX_STR, -12.70894, false, false);
 addFilterParameter("centerLong", T_ZBX_STR, -47.19727, false, false);
 addFilterParameter("showteam", T_ZBX_STR, "", false, false);
 addFilterParameter("zoomLevel", T_ZBX_INT, 5);
+addFilterParameter("refresh", T_ZBX_INT, 0);
 addFilterParameter("map", T_ZBX_STR, "0");
 addFilterParameter("layers", T_ZBX_STR, 99);
 

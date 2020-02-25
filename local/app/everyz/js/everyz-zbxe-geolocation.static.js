@@ -866,6 +866,7 @@ function updateLinkConfig(hostLink, options) {
   hostLink.zbxe.dasharray = options.dasharray || [];
   hostLink.zbxe.opacity = options.opacity || 0.9;
   hostLink.zbxe.popup = options.popup || "";
+  hostLink.zbxe.trigger = options.trigger || "";
   hostLink.setStyle({
     color: hostLink.zbxe.color,
     weight: hostLink.zbxe.width,

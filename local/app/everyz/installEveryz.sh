@@ -7,7 +7,7 @@
 
 # Não alterar o número da linha, usado no pre-commit
 VERSAO_EZ="2.0.27-4.4";
-VERSAO_EZ="2.0.31-4.4";
+VERSAO_EZ="2.0.33-4.4";
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com";
 TMP_DIR="/tmp/upgZabbix";

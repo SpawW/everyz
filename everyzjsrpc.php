@@ -33,6 +33,32 @@ if (!is_array($data) || !isset($data['method'])) {
 
 $result = [];
 switch ($data['method']) {
+  case 'geoevents.get':
+    // Filter by triggerID
+    // $result = API::Trigger()->get([
+    //   'output' => ['triggerid', 'description', 'priority', 'value'],
+    //   // 'selectHosts' => ['hostid'],
+    //   // 'active' => true,
+    //   // 'only_true' => true,
+    //   'expandComment' => true,
+    //   'expandDescription' => true,
+    //   'triggerids' => $data['triggerids'],
+    //   'preservekeys' => true,
+    //   'selectLastEvent' => true
+    //   // ,      'filter' => ["value" => 1]
+    //   // ,      'min_severity' => $severity  
+    // ]);
+    $result = API::Trigger()->get([
+      'output' => [
+        "triggerid",
+        "description",
+        "priority",
+        "value"]
+        , 'triggerids' => $data['triggerids']
+      
+    ]);
+    // $result = $data['triggerids'];
+    break;
   case 'host.triggers.get':
     if (!isset($data['hostid'])) {
       fatal_error('Missing hostid!');
@@ -68,14 +94,6 @@ switch ($data['method']) {
     }
     //  var_dump([$params, $data]);
     $result = API::Host()->update($params);
-
-    /*  $result = API::Host()->update([
-    'hostid' => $data['hostid'],
-    'inventory' => [  'tag' => 'tes2t']
-//    'output' => ['hostid'],
-//    'sortfield' => 'name',
-//    'limit' => 15
-]); */
     break;
 
   default:
