@@ -92,10 +92,10 @@ function htmlPopUpControl(saveOnClick, deleteOnClick, newOnClick) {
   + '</td><tr></table>';
 }
 
-function linkPopUpOptions (e) {
-  return {'popupDescription':description,'currentColor' :  color,
-  'weight' : weight, 'dasharray' : dasharray};
-}
+// function linkPopUpOptions (e) {
+//   return {'popupDescription':description,'currentColor' :  color,
+//   'weight' : weight, 'dasharray' : dasharray};
+// }
 
 function htmlLineParams() {
   return `<span><b>${zbxeTranslation['Description']}<b/></span><br/>`+
@@ -157,7 +157,7 @@ function customPopUp(e, html,values) {
 
 function htmlLineValues (layer) {
   return {'popupDescription':layer.zbxe.description,'currentColor' :  layer.zbxe.color.substring(1, 7),
-  'weight' : layer.zbxe.weight,
+  'weight' : layer.zbxe.width,
   'dasharray' : layer.zbxe.dasharray, 'opacity' : layer.zbxe.opacity};
 }
 
@@ -212,7 +212,7 @@ function updateLineOptions(currentElement){
   //console.log(currentElement.zbxe);
   document.getElementById('line_color').value = currentElement.zbxe.color;
   document.getElementById('line_description').value = currentElement.zbxe.popup;
-  document.getElementById('line_weight').value = currentElement.zbxe.width;
+  document.getElementById('line_weight').value = currentElement.zbxe.width || 5;
   document.getElementById('line_dasharray').value = currentElement.zbxe.dasharray;
   document.getElementById('line_opacity').value= currentElement.zbxe.opacity;
   everyzObj.dialog.open();
@@ -297,7 +297,7 @@ function buildJSON(){
       if (typeof everyzObj.json[layer.zbxe.type] == 'undefined') {
         everyzObj.json[layer.zbxe.type] = [];
       }
-      let element = {coordenates: layer._latlngs || layer._latlng, width: layer.zbxe.weight, color: layer.zbxe.color
+      let element = {coordenates: layer._latlngs || layer._latlng, width: layer.zbxe.width, color: layer.zbxe.color
         , popup: layer.zbxe.popup, uid: layer.zbxe.uid, dasharray: layer.zbxe.dasharray, opacity: layer.zbxe.opacity
         , trigger: layer.zbxe.trigger
       };

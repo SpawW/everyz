@@ -53,10 +53,6 @@ L.everyzLineOptions = LeafletToolbar.ToolbarAction.extend({
 						selector.options[selector.options.length] = newOption;						
 					});
 					selector.value = everyzObj.currentElement.zbxe.trigger;
-					// console.log(everyzObj.currentElement.zbxe);
-
-          // console.log(typeof JSONObj);
-          // console.log("get host triggers", JSONObj);
         }
       });
     });

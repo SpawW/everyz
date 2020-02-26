@@ -802,7 +802,7 @@ function initCurrentElement(currentElement, type, options) {
     uid: options.uid || generateUID(),
     color: options.color || everyzObj.default.polyline.color,
     popup: options.popup || "",
-    weight: options.weight || 5,
+    weight: options.width || 5,
     dasharray: options.dasharray || "",
     opacity: options.opacity || 0.8,
     size: options.size || 500,
@@ -830,7 +830,7 @@ function itemOptions(item) {
     dasharray: item.dasharray,
     popup: item.popup || "",
     opacity: item.opacity,
-    width: item.width,
+    width: item.width || 5,
     radius: item.size,
     trigger: item.trigger || ""
   };
@@ -862,6 +862,7 @@ function addLinkToHost(route, hostMaker, editMode) {
 
 function updateLinkConfig(hostLink, options) {
   hostLink.zbxe.color = options.color;
+  // console.log(options);
   hostLink.zbxe.width = options.width || 5;
   hostLink.zbxe.dasharray = options.dasharray || [];
   hostLink.zbxe.opacity = options.opacity || 0.9;

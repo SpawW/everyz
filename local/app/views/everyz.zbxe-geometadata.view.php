@@ -150,7 +150,7 @@ function addLine() {
   vLat = document.getElementById('line_lat').value;
   vLon = document.getElementById('line_lon').value;
   vPopUp = document.getElementById('line_popup').value;
-  vWidth = parseInt(document.getElementById('line_width').value);
+  vWidth = parseInt(document.getElementById('line_weight').value);
   vColor = document.getElementById('line_color').value;
   if (!validColor(vColor)) { return false; }
   if (!validNumberRange(vWidth,1,10,zbxeTranslation['Invalid width!'])) { return false; }
@@ -384,6 +384,7 @@ function init() {
         let element = L.polyline(item.coordenates);
         element.addTo(everyzObj.map);
         addEditPopUp(element);
+        console.log(item);
         initCurrentElement(element,'polyline',itemOptions (item));
       });
     }
@@ -415,13 +416,13 @@ function savePolyLine() {
   console.log('init - save polyline ['+ele.zbxe.uid+']');
   ele.zbxe.color = document.getElementById('line_color').value;
   ele.zbxe.popup = document.getElementById('line_description').value;
-  ele.zbxe.weight = document.getElementById('line_weight').value;
+  ele.zbxe.width = document.getElementById('line_weight').value;
   ele.zbxe.dasharray = document.getElementById('line_dasharray').value;
   ele.zbxe.opacity = document.getElementById('line_opacity').value;
   ele.zbxe.trigger = document.getElementById('linkTrigger').value;
   ele.setStyle({
     color: ele.zbxe.color,
-    weight: ele.zbxe.weight,
+    weight: ele.zbxe.width,
     dashArray: ele.zbxe.dasharray,
     opacity: ele.zbxe.opacity
   });
