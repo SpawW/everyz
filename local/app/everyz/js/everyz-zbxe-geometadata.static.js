@@ -98,14 +98,11 @@ function linkPopUpOptions (e) {
 }
 
 function htmlLineParams() {
-  return '<span><b>'+zbxeTranslation['Description']+'<b/></span><br/>'+
-  '<textarea id="line_description" cols="48" rows="2"><popupDescription></textarea><br/>' +
-  '<table class="list-table"><thead><tr><th><b>'+zbxeTranslation['Color']
-  +'</b></th><th><b>'+zbxeTranslation['Width']
-  +'</b></th><th><b>'+zbxeTranslation['Decorator']
-  +'</b></th><th><b>'+zbxeTranslation['Opacity']
-  +'</b></th><th></th></tr></thead>'+
-  //'<currentColor>'
+  return `<span><b>${zbxeTranslation['Description']}<b/></span><br/>`+
+  '<textarea id="line_description" cols="55" rows="4"><popupDescription></textarea><br/>' +
+  '<table class="lisWidtht-table"><thead><tr><th><b>'+zbxeTranslation['Color']
+  +`</b></th><th><b>${zbxeTranslation['Width']}</b></th><th><b>${zbxeTranslation['Decorator']}`
+  +`</b></th><th><b>${zbxeTranslation['Opacity']}</b></th><th></th></tr></thead>`+
   '<tbody><tr><td>'+divColorPicker ('#580f0f',85, 'line_color')+'</td>'+
   '<td>'+zbxeEditInteger('line_weight', '<weight>', 35, {'maxlength': 2})+'</td>'+
   '<td>'+zbxeSelect('line_dasharray','<dasharray>',{'': 'Solid','20,15': 'Dashed'})+'</td>'+
@@ -115,7 +112,7 @@ function htmlLineParams() {
   '</td></tr>'
   // Trigger connection
   +'<tr><td colspan="4">Trigger</td></tr>'
-  +'<tr><td colspan="4"><select id="linkTrigger" style="width:380px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;"><option value="">Loading...</option></select></td></tr>'
+  +'<tr><td colspan="4"><select id="linkTrigger" style="width:410px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;"><option value="">Loading...</option></select></td></tr>'
   +'</tbody></table>';
 }
 
@@ -215,7 +212,7 @@ function updateLineOptions(currentElement){
   //console.log(currentElement.zbxe);
   document.getElementById('line_color').value = currentElement.zbxe.color;
   document.getElementById('line_description').value = currentElement.zbxe.popup;
-  document.getElementById('line_weight').value = currentElement.zbxe.weight;
+  document.getElementById('line_weight').value = currentElement.zbxe.width;
   document.getElementById('line_dasharray').value = currentElement.zbxe.dasharray;
   document.getElementById('line_opacity').value= currentElement.zbxe.opacity;
   everyzObj.dialog.open();

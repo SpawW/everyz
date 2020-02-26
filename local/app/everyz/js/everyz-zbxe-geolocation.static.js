@@ -633,7 +633,7 @@ function zbxeEditInteger(id, value, width, args) {
   position = typeof position !== "undefined" ? position : "topleft";
   return (
     `<input id="${id}" name="${id}" value="${value}" style="text-align: right;width: ${width}px;"` +
-    ` onchange="validateNumericBox(this, false, true);" type="text" ${extra}>"`
+    ` onchange="validateNumericBox(this, false, true);" type="text" ${extra}>`
   );
 }
 
@@ -653,7 +653,7 @@ function zbxeSelect(id, value, options, args) {
       value === key ? "selected" : ""
     }>${options[key]}</option>`;
   }
-  return `<select id="${id}" name="${id}" ${extra}>${select_options}</select>"`;
+  return `<select id="${id}" name="${id}" ${extra}>${select_options}</select>`;
 }
 
 /**
