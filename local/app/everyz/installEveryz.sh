@@ -7,12 +7,10 @@
 
 INSTALAR="N";
 AUTOR="the.spaww@gmail.com";
-VERSAO_EZ="2.0.40-4.4";
+VERSAO_EZ="2.0.41-4.4";
 
 # Não alterar o número da linha, usado no pre-commit
-VERSAO_EZ="2.0.35-4.4";
-VERSAO_INST="2.0.0-18";
-VERSAO_EZ="2.0.2";
+VERSAO_INST="2.0.0-20";
 VERSAO_ZABBIX="4.4.*"
 UPDATEBD="S";
 BRANCH="4.4";
